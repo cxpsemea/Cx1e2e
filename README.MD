@@ -7,10 +7,12 @@ Usage:
 An example of a tests.yaml file can be found in all_crud.yaml.example
 
 The beginning of each test.yaml file will include standard items needed to connect to a Cx1 environment:
+```
     IAMURL: https://eu.iam.checkmarx.net
     Cx1URL: https://eu.ast.checkmarx.net
     Tenant: your_tenant_here
     #ProxyURL: http://127.0.0.1:8080
+```
 
 The proxy URL is optional and can be used for debugging.
 
