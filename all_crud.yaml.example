@@ -1,0 +1,133 @@
+
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+Tests:
+  - Name: simple test Create all
+    Roles:
+      - Name: e2e-test-role1
+        Test: C
+    Groups:
+      - Name: e2e-test-group1
+        Test: C
+    Users:
+      - Name: e2e-test-user1
+        Email: e2e_test_user1@cx.local
+        Test: C
+    Applications:
+      - Name: e2e-test-app1
+        Test: C
+    Presets:
+      - Name: e2e-test-preset1
+        Description: This is my test preset        
+        Queries:
+          - Language: Java
+            Group: "Java_High_Risk"
+            Name: "Reflected_XSS_All_Clients"
+        Test: C
+    Projects:
+      - Name: e2e-test-project1
+        Test: C
+    Scans:
+      - Project: e2e-test-project1
+        Repository: https://github.com/cxpsemea/cx1clientgo
+        Branch: master
+        Preset: e2e-test-preset1
+        Engine: sast
+        WaitForEnd: true
+        Test: C
+    Queries:
+      - Name: "e2e-test-query1"
+        Group: "e2e-test-querygroup1"
+        Language: "Java"
+        Scope: "Corp"
+        Source: "// no result"
+        Severity: LOW
+        Test: C
+  - Name: simple test RU for all
+    Roles:
+      - Name: e2e-test-role1
+        Permissions: [ view-scans-if-in-group ]
+        Test: RU
+    Groups:
+      - Name: e2e-test-group1
+        Roles: [ e2e-test-role1 ]
+        Test: RU
+    Users:
+      - Name: e2e-test-user1
+        Email: e2e_test_user1@cx.local
+        Roles: [ e2e-test-role1 ]
+        Groups: [ e2e-test-group1 ]
+        Test: RU
+    Applications:
+      - Name: e2e-test-app1
+        Tags: 
+          - Test: tag1
+            Test2: tag2
+        Test: RU
+    Presets:
+      - Name: e2e-test-preset1
+        Description: This is my test preset        
+        Queries:
+          - Language: Java
+            Group: "Java_High_Risk"
+            Name: "SQL_Injection"    
+        Test: RU
+    Projects:
+      - Name: e2e-test-project1
+        Groups: [ e2e-test-group1 ]
+        Application: e2e-test-app1
+        Tags: 
+          - Test: tag1
+            Test2: tag2
+        Test: RU
+    Scans:
+      - Project: e2e-test-project1
+        Test: R
+    Results:
+      - Project: e2e-test-project1
+        FindingNumber: 1
+        State: CONFIRMED
+        Severity: HIGH
+        Test: RU
+    Queries:
+      - Name: "e2e-test-query1"
+        Group: "e2e-test-querygroup1"
+        Language: "Java"
+        Scope: "Corp"
+        Source: "// no result but updated"
+        Severity: HIGH
+        Test: RU
+  - Name: simple delete for all
+    Roles:
+      - Name: e2e-test-role1
+        Test: RD
+    Groups:
+      - Name: e2e-test-group1
+        Test: RD
+    Users:
+      - Name: e2e-test-user1
+        Email: e2e_test_user1@cx.local
+        Test: RD
+    Applications:
+      - Name: e2e-test-app1
+        Test: RD
+    Presets:
+      - Name: e2e-test-preset1
+        Test: RD
+    Projects:
+      - Name: e2e-test-project1
+        Test: RD
+    Scans:
+      - Project: e2e-test-project1
+        Test: RD
+    Results:
+      - Project: e2e-test-project1
+        Test: RD
+    Queries:
+      - Name: "e2e-test-query1"
+        Group: "e2e-test-querygroup1"
+        Language: "Java"
+        Scope: "Corp"
+        Test: RD
