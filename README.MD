@@ -70,3 +70,18 @@ Currently this testing tool covers the following objects:
 - Users (CRUD)
 
 There are some limitations in this tool due to unimplemented functionality in the testing tool or in the underlying Cx1ClientGo library. Feel free to contribute (PR against dev branch please) or raise Issues.
+
+Example output:
+```
+[INFO][2023-03-14 16:42:18.758] Created Cx1 client cx_tam_appsec_canary_michael_kubiaczyk on https://deu.ast.checkmarx.net
+[INFO][2023-03-14 16:42:18.892] PASS [0.133s]: Create Group Test 'simple test Create all' #1 (e2e-test-group1)
+[INFO][2023-03-14 16:42:19.298] PASS [0.406s]: Create Application Test 'simple test Create all' #1 (e2e-test-app1)
+[INFO][2023-03-14 16:42:19.406] PASS [0.108s]: Create Project Test 'simple test Create all' #1 (e2e-test-project1)
+[INFO][2023-03-14 16:42:19.685] PASS [0.279s]: Create Role Test 'simple test Create all' #1 (e2e-test-role1)
+[INFO][2023-03-14 16:42:20.755] PASS [1.070s]: Create User Test 'simple test Create all' #1 (e2e-test-user1 (e2e_test_user1@cx.local))
+[ERROR][2023-03-14 16:42:20.755] FAIL [0.000s]: Create Query Test 'simple test Create all' #1 (Java -> e2e-test-querygroup1 -> e2e-test-query1) - not implemented
+[INFO][2023-03-14 16:42:38.293] PASS [17.538s]: Create Preset Test 'simple test Create all' #1 (e2e-test-preset1)
+[INFO][2023-03-14 16:42:38.632] Polling status of scan 7f41093f-6e2e-47b3-9d97-058abd64653e
+[INFO][2023-03-14 16:42:48.747]  - Running
+...
+```
