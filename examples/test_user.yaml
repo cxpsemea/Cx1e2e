@@ -1,0 +1,23 @@
+
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+Tests:
+  - Name: test user create
+    Users:
+      - Name: e2e-test-user1
+        Email: e2e_test_user1@cx.local
+        Test: C
+  - Name: test user update
+    Users:
+      - Name: e2e-test-user1
+        Email: e2e_test_user1@cx.local
+        Roles: [ ast-viewer ]
+        Groups: [ CxServer ]
+        Test: RU
+  - Name: test user delete
+    Users:
+      - Name: e2e-test-user1
+        Email: e2e_test_user1@cx.local
+        Test: RD

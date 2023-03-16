@@ -1,0 +1,70 @@
+
+IAMURL: https://deu.iam.checkmarx.net
+Cx1URL: https://deu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+Tests:
+  - Name: Group, Application, Project, Preset
+    Groups:
+      - Name: e2e-test-group1
+        Test: C
+      - Name: e2e-test-group2
+        Parent: e2e-test-group1
+        Test: C
+    Applications:
+      - Name: e2e-test-app1
+        Test: C
+    Projects:
+      - Name: e2e-test-project1
+        Groups: [ e2e-test-group1 ]
+        Test: C
+    Presets:
+      - Name: e2e-test-preset1
+        Description: This is my test preset        
+        Queries:
+          - Language: Java
+            Group: "Java_High_Risk"
+            Name: "Reflected_XSS_All_Clients"    
+        Test: C
+  - Name: Role, User, Project, Scan
+    Roles:
+      - Name: e2e-test-role1
+        Permissions: [ view-scans-if-in-group ]
+        Test: C
+    Groups:
+      - Name: e2e-test-group1
+        Test: RU
+        ClientRoles:
+          - Client: ast-app
+            Roles: [ ast-scanner, e2e-test-role1 ]
+    Projects:
+      - Name: e2e-test-project
+        Groups: [ e2e-test-group2 ]        
+        Applications: [ e2e-test-app1 ]
+    Scans:
+      - Project: e2e-test-project1
+        Engine: sast
+        Repository: https://github.com/cxpsemea/cx1clientgo
+        Branch: master
+        Preset: e2e-test-preset1
+        Test: C
+        WaitForEnd: true
+  - Name: Clean up and remove created elements
+    Groups:
+      - Name: e2e-test-group2
+        Test: RD
+      - Name: e2e-test-group1
+        Test: RD
+    Applications:
+      - Name: e2e-test-app1
+        Test: RD
+    Projects:
+      - Name: e2e-test-project1
+        Test: RD
+    Presets:
+      - Name: e2e-test-preset1
+        Test: RD
+    Roles: 
+      - Name: e2e-test-role1
+        Test: RD
+    
