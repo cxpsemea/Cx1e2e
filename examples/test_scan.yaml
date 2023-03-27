@@ -6,40 +6,49 @@ Tenant: your_tenant_here
 Tests:
   - Name: Create a Project and Scan
     Projects:
-      - Name: e2e-test-project1
+      - Name: e2e-test-project1-git
+        Test: C
+      - Name: e2e-test-project1-zip
         Test: C
     Scans:
-      - Project: e2e-test-project1
+      - Project: e2e-test-project1-git
         Engine: sast
         Repository: https://github.com/michaelkubiaczyk/ssba
         Branch: master
         Preset: Checkmarx Default
         Test: C
+        WaitForEnd: false
+      - Project: e2e-test-project1-zip
+        Engine: sast
+        ZipFile: "c:/work/code/ssba/ssba.zip"
+        Branch: zip
+        Preset: Checkmarx Default
+        Test: C
         WaitForEnd: true
   - Name: Read project scan results and update a finding
     Scans:
-      - Project: e2e-test-project1
+      - Project: e2e-test-project1-git
         Test: R
     Results:
-      - Project: e2e-test-project1
+      - Project: e2e-test-project1-git
         FindingNumber: 1 # ? improper resource access
         State: CONFIRMED
         Severity: HIGH
         Comment: "Should be finding #1 (improper resource access?)"
         Test: RU
-      - Project: e2e-test-project1
+      - Project: e2e-test-project1-git
         ResultHash: "5u/viwHFlyaMUhEEqy6jBW3J+xk=" # stored xss
         State: CONFIRMED
         Severity: HIGH
         Comment: "Should be stored xss hash 5u/viwHFlyaMUhEEqy6jBW3J+xk="
         Test: RU
-      - Project: e2e-test-project1
+      - Project: e2e-test-project1-git
         SimilarityID: -425684883 # spring overly permissive
         State: CONFIRMED
         Severity: HIGH
         Comment: "Should be spring overly permissive, simID -425684883"
         Test: RU
-      - Project: e2e-test-project1
+      - Project: e2e-test-project1-git
         FindingNumber: 1
         Name: Stored_XSS
         Group: Java_High_Risk
@@ -48,7 +57,7 @@ Tests:
         State: CONFIRMED
         Severity: HIGH
         Test: RU
-      - Project: e2e-test-project1
+      - Project: e2e-test-project1-git
         FindingNumber: 2
         ID: 8481125285487743346
         Comment: "Should be queryid 8481125285487743346 (reflected xss) second finding"
@@ -57,5 +66,7 @@ Tests:
         Test: RU
   - Name: Delete project
     Projects:
-      - Name: e2e-test-project1
+      - Name: e2e-test-project1-git
+        Test: RD
+      - Name: e2e-test-project1-zip
         Test: RD
