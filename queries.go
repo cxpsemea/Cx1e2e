@@ -9,8 +9,7 @@ import (
 )
 
 /*
-	These query tests are read-only and specifically for the /api/queries/ endpoints including /api/queries/description
-	CxAudit tests are separate
+	The /api/queries api is expected to be replaced by cxaudit api, hence this set of tests will be changed over to the cxaudit endpoints.
 */
 
 func (q *QueryCRUD) IsValidQuery() bool {

@@ -9,14 +9,26 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func (t *ScanCRUD) IsValid() bool {
+	if t.Project == "" {
+		return false
+	}
+
+	if (t.Repository == "" || t.Branch == "") && t.ZipFile == "" {
+		return false
+	}
+
+	return true
+}
+
 func ScanTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) bool {
 	result := true
 	for id := range *scans {
 		t := &(*scans)[id]
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
-			if t.Project == "" || t.Repository == "" || t.Branch == "" {
-				LogSkip(logger, "Create Scan", start, testname, id+1, "invalid test (missing project name, repository, or branch)")
+			if !t.IsValid() {
+				LogSkip(logger, "Create Scan", start, testname, id+1, "invalid test (missing project name, repository, branch, or zipfile)")
 			} else {
 				err := ScanTestCreate(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
@@ -40,9 +52,28 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	scanConfig.ScanType = t.Engine
 	scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
 
-	test_Scan, err := cx1client.ScanProjectGitByID(project.ProjectID, t.Repository, t.Branch, []Cx1ClientGo.ScanConfiguration{scanConfig}, map[string]string{})
-	if err != nil {
-		return err
+	var test_Scan Cx1ClientGo.Scan
+
+	if t.ZipFile == "" {
+		test_Scan, err = cx1client.ScanProjectGitByID(project.ProjectID, t.Repository, t.Branch, []Cx1ClientGo.ScanConfiguration{scanConfig}, map[string]string{})
+		if err != nil {
+			return err
+		}
+	} else {
+		uploadURL, err := cx1client.GetUploadURL()
+		if err != nil {
+			return err
+		}
+
+		_, err = cx1client.PutFile(uploadURL, t.ZipFile)
+		if err != nil {
+			return err
+		}
+
+		test_Scan, err = cx1client.ScanProjectZipByID(project.ProjectID, uploadURL, t.Branch, []Cx1ClientGo.ScanConfiguration{scanConfig}, map[string]string{})
+		if err != nil {
+			return err
+		}
 	}
 
 	t.Scan = &test_Scan
