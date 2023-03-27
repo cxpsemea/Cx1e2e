@@ -163,6 +163,7 @@ type ScanCRUD struct {
 	Engine      string `yaml:"Engine"`
 	Incremental bool   `yaml:"Incremental"`
 	WaitForEnd  bool   `yaml:"WaitForEnd"`
+	ZipFile     string `yaml:"ZipFile"`
 	Preset      string `yaml:"Preset"`
 	Scan        *Cx1ClientGo.Scan
 }
