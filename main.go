@@ -29,7 +29,7 @@ func main() {
 
 	if len(os.Args) != 3 && len(os.Args) != 4 {
 		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration.")
-		logger.Fatal("Expected arguments not provided. Usage:\nAPIKey auth: cx1e2e <test definition yaml file> <APIKey>'nOIDC auth: cx1e2e <test definition yaml file> <client id> <client secret>")
+		logger.Fatal("Expected arguments not provided. Usage:\nAPIKey auth: cx1e2e <test definition yaml file> <APIKey>\nOIDC auth: cx1e2e <test definition yaml file> <client id> <client secret>")
 		return
 	}
 
