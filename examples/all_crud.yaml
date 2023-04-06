@@ -32,7 +32,7 @@ Tests:
     Scans:
       - Project: e2e-test-project1
         Repository: https://github.com/cxpsemea/cx1clientgo
-        Branch: master
+        Branch: main
         Preset: e2e-test-preset1
         Engine: sast
         WaitForEnd: true

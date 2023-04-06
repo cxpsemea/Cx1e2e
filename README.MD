@@ -1,10 +1,11 @@
 This is an automated end-to-end workflow testing tool for Cx1 via the REST API, as exposed by Cx1ClientGo (https://github.com/cxpsemea/Cx1ClientGo/)
 
 Usage:
+```
     cx1e2e.exe tests.yaml APIKey
     cx1e2e.exe tests.yaml ClientID ClientSecret
-
-An example of a tests.yaml file can be found in all_crud.yaml.example
+```
+Multiple example test.yaml definitions can be found in the examples directory.
 
 The beginning of each test.yaml file will include standard items needed to connect to a Cx1 environment:
 ```
@@ -18,14 +19,14 @@ The proxy URL is optional and can be used for debugging.
 
 Tests are defined in Test Sets, each of which is named and can have a number of objects targeted for testing.
 
-Simple test to create, read, update (but no change is specified), and delete a role:
+Simple test to create a new role, create a new group with that role, and create a new user with the new role and also membership in the new group:
 ```
     Tests:
       - Name: simple test to create role & group & user
         Roles:
           - Name: e2e-test-role1
             Permissions: [ view-scans-if-in-group ]
-            Test: CRUD
+            Test: C
         Groups:
           - Name: e2e-test-group1
             Roles: [ e2e-test-role1 ]
@@ -37,6 +38,7 @@ Simple test to create, read, update (but no change is specified), and delete a r
             Groups: [ e2e-test-group1 ]
             Test: C
 ```
+In each of the above tests, the parameter "Test" includes the letter "C" - this indicates the test is to Create the relevant object.
 
 More complicated set of 3 tests to create, read & update (set a permission), then delete a role:
 ```
@@ -55,8 +57,7 @@ More complicated set of 3 tests to create, read & update (set a permission), the
         - Name: e2e-test-role1
           Test: RD
 ```
-
-Tests are selected through the "Test: CRUD" line for each test which decides if the [C]reate, [R]ead, [U]pdate, or [D]elete tests are performed. 
+In the tests above, each "Test" parameter includes different combinations of CRUD operations. Tests are selected through the "Test: CRUD" line which defines if the [C]reate, [R]ead, [U]pdate, or [D]elete tests are performed. 
 
 Currently this testing tool covers the following objects:
 - Applications (CRUD)
