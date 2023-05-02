@@ -27,9 +27,11 @@ func main() {
 	logger.SetFormatter(myformatter)
 	logger.SetOutput(os.Stdout)
 
-	if len(os.Args) != 3 && len(os.Args) != 4 {
+	if len(os.Args) != 3 && len(os.Args) != 6 {
 		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration.")
-		logger.Fatal("Expected arguments not provided. Usage:\nAPIKey auth: cx1e2e <test definition yaml file> <APIKey>\nOIDC auth: cx1e2e <test definition yaml file> <client id> <client secret>")
+		logger.Info("Expected arguments not provided. Usage:\n1)\tcx1e2e <test definition yaml file> <APIKey>\n")
+		logger.Info("2)\tcx1e2e <test definition yaml file> <APIKey> <Cx1 URL> <IAM URL> <Tenant>\n")
+		logger.Info("Note: API Key authentication is currently required and OIDC client/secret authentication is not supported.\n")
 		return
 	}
 
@@ -57,11 +59,13 @@ func main() {
 		logger.Infof("Running with proxy: %v", Config.ProxyURL)
 	}
 
-	if len(os.Args) == 3 {
-		cx1client, err = Cx1ClientGo.NewAPIKeyClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, os.Args[2], logger)
-	} else {
-		cx1client, err = Cx1ClientGo.NewOAuthClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, os.Args[2], os.Args[3], logger)
+	if len(os.Args) == 6 {
+		Config.Cx1URL = os.Args[3]
+		Config.IAMURL = os.Args[4]
+		Config.Tenant = os.Args[5]
 	}
+
+	cx1client, err = Cx1ClientGo.NewAPIKeyClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, os.Args[2], logger)
 
 	if err != nil {
 		logger.Fatalf("Failed to create Cx1 client: %s", err)
