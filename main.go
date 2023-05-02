@@ -18,6 +18,7 @@ import (
 var logger *logrus.Logger
 
 var Config TestConfig
+var TestResults []TestResult
 
 func main() {
 	logger = logrus.New()
@@ -75,10 +76,23 @@ func main() {
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
 
-	if RunTests(cx1client, logger) {
-		logger.Info("All tests PASS")
+	RunTests(cx1client, logger)
+
+	logger.Infof("Test result summary:\n")
+	failed_test := false
+	for _, result := range TestResults {
+		if result.Result {
+			fmt.Printf("PASS %v - %v\n", result.Name, result.CRUD)
+		} else {
+			fmt.Printf("FAIL %v - %v\n", result.Name, result.CRUD)
+			failed_test = true
+		}
+	}
+	fmt.Println("")
+	if failed_test {
+		logger.Errorf("Some tests failed")
 	} else {
-		logger.Error("Some tests FAIL")
+		logger.Infof("All tests passed")
 	}
 }
 
@@ -128,197 +142,161 @@ func IsDelete(test string) bool {
 	return strings.Contains(test, "D")
 }
 
-func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) bool {
-	tests := true
-
+func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
 	for _, t := range Config.Tests {
-		if !TestCreate(cx1client, logger, t.Name, &t) {
-			tests = false
-		}
-		if !TestRead(cx1client, logger, t.Name, &t) {
-			tests = false
-		}
-		if !TestUpdate(cx1client, logger, t.Name, &t) {
-			tests = false
-		}
-		if !TestDelete(cx1client, logger, t.Name, &t) {
-			tests = false
-		}
+		TestCreate(cx1client, logger, t.Name, &t)
+		TestRead(cx1client, logger, t.Name, &t)
+		TestUpdate(cx1client, logger, t.Name, &t)
+		TestDelete(cx1client, logger, t.Name, &t)
 	}
-
-	return tests
 }
 
-func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) bool {
-	result := true
-	if len(tests.Groups) > 0 && !GroupTestsCreate(cx1client, logger, testname, &tests.Groups) {
-		result = false
+func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	if len(tests.Groups) > 0 {
+		GroupTestsCreate(cx1client, logger, testname, &tests.Groups)
 	}
-
-	if len(tests.Applications) > 0 && !ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications) {
-		result = false
+	if len(tests.Applications) > 0 {
+		ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications)
 	}
-
-	if len(tests.Projects) > 0 && !ProjectTestsCreate(cx1client, logger, testname, &tests.Projects) {
-		result = false
+	if len(tests.Projects) > 0 {
+		ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
 	}
-
-	if len(tests.Roles) > 0 && !RoleTestsCreate(cx1client, logger, testname, &tests.Roles) {
-		result = false
+	if len(tests.Roles) > 0 {
+		RoleTestsCreate(cx1client, logger, testname, &tests.Roles)
 	}
-
-	if len(tests.Users) > 0 && !UserTestsCreate(cx1client, logger, testname, &tests.Users) {
-		result = false
+	if len(tests.Users) > 0 {
+		UserTestsCreate(cx1client, logger, testname, &tests.Users)
 	}
-
-	if len(tests.Queries) > 0 && !QueryTestsCreate(cx1client, logger, testname, &tests.Queries) {
-		result = false
+	if len(tests.Queries) > 0 {
+		QueryTestsCreate(cx1client, logger, testname, &tests.Queries)
 	}
-
-	if len(tests.Presets) > 0 && !PresetTestsCreate(cx1client, logger, testname, &tests.Presets) {
-		result = false
+	if len(tests.Presets) > 0 {
+		PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
 	}
-
-	if len(tests.Scans) > 0 && !ScanTestsCreate(cx1client, logger, testname, &tests.Scans) {
-		result = false
+	if len(tests.Scans) > 0 {
+		ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
 	}
-
-	if len(tests.Results) > 0 && !ResultTestsCreate(cx1client, logger, testname, &tests.Results) {
-		result = false
+	if len(tests.Results) > 0 {
+		ResultTestsCreate(cx1client, logger, testname, &tests.Results)
 	}
-
-	return result
 }
-func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) bool {
-	result := true
-	if len(tests.Groups) > 0 && !GroupTestsRead(cx1client, logger, testname, &tests.Groups) {
-		result = false
+func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	if len(tests.Groups) > 0 {
+		GroupTestsRead(cx1client, logger, testname, &tests.Groups)
 	}
-
-	if len(tests.Applications) > 0 && !ApplicationTestsRead(cx1client, logger, testname, &tests.Applications) {
-		result = false
+	if len(tests.Applications) > 0 {
+		ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
 	}
-
-	if len(tests.Projects) > 0 && !ProjectTestsRead(cx1client, logger, testname, &tests.Projects) {
-		result = false
+	if len(tests.Projects) > 0 {
+		ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
 	}
-
-	if len(tests.Roles) > 0 && !RoleTestsRead(cx1client, logger, testname, &tests.Roles) {
-		result = false
+	if len(tests.Roles) > 0 {
+		RoleTestsRead(cx1client, logger, testname, &tests.Roles)
 	}
-
-	if len(tests.Users) > 0 && !UserTestsRead(cx1client, logger, testname, &tests.Users) {
-		result = false
+	if len(tests.Users) > 0 {
+		UserTestsRead(cx1client, logger, testname, &tests.Users)
 	}
-
-	if len(tests.Queries) > 0 && !QueryTestsRead(cx1client, logger, testname, &tests.Queries) {
-		result = false
+	if len(tests.Queries) > 0 {
+		QueryTestsRead(cx1client, logger, testname, &tests.Queries)
 	}
-
-	if len(tests.Presets) > 0 && !PresetTestsRead(cx1client, logger, testname, &tests.Presets) {
-		result = false
+	if len(tests.Presets) > 0 {
+		PresetTestsRead(cx1client, logger, testname, &tests.Presets)
 	}
-
-	if len(tests.Scans) > 0 && !ScanTestsRead(cx1client, logger, testname, &tests.Scans) {
-		result = false
+	if len(tests.Scans) > 0 {
+		ScanTestsRead(cx1client, logger, testname, &tests.Scans)
 	}
-
-	if len(tests.Results) > 0 && !ResultTestsRead(cx1client, logger, testname, &tests.Results) {
-		result = false
+	if len(tests.Results) > 0 {
+		ResultTestsRead(cx1client, logger, testname, &tests.Results)
 	}
-
-	return result
 }
-func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) bool {
-	result := true
-	if len(tests.Groups) > 0 && !GroupTestsUpdate(cx1client, logger, testname, &tests.Groups) {
-		result = false
+func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	if len(tests.Groups) > 0 {
+		GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
 	}
-
-	if len(tests.Applications) > 0 && !ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications) {
-		result = false
+	if len(tests.Applications) > 0 {
+		ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
 	}
-
-	if len(tests.Projects) > 0 && !ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects) {
-		result = false
+	if len(tests.Projects) > 0 {
+		ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
 	}
-
-	if len(tests.Roles) > 0 && !RoleTestsUpdate(cx1client, logger, testname, &tests.Roles) {
-		result = false
+	if len(tests.Roles) > 0 {
+		RoleTestsUpdate(cx1client, logger, testname, &tests.Roles)
 	}
-
-	if len(tests.Users) > 0 && !UserTestsUpdate(cx1client, logger, testname, &tests.Users) {
-		result = false
+	if len(tests.Users) > 0 {
+		UserTestsUpdate(cx1client, logger, testname, &tests.Users)
 	}
-
-	if len(tests.Queries) > 0 && !QueryTestsUpdate(cx1client, logger, testname, &tests.Queries) {
-		result = false
+	if len(tests.Queries) > 0 {
+		QueryTestsUpdate(cx1client, logger, testname, &tests.Queries)
 	}
-
-	if len(tests.Presets) > 0 && !PresetTestsUpdate(cx1client, logger, testname, &tests.Presets) {
-		result = false
+	if len(tests.Presets) > 0 {
+		PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
 	}
-
-	if len(tests.Scans) > 0 && !ScanTestsUpdate(cx1client, logger, testname, &tests.Scans) {
-		result = false
+	if len(tests.Scans) > 0 {
+		ScanTestsUpdate(cx1client, logger, testname, &tests.Scans)
 	}
-
-	if len(tests.Results) > 0 && !ResultTestsUpdate(cx1client, logger, testname, &tests.Results) {
-		result = false
+	if len(tests.Results) > 0 {
+		ResultTestsUpdate(cx1client, logger, testname, &tests.Results)
 	}
-
-	return result
 }
-func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) bool {
-	result := true
-	if len(tests.Groups) > 0 && !GroupTestsDelete(cx1client, logger, testname, &tests.Groups) {
-		result = false
+func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	if len(tests.Groups) > 0 {
+		GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
 	}
-
-	if len(tests.Applications) > 0 && !ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications) {
-		result = false
+	if len(tests.Applications) > 0 {
+		ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
 	}
-
-	if len(tests.Projects) > 0 && !ProjectTestsDelete(cx1client, logger, testname, &tests.Projects) {
-		result = false
+	if len(tests.Projects) > 0 {
+		ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)
 	}
-
-	if len(tests.Roles) > 0 && !RoleTestsDelete(cx1client, logger, testname, &tests.Roles) {
-		result = false
+	if len(tests.Roles) > 0 {
+		RoleTestsDelete(cx1client, logger, testname, &tests.Roles)
 	}
-
-	if len(tests.Users) > 0 && !UserTestsDelete(cx1client, logger, testname, &tests.Users) {
-		result = false
+	if len(tests.Users) > 0 {
+		UserTestsDelete(cx1client, logger, testname, &tests.Users)
 	}
-
-	if len(tests.Queries) > 0 && !QueryTestsDelete(cx1client, logger, testname, &tests.Queries) {
-		result = false
+	if len(tests.Queries) > 0 {
+		QueryTestsDelete(cx1client, logger, testname, &tests.Queries)
 	}
-
-	if len(tests.Presets) > 0 && !PresetTestsDelete(cx1client, logger, testname, &tests.Presets) {
-		result = false
+	if len(tests.Presets) > 0 {
+		PresetTestsDelete(cx1client, logger, testname, &tests.Presets)
 	}
-
-	if len(tests.Scans) > 0 && !ScanTestsDelete(cx1client, logger, testname, &tests.Scans) {
-		result = false
+	if len(tests.Scans) > 0 {
+		ScanTestsDelete(cx1client, logger, testname, &tests.Scans)
 	}
-
-	if len(tests.Results) > 0 && !ResultTestsDelete(cx1client, logger, testname, &tests.Results) {
-		result = false
+	if len(tests.Results) > 0 {
+		ResultTestsDelete(cx1client, logger, testname, &tests.Results)
 	}
-
-	return result
 }
 
-func LogPass(logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string) {
+func LogPass(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
-	logger.Infof("PASS [%.3fs]: %v Test '%v' #%d (%v)", duration, CRUD, testName, testId, testObject)
+	if failTest {
+		logger.Errorf("FAIL [%.3fs]: %v FailTest '%v' #%d (%v) - %v", duration, CRUD, testName, testId, testObject, "test passed but was expected to fail")
+		TestResults = append(TestResults, TestResult{
+			failTest, false, CRUD, duration, testName, testId, testObject, "test passed but was expected to fail",
+		})
+	} else {
+		logger.Infof("PASS [%.3fs]: %v Test '%v' #%d (%v)", duration, CRUD, testName, testId, testObject)
+		TestResults = append(TestResults, TestResult{
+			failTest, true, CRUD, duration, testName, testId, testObject, "",
+		})
+	}
 }
 func LogSkip(logger *logrus.Logger, CRUD string, start int64, testName string, testId int, reason string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	logger.Warnf("SKIP [%.3fs]: %v Test '%v' #%d - %v", duration, CRUD, testName, testId, reason)
 }
-func LogFail(logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string, reason error) {
+func LogFail(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string, reason error) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
-	logger.Errorf("FAIL [%.3fs]: %v Test '%v' #%d (%v) - %s", duration, CRUD, testName, testId, testObject, reason)
+	if failTest {
+		logger.Infof("PASS [%.3fs]: %v FailTest '%v' #%d (%v)", duration, CRUD, testName, testId, testObject)
+		TestResults = append(TestResults, TestResult{
+			failTest, true, CRUD, duration, testName, testId, testObject, "",
+		})
+	} else {
+		logger.Errorf("FAIL [%.3fs]: %v Test '%v' #%d (%v) - %s", duration, CRUD, testName, testId, testObject, reason)
+		TestResults = append(TestResults, TestResult{
+			failTest, false, CRUD, duration, testName, testId, testObject, reason.Error(),
+		})
+	}
 }

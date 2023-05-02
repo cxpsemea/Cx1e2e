@@ -33,9 +33,9 @@ func ScanTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				err := ScanTestCreate(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Create Scan", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Create Scan", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Create Scan", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Create Scan", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -82,8 +82,13 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 		if err != nil {
 			return err
 		}
+
+		t.Scan = &test_Scan
+
+		if test_Scan.Status != "Completed" {
+			return fmt.Errorf("scan finished with status: %v", test_Scan.Status)
+		}
 	}
-	t.Scan = &test_Scan
 
 	return nil
 }
@@ -100,9 +105,9 @@ func ScanTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 				err := ScanTestRead(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Read Scan", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Read Scan", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Read Scan", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Read Scan", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -140,9 +145,9 @@ func ScanTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				err := ScanTestUpdate(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Update Scan", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Update Scan", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Update Scan", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Update Scan", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -166,9 +171,9 @@ func ScanTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				err := ScanTestDelete(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Delete Scan", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Delete Scan", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Delete Scan", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Delete Scan", start, testname, id+1, t.String())
 				}
 			}
 		}

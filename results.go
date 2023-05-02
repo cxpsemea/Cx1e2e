@@ -33,9 +33,9 @@ func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				err := ResultTestRead(cx1client, logger, testname, &(*results)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Read Result", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Read Result", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Read Result", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Read Result", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -143,9 +143,9 @@ func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				err := ResultTestUpdate(cx1client, logger, testname, t)
 				if err != nil {
 					result = false
-					LogFail(logger, "Update Result", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Update Result", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Update Result", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Update Result", start, testname, id+1, t.String())
 				}
 			}
 		}

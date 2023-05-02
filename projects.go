@@ -19,9 +19,9 @@ func ProjectTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 				err := ProjectTestCreate(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Create Project", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Create Project", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Create Project", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Create Project", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -78,9 +78,9 @@ func ProjectTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				err := ProjectTestRead(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Read Project", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Read Project", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Read Project", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Read Project", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -109,9 +109,9 @@ func ProjectTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 				err := ProjectTestUpdate(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Update Project", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Update Project", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Update Project", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Update Project", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -158,9 +158,9 @@ func ProjectTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 				err := ProjectTestDelete(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Delete Project", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Delete Project", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Delete Project", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Delete Project", start, testname, id+1, t.String())
 				}
 			}
 		}
