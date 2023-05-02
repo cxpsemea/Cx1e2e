@@ -82,8 +82,13 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 		if err != nil {
 			return err
 		}
+
+		t.Scan = &test_Scan
+
+		if test_Scan.Status != "Completed" {
+			return fmt.Errorf("scan finished with status: %v", test_Scan.Status)
+		}
 	}
-	t.Scan = &test_Scan
 
 	return nil
 }
