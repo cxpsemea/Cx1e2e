@@ -194,6 +194,7 @@ type Tag struct {
 
 type TestSet struct {
 	Name         string            `yaml:"Name"`
+	File         string            `yaml:"File"`
 	Groups       []GroupCRUD       `yaml:"Groups"`
 	Users        []UserCRUD        `yaml:"Users"`
 	Applications []ApplicationCRUD `yaml:"Applications"`

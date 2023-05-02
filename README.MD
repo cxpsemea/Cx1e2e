@@ -3,7 +3,7 @@ This is an automated end-to-end workflow testing tool for Cx1 via the REST API, 
 Usage:
 ```
     cx1e2e.exe tests.yaml APIKey
-    cx1e2e.exe tests.yaml ClientID ClientSecret
+    cx1e2e.exe tests.yaml APIKey Cx1URL IAMURL Tenant
 ```
 Multiple example test.yaml definitions can be found in the examples directory.
 
@@ -58,6 +58,14 @@ More complicated set of 3 tests to create, read & update (set a permission), the
           Test: RD
 ```
 In the tests above, each "Test" parameter includes different combinations of CRUD operations. Tests are selected through the "Test: CRUD" line which defines if the [C]reate, [R]ead, [U]pdate, or [D]elete tests are performed. 
+
+Tests can also be defined in multiple files which are then referenced from the primary file. For example:
+```
+    Tests:
+      - Name: my-special-tests
+        File: special\tests.yaml
+```
+This will load the indicated special\tests.yaml file and add the tests to the end of the set.
 
 Currently this testing tool covers the following objects:
 - Applications (CRUD)
