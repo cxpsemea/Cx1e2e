@@ -20,9 +20,9 @@ func RoleTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				err := RoleTestCreate(cx1client, logger, testname, &(*roles)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Create Role", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Create Role", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Create Role", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Create Role", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -122,9 +122,9 @@ func RoleTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 				err := RoleTestRead(cx1client, logger, testname, &(*roles)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Read Role", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Read Role", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Read Role", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Read Role", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -153,9 +153,9 @@ func RoleTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				err := RoleTestUpdate(cx1client, logger, testname, &(*roles)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Update Role", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Update Role", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Update Role", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Update Role", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -179,9 +179,9 @@ func RoleTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				err := RoleTestDelete(cx1client, logger, testname, &(*roles)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Delete Role", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Delete Role", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Delete Role", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Delete Role", start, testname, id+1, t.String())
 				}
 			}
 		}
