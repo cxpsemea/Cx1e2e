@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -36,7 +37,7 @@ func main() {
 	}
 
 	var err error
-	err = LoadConfig(os.Args[1])
+	Config, err = LoadConfig(os.Args[1])
 	if err != nil {
 		logger.Fatalf("Failed to load configuration file %v: %s", os.Args[1], err)
 		return
@@ -81,21 +82,37 @@ func main() {
 	}
 }
 
-func LoadConfig(testconfig string) error {
+func LoadConfig(testconfig string) (TestConfig, error) {
+	var conf TestConfig
+
 	file, err := os.Open(testconfig)
 
 	if err != nil {
-		return err
+		return conf, err
 	}
 	defer file.Close()
 	d := yaml.NewDecoder(file)
 
-	err = d.Decode(&Config)
+	err = d.Decode(&conf)
 	if err != nil {
-		return err
+		return conf, err
 	}
 
-	return nil
+	var sub_tests []TestSet
+
+	for _, set := range conf.Tests {
+		if set.File != "" {
+			conf2, err := LoadConfig(set.File)
+			if err != nil {
+				return conf, fmt.Errorf("error loading sub-test %v: %s", set.File, err)
+			}
+			sub_tests = append(sub_tests, conf2.Tests...)
+		}
+	}
+
+	conf.Tests = append(conf.Tests, sub_tests...)
+
+	return conf, nil
 }
 
 func IsCreate(test string) bool {
