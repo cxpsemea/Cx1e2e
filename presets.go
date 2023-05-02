@@ -20,9 +20,9 @@ func PresetTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				err := PresetTestCreate(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Create Preset", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Create Preset", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Create Preset", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Create Preset", start, testname, id+1, t.String())
 				}
 			}
 
@@ -75,9 +75,9 @@ func PresetTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				err := PresetTestRead(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Read Preset", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Read Preset", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Read Preset", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Read Preset", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -106,9 +106,9 @@ func PresetTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				err := PresetTestUpdate(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Update Preset", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Update Preset", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Update Preset", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Update Preset", start, testname, id+1, t.String())
 				}
 			}
 
@@ -140,9 +140,9 @@ func PresetTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				err := PresetTestDelete(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Delete Preset", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Delete Preset", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Delete Preset", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Delete Preset", start, testname, id+1, t.String())
 				}
 			}
 		}

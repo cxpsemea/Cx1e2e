@@ -28,9 +28,9 @@ func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				err := QueryTestCreate(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Create Query", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Create Query", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Create Query", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Create Query", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -60,9 +60,9 @@ func QueryTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 				err := QueryTestRead(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Read Query", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Read Query", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Read Query", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Read Query", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -107,9 +107,9 @@ func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				err := QueryTestUpdate(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Update Query", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Update Query", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Update Query", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Update Query", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -134,9 +134,9 @@ func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				err := QueryTestDelete(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Delete Query", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Delete Query", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Delete Query", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Delete Query", start, testname, id+1, t.String())
 				}
 			}
 		}

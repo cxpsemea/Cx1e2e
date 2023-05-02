@@ -19,9 +19,9 @@ func ApplicationTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 				err := ApplicationTestCreate(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Create Application", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Create Application", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Create Application", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Create Application", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -83,9 +83,9 @@ func ApplicationTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logge
 				err := ApplicationTestRead(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Read Application", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Read Application", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Read Application", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Read Application", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -114,9 +114,9 @@ func ApplicationTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 				err := ApplicationTestUpdate(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Update Application", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Update Application", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Update Application", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Update Application", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -144,9 +144,9 @@ func ApplicationTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 				err := ApplicationTestDelete(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Delete Application", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Delete Application", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Delete Application", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Delete Application", start, testname, id+1, t.String())
 				}
 			}
 		}

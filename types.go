@@ -13,6 +13,8 @@ type ApplicationCRUD struct {
 	Criticality uint              `yaml:"Criticality"`
 	Rules       []ApplicationRule `yaml:"Rules"`
 	Tags        []Tag             `yaml:"Tags"`
+	FailTest    bool              `yaml:"FailTest"`
+	TestResult  bool
 	Application *Cx1ClientGo.Application
 }
 
@@ -38,6 +40,8 @@ type CxQLCRUD struct {
 	Source        string `yaml:"Source"`
 	Scope         string `yaml:"Scope"`
 	Severity      string `yaml:"Severity"`
+	FailTest      bool   `yaml:"FailTest"`
+	TestResult    bool
 	Query         *Cx1ClientGo.Query
 }
 
@@ -57,7 +61,9 @@ type GroupCRUD struct {
 		Client string   `yaml:"Client"`
 		Roles  []string `yaml:"Roles"`
 	} `yaml:"ClientRoles"`
-	Group *Cx1ClientGo.Group
+	FailTest   bool `yaml:"FailTest"`
+	TestResult bool
+	Group      *Cx1ClientGo.Group
 }
 
 func (o *GroupCRUD) String() string {
@@ -70,6 +76,7 @@ type ProjectCRUD struct {
 	Groups      []string `yaml:"Groups"`
 	Application string   `yaml:"Application"`
 	Tags        []Tag    `yaml:"Tags"`
+	FailTest    bool     `yaml:"FailTest"`
 	Project     *Cx1ClientGo.Project
 }
 
@@ -87,7 +94,8 @@ type PresetCRUD struct {
 		QueryGroup    string `yaml:"Group"`
 		QueryName     string `yaml:"Name"`
 	} `yaml:"Queries"`
-	Preset *Cx1ClientGo.Preset
+	FailTest bool `yaml:"FailTest"`
+	Preset   *Cx1ClientGo.Preset
 }
 
 func (o *PresetCRUD) String() string {
@@ -100,6 +108,7 @@ type QueryCRUD struct {
 	QueryGroup    string `yaml:"Group"`
 	QueryName     string `yaml:"Name"`
 	Test          string `yaml:"Test"`
+	FailTest      bool   `yaml:"FailTest"`
 	Query         *Cx1ClientGo.Query
 }
 
@@ -124,6 +133,7 @@ type ResultCRUD struct {
 	Severity      string `yaml:"Severity"`
 	Comment       string `yaml:"Comment"`
 	Test          string `yaml:"Test"`
+	FailTest      bool   `yaml:"FailTest"`
 	Result        *Cx1ClientGo.ScanResult
 	Project       *Cx1ClientGo.Project
 }
@@ -148,6 +158,7 @@ type RoleCRUD struct {
 	Name        string   `yaml:"Name"`
 	Test        string   `yaml:"Test"`
 	Permissions []string `yaml:"Permissions"`
+	FailTest    bool     `yaml:"FailTest"`
 	Role        *Cx1ClientGo.Role
 }
 
@@ -165,6 +176,7 @@ type ScanCRUD struct {
 	WaitForEnd  bool   `yaml:"WaitForEnd"`
 	ZipFile     string `yaml:"ZipFile"`
 	Preset      string `yaml:"Preset"`
+	FailTest    bool   `yaml:"FailTest"`
 	Scan        *Cx1ClientGo.Scan
 }
 
@@ -180,6 +192,7 @@ type UserCRUD struct {
 	LastName  string   `yaml:"LastName"`
 	Groups    []string `yaml:"Groups"`
 	Roles     []string `yaml:"Roles"`
+	FailTest  bool     `yaml:"FailTest"`
 	User      *Cx1ClientGo.User
 }
 
@@ -212,4 +225,15 @@ type TestConfig struct {
 	Tenant   string    `yaml:"Tenant"`
 	ProxyURL string    `yaml:"ProxyURL"`
 	Tests    []TestSet `yaml:"Tests"`
+}
+
+type TestResult struct {
+	FailTest   bool
+	Result     bool
+	CRUD       string
+	Duration   float64
+	Name       string
+	Id         int
+	TestObject string
+	Reason     string
 }

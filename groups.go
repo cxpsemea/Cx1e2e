@@ -20,9 +20,9 @@ func GroupTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				err := GroupTestCreate(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Create Group", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Create Group", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Create Group", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Create Group", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -91,9 +91,9 @@ func GroupTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 				err := GroupTestRead(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Read Group", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Read Group", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Read Group", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Read Group", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -128,9 +128,9 @@ func GroupTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				err := GroupTestUpdate(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Update Group", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Update Group", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Update Group", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Update Group", start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -159,9 +159,9 @@ func GroupTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				err := GroupTestDelete(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
 					result = false
-					LogFail(logger, "Delete Group", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, "Delete Group", start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(logger, "Delete Group", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, "Delete Group", start, testname, id+1, t.String())
 				}
 			}
 		}
