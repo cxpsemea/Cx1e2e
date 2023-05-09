@@ -32,25 +32,32 @@ func (o *ApplicationRule) String() string {
 }
 
 type CxQLCRUD struct {
-	QueryID       uint64 `yaml:"ID"`
-	QueryLanguage string `yaml:"Language"`
-	QueryGroup    string `yaml:"Group"`
-	QueryName     string `yaml:"Name"`
-	Test          string `yaml:"Test"`
-	Source        string `yaml:"Source"`
-	Scope         string `yaml:"Scope"`
-	Severity      string `yaml:"Severity"`
-	FailTest      bool   `yaml:"FailTest"`
+	//QueryID       uint64 `yaml:"ID"`
+	QueryLanguage string    `yaml:"Language"`
+	QueryGroup    string    `yaml:"Group"`
+	QueryName     string    `yaml:"Name"`
+	Test          string    `yaml:"Test"`
+	Source        string    `yaml:"Source"`
+	Scope         CxQLScope `yaml:"Scope"`
+	Severity      string    `yaml:"Severity"`
+	FailTest      bool      `yaml:"FailTest"`
+	Compile       bool      `yaml:"Compile"`
 	TestResult    bool
-	Query         *Cx1ClientGo.Query
+	Query         *Cx1ClientGo.AuditQuery
 }
 
 func (o *CxQLCRUD) String() string {
-	if o.QueryName != "" {
-		return fmt.Sprintf("%v: %v -> %v -> %v", o.Scope, o.QueryLanguage, o.QueryGroup, o.QueryName)
-	} else {
+	//if o.QueryName != "" {
+	return fmt.Sprintf("%v: %v -> %v -> %v", o.Scope, o.QueryLanguage, o.QueryGroup, o.QueryName)
+	/*} else {
 		return fmt.Sprintf("QueryID#%d", o.QueryID)
-	}
+	} // */
+}
+
+type CxQLScope struct {
+	Corp        bool   `yaml:"Tenant"`
+	Project     string `yaml:"Project"`
+	Application string `yaml:"Application"`
 }
 
 type GroupCRUD struct {
@@ -212,7 +219,7 @@ type TestSet struct {
 	Users        []UserCRUD        `yaml:"Users"`
 	Applications []ApplicationCRUD `yaml:"Applications"`
 	Projects     []ProjectCRUD     `yaml:"Projects"`
-	Queries      []QueryCRUD       `yaml:"Queries"`
+	Queries      []CxQLCRUD        `yaml:"Queries"`
 	Presets      []PresetCRUD      `yaml:"Presets"`
 	Roles        []RoleCRUD        `yaml:"Roles"`
 	Scans        []ScanCRUD        `yaml:"Scans"`
