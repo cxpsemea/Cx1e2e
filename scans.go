@@ -28,8 +28,9 @@ func ScanTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
-				LogSkip(logger, "Create Scan", start, testname, id+1, "invalid test (missing project name, repository, branch, or zipfile)")
+				LogSkip(t.FailTest, logger, "Create Scan", start, testname, id+1, t.String(), "invalid test (missing project name, repository, branch, or zipfile)")
 			} else {
+				LogStart(t.FailTest, logger, "Create Scan", start, testname, id+1, t.String())
 				err := ScanTestCreate(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
 					result = false
@@ -86,7 +87,14 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 		t.Scan = &test_Scan
 
 		if test_Scan.Status != "Completed" {
-			return fmt.Errorf("scan finished with status: %v", test_Scan.Status)
+			workflow, err := cx1client.GetScanWorkflowByID(test_Scan.ScanID)
+			if err != nil {
+				logger.Errorf("Failed to get workflow update for scan %v: %s", test_Scan.ScanID, err)
+				return fmt.Errorf("scan finished with status: %v", test_Scan.Status)
+			} else {
+				return fmt.Errorf("scan finished with status: %v - %v", test_Scan.Status, workflow[len(workflow)-1])
+			}
+
 		}
 	}
 
@@ -100,8 +108,9 @@ func ScanTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Project == "" {
-				LogSkip(logger, "Read Scan", start, testname, id+1, "invalid test (missing project)")
+				LogSkip(t.FailTest, logger, "Read Scan", start, testname, id+1, t.String(), "invalid test (missing project)")
 			} else {
+				LogStart(t.FailTest, logger, "Read Scan", start, testname, id+1, t.String())
 				err := ScanTestRead(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
 					result = false
@@ -140,8 +149,9 @@ func ScanTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Scan == nil {
-				LogSkip(logger, "Update Scan", start, testname, id+1, "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, "Update Scan", start, testname, id+1, t.String(), "invalid test (must read before updating)")
 			} else {
+				LogStart(t.FailTest, logger, "Update Scan", start, testname, id+1, t.String())
 				err := ScanTestUpdate(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
 					result = false
@@ -166,8 +176,9 @@ func ScanTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Scan == nil {
-				LogSkip(logger, "Delete Scan", start, testname, id+1, "invalid test (must read before deleting)")
+				LogSkip(t.FailTest, logger, "Delete Scan", start, testname, id+1, t.String(), "invalid test (must read before deleting)")
 			} else {
+				LogStart(t.FailTest, logger, "Delete Scan", start, testname, id+1, t.String())
 				err := ScanTestDelete(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
 					result = false

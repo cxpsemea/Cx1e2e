@@ -14,7 +14,7 @@ func ResultTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		t := &(*results)[id]
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
-			LogSkip(logger, "Create Result", start, testname, id+1, "action not supported")
+			LogSkip(t.FailTest, logger, "Create Result", start, testname, id+1, t.String(), "action not supported")
 		}
 	}
 
@@ -28,8 +28,9 @@ func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if t.ProjectName == "" || (t.SimilarityID == 0 && t.ResultHash == "" && t.Number == 0) {
-				LogSkip(logger, "Read Result", start, testname, id+1, "invalid test (missing project and finding identifier - similarityId, resultHash, or finding number with optional query identifier)")
+				LogSkip(t.FailTest, logger, "Read Result", start, testname, id+1, t.String(), "invalid test (missing project and finding identifier - similarityId, resultHash, or finding number with optional query identifier)")
 			} else {
+				LogStart(t.FailTest, logger, "Read Result", start, testname, id+1, t.String())
 				err := ResultTestRead(cx1client, logger, testname, &(*results)[id])
 				if err != nil {
 					result = false
@@ -138,8 +139,9 @@ func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Result == nil {
-				LogSkip(logger, "Update Result", start, testname, id+1, "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, "Update Result", start, testname, id+1, t.String(), "invalid test (must read before updating)")
 			} else {
+				LogStart(t.FailTest, logger, "Update Result", start, testname, id+1, t.String())
 				err := ResultTestUpdate(cx1client, logger, testname, t)
 				if err != nil {
 					result = false
@@ -170,7 +172,7 @@ func ResultTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		t := &(*results)[id]
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
-			LogSkip(logger, "Delete Result", start, testname, id+1, "invalid test (action not supported)")
+			LogSkip(t.FailTest, logger, "Delete Result", start, testname, id+1, t.String(), "invalid test (action not supported)")
 		}
 	}
 	return true

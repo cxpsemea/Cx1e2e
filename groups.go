@@ -15,8 +15,9 @@ func GroupTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" {
-				LogSkip(logger, "Create Group", start, testname, id+1, "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, "Create Group", start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
+				LogStart(t.FailTest, logger, "Create Group", start, testname, id+1, t.String())
 				err := GroupTestCreate(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
 					result = false
@@ -86,8 +87,9 @@ func GroupTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" {
-				LogSkip(logger, "Read Group", start, testname, id+1, "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, "Read Group", start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
+				LogStart(t.FailTest, logger, "Read Group", start, testname, id+1, t.String())
 				err := GroupTestRead(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
 					result = false
@@ -123,8 +125,9 @@ func GroupTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Group == nil {
-				LogSkip(logger, "Update Group", start, testname, id+1, "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, "Update Group", start, testname, id+1, t.String(), "invalid test (must read before updating)")
 			} else {
+				LogStart(t.FailTest, logger, "Update Group", start, testname, id+1, t.String())
 				err := GroupTestUpdate(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
 					result = false
@@ -154,8 +157,9 @@ func GroupTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Group == nil {
-				LogSkip(logger, "Delete Group", start, testname, id+1, "invalid test (must read before deleting)")
+				LogSkip(t.FailTest, logger, "Delete Group", start, testname, id+1, t.String(), "invalid test (must read before deleting)")
 			} else {
+				LogStart(t.FailTest, logger, "Delete Group", start, testname, id+1, t.String())
 				err := GroupTestDelete(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
 					result = false

@@ -44,6 +44,23 @@ func main() {
 		return
 	}
 
+	switch strings.ToUpper(Config.LogLevel) {
+	case "":
+		break
+	case "TRACE":
+		logger.SetLevel(logrus.TraceLevel)
+	case "DEBUG":
+		logger.SetLevel(logrus.DebugLevel)
+	case "INFO":
+		logger.SetLevel(logrus.InfoLevel)
+	case "WARNING":
+		logger.SetLevel(logrus.WarnLevel)
+	case "ERROR":
+		logger.SetLevel(logrus.ErrorLevel)
+	case "FATAL":
+		logger.SetLevel(logrus.FatalLevel)
+	}
+
 	var cx1client *Cx1ClientGo.Cx1Client
 	httpClient := &http.Client{}
 
@@ -81,11 +98,14 @@ func main() {
 	logger.Infof("Test result summary:\n")
 	failed_test := false
 	for _, result := range TestResults {
-		if result.Result {
-			fmt.Printf("PASS %v - %v\n", result.Name, result.CRUD)
-		} else {
-			fmt.Printf("FAIL %v - %v\n", result.Name, result.CRUD)
+		switch result.Result {
+		case 1:
+			fmt.Printf("PASS %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
+		case 0:
+			fmt.Printf("FAIL %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
 			failed_test = true
+		case 2:
+			fmt.Printf("SKIP %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
 		}
 	}
 	fmt.Println("")
@@ -268,35 +288,43 @@ func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	}
 }
 
+func LogStart(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string) {
+	logger.Infof("")
+	logger.Infof("Starting %v Test '%v' #%d - %v", CRUD, testName, testId, testObject)
+}
+
 func LogPass(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
 		logger.Errorf("FAIL [%.3fs]: %v FailTest '%v' #%d (%v) - %v", duration, CRUD, testName, testId, testObject, "test passed but was expected to fail")
 		TestResults = append(TestResults, TestResult{
-			failTest, false, CRUD, duration, testName, testId, testObject, "test passed but was expected to fail",
+			failTest, 0, CRUD, duration, testName, testId, testObject, "test passed but was expected to fail",
 		})
 	} else {
 		logger.Infof("PASS [%.3fs]: %v Test '%v' #%d (%v)", duration, CRUD, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
-			failTest, true, CRUD, duration, testName, testId, testObject, "",
+			failTest, 1, CRUD, duration, testName, testId, testObject, "",
 		})
 	}
 }
-func LogSkip(logger *logrus.Logger, CRUD string, start int64, testName string, testId int, reason string) {
+func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string, reason string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	logger.Warnf("SKIP [%.3fs]: %v Test '%v' #%d - %v", duration, CRUD, testName, testId, reason)
+	TestResults = append(TestResults, TestResult{
+		failTest, 1, CRUD, duration, testName, testId, testObject, "",
+	})
 }
 func LogFail(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string, reason error) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
 		logger.Infof("PASS [%.3fs]: %v FailTest '%v' #%d (%v)", duration, CRUD, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
-			failTest, true, CRUD, duration, testName, testId, testObject, "",
+			failTest, 1, CRUD, duration, testName, testId, testObject, "",
 		})
 	} else {
 		logger.Errorf("FAIL [%.3fs]: %v Test '%v' #%d (%v) - %s", duration, CRUD, testName, testId, testObject, reason)
 		TestResults = append(TestResults, TestResult{
-			failTest, false, CRUD, duration, testName, testId, testObject, reason.Error(),
+			failTest, 0, CRUD, duration, testName, testId, testObject, reason.Error(),
 		})
 	}
 }

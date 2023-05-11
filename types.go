@@ -46,9 +46,21 @@ type CxQLCRUD struct {
 	Query         *Cx1ClientGo.AuditQuery
 }
 
-func (o *CxQLCRUD) String() string {
+func (s CxQLScope) String() string {
+	if s.Corp {
+		return "Corp"
+	} else {
+		if s.Application != "" {
+			return fmt.Sprintf("App: %v", s.Application)
+		} else {
+			return fmt.Sprintf("Proj: %v", s.Project)
+		}
+	}
+}
+
+func (o CxQLCRUD) String() string {
 	//if o.QueryName != "" {
-	return fmt.Sprintf("%v: %v -> %v -> %v", o.Scope, o.QueryLanguage, o.QueryGroup, o.QueryName)
+	return fmt.Sprintf("%v: %v -> %v -> %v", o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
 	/*} else {
 		return fmt.Sprintf("QueryID#%d", o.QueryID)
 	} // */
@@ -232,11 +244,12 @@ type TestConfig struct {
 	Tenant   string    `yaml:"Tenant"`
 	ProxyURL string    `yaml:"ProxyURL"`
 	Tests    []TestSet `yaml:"Tests"`
+	LogLevel string    `yaml:"LogLevel"`
 }
 
 type TestResult struct {
 	FailTest   bool
-	Result     bool
+	Result     int
 	CRUD       string
 	Duration   float64
 	Name       string

@@ -31,17 +31,20 @@ Tests:
         Test: C
     Scans:
       - Project: e2e-test-project1
-        Repository: https://github.com/cxpsemea/cx1clientgo
-        Branch: main
+        Repository: https://github.com/michaelkubiaczyk/ssba
+        Branch: master
         Preset: e2e-test-preset1
         Engine: sast
         WaitForEnd: true
         Test: C
+  - Name: simple test Create Query after scan
     Queries:
-      - Name: "e2e-test-query1"
-        Group: "e2e-test-querygroup1"
+      - Name: "e2e_test_query1"
+        Group: "e2e_test_querygroup1"
         Language: "Java"
-        Scope: "Corp"
+        Scope: 
+          Tenant: true
+          Project: e2e-test-project1
         Source: "// no result"
         Severity: LOW
         Test: C
@@ -92,10 +95,12 @@ Tests:
         Severity: HIGH
         Test: RU
     Queries:
-      - Name: "e2e-test-query1"
-        Group: "e2e-test-querygroup1"
+      - Name: "e2e_test_query1"
+        Group: "e2e_test_querygroup1"
         Language: "Java"
-        Scope: "Corp"
+        Scope: 
+          Corp: true
+          Project: e2e-test-project1
         Source: "// no result but updated"
         Severity: HIGH
         Test: RU
@@ -122,12 +127,11 @@ Tests:
     Scans:
       - Project: e2e-test-project1
         Test: RD
-    Results:
-      - Project: e2e-test-project1
-        Test: RD
     Queries:
-      - Name: "e2e-test-query1"
-        Group: "e2e-test-querygroup1"
+      - Name: "e2e_test_query1"
+        Group: "e2e_test_querygroup1"
         Language: "Java"
-        Scope: "Corp"
+        Scope: 
+          Corp: true
+          Project: e2e-test-project1
         Test: RD
