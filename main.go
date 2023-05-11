@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -38,7 +39,7 @@ func main() {
 	}
 
 	var err error
-	Config, err = LoadConfig(os.Args[1])
+	Config, err = LoadConfig(logger, os.Args[1])
 	if err != nil {
 		logger.Fatalf("Failed to load configuration file %v: %s", os.Args[1], err)
 		return
@@ -116,14 +117,17 @@ func main() {
 	}
 }
 
-func LoadConfig(testconfig string) (TestConfig, error) {
+func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	var conf TestConfig
 
-	file, err := os.Open(testconfig)
-
+	file, err := os.Open(configPath)
 	if err != nil {
 		return conf, err
 	}
+
+	conf.ConfigPath, _ = filepath.Abs(file.Name())
+	currentRoot := filepath.Dir(file.Name())
+
 	defer file.Close()
 	d := yaml.NewDecoder(file)
 
@@ -132,21 +136,52 @@ func LoadConfig(testconfig string) (TestConfig, error) {
 		return conf, err
 	}
 
-	var sub_tests []TestSet
+	testSet := make([]TestSet, 0)
 
 	for _, set := range conf.Tests {
 		if set.File != "" {
-			conf2, err := LoadConfig(set.File)
+			configPath, err := getFilePath(currentRoot, set.File)
+			if err != nil {
+				return conf, err
+			}
+
+			conf2, err := LoadConfig(logger, configPath)
 			if err != nil {
 				return conf, fmt.Errorf("error loading sub-test %v: %s", set.File, err)
 			}
-			sub_tests = append(sub_tests, conf2.Tests...)
+			logger.Debugf("Loaded sub-config from %v", conf2.ConfigPath)
+			testSet = append(testSet, conf2.Tests...)
+		} else {
+			for id, scan := range set.Scans {
+				if scan.ZipFile != "" {
+					filePath, err := getFilePath(currentRoot, scan.ZipFile)
+					if err != nil {
+						return conf, fmt.Errorf("error locating scan zipfile %v", scan.ZipFile)
+					}
+					set.Scans[id].ZipFile = filePath
+				}
+			}
+			testSet = append(testSet, set)
 		}
 	}
-
-	conf.Tests = append(conf.Tests, sub_tests...)
+	conf.Tests = testSet
 
 	return conf, nil
+}
+
+func getFilePath(currentRoot, file string) (string, error) {
+	logger.Debugf("Trying to find config file %v, current root is %v", file, currentRoot)
+	if _, err := os.Stat(file); err == nil {
+		return filepath.Clean(file), nil
+	} else {
+		testPath := fmt.Sprintf("%v\\%v", currentRoot, file)
+		logger.Debugf("File doesn't exist, testing: %v", testPath)
+		if _, err := os.Stat(testPath); err == nil {
+			return filepath.Clean(testPath), nil
+		} else {
+			return "", fmt.Errorf("unable to find configuration file %v", file)
+		}
+	}
 }
 
 func IsCreate(test string) bool {

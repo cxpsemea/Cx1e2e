@@ -1,0 +1,22 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+LogLevel: WARNING
+Tests:
+  - Name: Application
+    File: application\all.yaml
+  - Name: Group
+    File: group\all.yaml
+  - Name: Project
+    File: project\all.yaml
+  - Name: Scan
+    File: scan\all.yaml
+  - Name: Query
+    File: query\all.yaml
+  - Name: Results
+    File: results\update.yaml
+  - Name: Role
+    File: role\all.yaml
+  - Name: User
+    File: user\all.yaml

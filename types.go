@@ -200,7 +200,11 @@ type ScanCRUD struct {
 }
 
 func (o *ScanCRUD) String() string {
-	return fmt.Sprintf("%v: %v branch %v", o.Project, o.Repository, o.Branch)
+	if o.Repository != "" {
+		return fmt.Sprintf("%v: repo %v, branch %v", o.Project, o.Repository, o.Branch)
+	} else {
+		return fmt.Sprintf("%v: zip %v, branch %v", o.Project, o.ZipFile, o.Branch)
+	}
 }
 
 type UserCRUD struct {
@@ -239,12 +243,13 @@ type TestSet struct {
 }
 
 type TestConfig struct {
-	Cx1URL   string    `yaml:"Cx1URL"`
-	IAMURL   string    `yaml:"IAMURL"`
-	Tenant   string    `yaml:"Tenant"`
-	ProxyURL string    `yaml:"ProxyURL"`
-	Tests    []TestSet `yaml:"Tests"`
-	LogLevel string    `yaml:"LogLevel"`
+	Cx1URL     string    `yaml:"Cx1URL"`
+	IAMURL     string    `yaml:"IAMURL"`
+	Tenant     string    `yaml:"Tenant"`
+	ProxyURL   string    `yaml:"ProxyURL"`
+	Tests      []TestSet `yaml:"Tests"`
+	LogLevel   string    `yaml:"LogLevel"`
+	ConfigPath string    `yaml:"-"`
 }
 
 type TestResult struct {

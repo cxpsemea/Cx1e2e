@@ -20,7 +20,7 @@ Tests:
         WaitForEnd: false
       - Project: e2e-test-project1-zip
         Engine: sast
-        ZipFile: "c:/work/code/ssba/ssba.zip"
+        ZipFile: "files\SSBAv0.7.zip"
         Branch: zip
         Preset: Checkmarx Default
         Test: C

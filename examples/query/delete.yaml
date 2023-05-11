@@ -1,0 +1,19 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: test delete corp/tenant query override
+    Queries:
+      - Name: Spring_Missing_Expect_CT_Header
+        Group: Java_Spring
+        Language: Java
+        Scope: 
+          Tenant: true
+          Project: e2e-test-project1
+        Test: RD
+  - Name: delete temporary project        
+    Projects:
+      - Name: e2e-test-project1
+#        Test: RD

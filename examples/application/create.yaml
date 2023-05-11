@@ -1,0 +1,20 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: App Create
+    Groups:
+      - Name: e2e-test-group1
+    Projects:
+      - Name: e2e-test-group1
+        Groups: [ e2e-test-group1 ]
+    Applications:
+      - Name: e2e-test-app1
+        Rules: 
+          - Type: "project.name.in"
+            Value: "e2e-test-project1"
+          - Type: "project.name.in"
+            Value: "herpaderp"
+        Test: C

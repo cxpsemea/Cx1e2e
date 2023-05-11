@@ -79,7 +79,7 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 
 	t.Scan = &test_Scan
 	if t.WaitForEnd {
-		test_Scan, err = cx1client.ScanPolling(&test_Scan)
+		test_Scan, err = cx1client.ScanPollingDetailed(&test_Scan)
 		if err != nil {
 			return err
 		}

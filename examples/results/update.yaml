@@ -1,0 +1,45 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Read project scan results and update a finding
+    Scans:
+      - Project: e2e-test-project1
+        Test: R
+    Results:
+      - Project: e2e-test-project1
+        FindingNumber: 1 # ? improper resource access
+        State: CONFIRMED
+        Severity: HIGH
+        Comment: "Should be finding #1 (improper resource access?)"
+        Test: RU
+      - Project: e2e-test-project1
+        ResultHash: "5u/viwHFlyaMUhEEqy6jBW3J+xk=" # stored xss
+        State: CONFIRMED
+        Severity: HIGH
+        Comment: "Should be stored xss with result hash 5u/viwHFlyaMUhEEqy6jBW3J+xk="
+        Test: RU
+      - Project: e2e-test-project1
+        SimilarityID: -425684883 # spring overly permissive
+        State: CONFIRMED
+        Severity: HIGH
+        Comment: "Should be spring overly permissive, simID -425684883"
+        Test: RU
+      - Project: e2e-test-project1
+        FindingNumber: 1
+        Name: Stored_XSS
+        Group: Java_High_Risk
+        Language: Java
+        Comment: "Should be stored xss finding #1"
+        State: CONFIRMED
+        Severity: HIGH
+        Test: RU
+      - Project: e2e-test-project1
+        FindingNumber: 2
+        ID: 8481125285487743346
+        Comment: "Should be queryid 8481125285487743346 (reflected xss) second finding"
+        State: CONFIRMED
+        Severity: HIGH
+        Test: RU

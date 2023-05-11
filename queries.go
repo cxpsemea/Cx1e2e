@@ -2,34 +2,12 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
-
-/*
-	1. Create a new query
-		-> doesn't exist on Cx level, create corp
-		-> doesn't exist on project/app level, create override
-	2. Update an existing query
-
-	Issue:
-	  - if the query does not exist at all, response is:
-	  	{
-			"message": "Failed to get file content from path 'queries/Java/Java_High_Risk/Herpaderp/Herpaderp.cs'",
-			"type": "ERROR",
-			"code": 706
-		}
-	  - If the query exists at any level beneath the target, the response returns the query code
-		eg: query exists at Cx level but not in Project level, but checking if the query exists under the project will return the code from the Cx version
-		    query exists at Cx & Corp level but not project, checking for the query on project level will return the Corp version
-
-	Hence:
-		The only time we get a "doesn't exist" response is for brand new queries
-		Thus: "update" is effectively "create" except when the Cx or Corp-level query doesn't already exist.
-
-*/
 
 func (q *CxQLCRUD) IsValidQuery() bool {
 	return q.QueryLanguage != "" && q.QueryGroup != "" && q.QueryName != "" && q.Scope.Project != ""
@@ -74,30 +52,41 @@ func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, projectId string) (string
 	return cx1client.GetAuditSessionByID(projectId, lastscan.ScanID, true)
 }
 
-func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD) *Cx1ClientGo.AuditQuery {
+func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error) {
 	scope := "Corp"
 	if !t.Scope.Corp {
 		if t.Scope.Application != "" {
 			app, err := cx1client.GetApplicationByName(t.Scope.Application)
 			if err != nil {
-				logger.Errorf("Failed to find application named %v", t.Scope.Application)
-				return nil
+				return "", fmt.Errorf("failed to find application named %v", t.Scope.Application)
 			}
 			scope = app.ApplicationID
 		} else {
 			proj, err := cx1client.GetProjectByName(t.Scope.Project)
 			if err != nil {
-				logger.Errorf("Failed to find project named %v", t.Scope.Project)
-				return nil
+				return "", fmt.Errorf("failed to find project named %v", t.Scope.Project)
 			}
 			scope = proj.ProjectID
 		}
 	}
+	return scope, nil
+}
+
+func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD) *Cx1ClientGo.AuditQuery {
+	scope, err := getQueryScope(cx1client, t)
+	if err != nil {
+		logger.Errorf("Error with query scope: %v", err)
+		return nil
+	}
+
 	auditQuery, err := cx1client.GetQueryByName(scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	if err != nil {
 		logger.Warnf("Error getting query %v: %s", t.String(), err)
 		return nil
 	}
+
+	logger.Debugf("Found query %v", auditQuery.String())
+
 	return &auditQuery
 }
 
@@ -105,6 +94,23 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuery
 	session, err := getAuditSession(cx1client, projectId)
 	if err != nil {
 		return err
+	}
+
+	switch strings.ToUpper(t.Severity) {
+	case "INFO":
+		query.Severity = 0
+	case "INFORMATION":
+		query.Severity = 0
+	case "LOW":
+		query.Severity = 1
+	case "MEDIUM":
+		query.Severity = 2
+	case "HIGH":
+		query.Severity = 3
+	}
+
+	if t.Source != "" {
+		query.Source = t.Source
 	}
 
 	if t.Compile {
