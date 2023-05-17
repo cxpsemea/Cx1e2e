@@ -117,13 +117,13 @@ func main() {
 	fmt.Println("")
 	fmt.Printf("Ran %d tests\n", (count_failed + count_passed + count_skipped))
 	if count_failed > 0 {
-		fmt.Printf("FAILED %d tests", count_failed)
+		fmt.Printf("FAILED %d tests\n", count_failed)
 	}
 	if count_skipped > 0 {
-		fmt.Printf("SKIPPED %d tests", count_skipped)
+		fmt.Printf("SKIPPED %d tests\n", count_skipped)
 	}
 	if count_passed > 0 {
-		fmt.Printf("PASSED %d tests", count_passed)
+		fmt.Printf("PASSED %d tests\n", count_passed)
 	}
 }
 
