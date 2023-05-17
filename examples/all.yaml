@@ -1,0 +1,36 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: DEBUG # if you set this to WARNING, you will get no output except errors and a pass/fail report at the end
+Tests:
+  - Name: Application
+    File: application\all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: Group
+    File: group\all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: Project
+    File: project\all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: Scan
+    File: scan\all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: Query
+    File: query\all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: Results
+    File: results\all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: Role
+    File: role\all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: User
+    File: user\all.yaml

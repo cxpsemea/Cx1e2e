@@ -1,23 +1,11 @@
-
 IAMURL: https://eu.iam.checkmarx.net
 Cx1URL: https://eu.ast.checkmarx.net
 Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
 Tests:
   - Name: Role Create
     Roles:
       - Name: e2e-test-role1
         Permissions: [ view-scans-if-in-group ]
         Test: C
-  - Name: Role Update
-    Roles:
-      - Name: e2e-test-role1
-        Permissions: [ view-projects-if-in-group ]
-        Test: RU
-  - Name: Role Delete
-    Roles:
-      - Name: e2e-test-role1
-        Test: RD
-
-
-    

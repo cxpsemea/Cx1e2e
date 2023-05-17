@@ -1,0 +1,15 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: App Update
+    Applications:
+      - Name: e2e-test-app1
+        Groups: []
+        Criticality: 3
+        Tags: 
+          - Test: tag1
+            Test2: tag2
+        Test: RU

@@ -15,8 +15,9 @@ func PresetTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" {
-				LogSkip(logger, "Create Preset", start, testname, id+1, "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, "Create Preset", start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
+				LogStart(t.FailTest, logger, "Create Preset", start, testname, id+1, t.String())
 				err := PresetTestCreate(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
 					result = false
@@ -70,8 +71,9 @@ func PresetTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" {
-				LogSkip(logger, "Read Preset", start, testname, id+1, "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, "Read Preset", start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
+				LogStart(t.FailTest, logger, "Read Preset", start, testname, id+1, t.String())
 				err := PresetTestRead(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
 					result = false
@@ -101,8 +103,9 @@ func PresetTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Preset == nil {
-				LogSkip(logger, "Update Preset", start, testname, id+1, "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, "Update Preset", start, testname, id+1, t.String(), "invalid test (must read before updating)")
 			} else {
+				LogStart(t.FailTest, logger, "Update Preset", start, testname, id+1, t.String())
 				err := PresetTestUpdate(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
 					result = false
@@ -135,8 +138,9 @@ func PresetTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Preset == nil {
-				LogSkip(logger, "Delete Preset", start, testname, id+1, "invalid test (must read before deleting)")
+				LogSkip(t.FailTest, logger, "Delete Preset", start, testname, id+1, t.String(), "invalid test (must read before deleting)")
 			} else {
+				LogStart(t.FailTest, logger, "Delete Preset", start, testname, id+1, t.String())
 				err := PresetTestDelete(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
 					result = false
