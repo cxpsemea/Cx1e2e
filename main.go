@@ -97,23 +97,33 @@ func main() {
 	RunTests(cx1client, logger)
 
 	logger.Infof("Test result summary:\n")
-	failed_test := false
+	count_failed := 0
+	count_passed := 0
+	count_skipped := 0
+
 	for _, result := range TestResults {
 		switch result.Result {
 		case 1:
 			fmt.Printf("PASS %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
+			count_passed++
 		case 0:
 			fmt.Printf("FAIL %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
-			failed_test = true
+			count_failed++
 		case 2:
 			fmt.Printf("SKIP %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
+			count_skipped++
 		}
 	}
 	fmt.Println("")
-	if failed_test {
-		logger.Errorf("Some tests failed")
-	} else {
-		logger.Infof("All tests passed")
+	fmt.Printf("Ran %d tests\n", (count_failed + count_passed + count_skipped))
+	if count_failed > 0 {
+		fmt.Printf("FAILED %d tests", count_failed)
+	}
+	if count_skipped > 0 {
+		fmt.Printf("SKIPPED %d tests", count_skipped)
+	}
+	if count_passed > 0 {
+		fmt.Printf("PASSED %d tests", count_passed)
 	}
 }
 
@@ -278,7 +288,7 @@ func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, start int64, tes
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	logger.Warnf("SKIP [%.3fs]: %v Test '%v' #%d - %v", duration, CRUD, testName, testId, reason)
 	TestResults = append(TestResults, TestResult{
-		failTest, 0, CRUD, duration, testName, testId, testObject, "",
+		failTest, 2, CRUD, duration, testName, testId, testObject, "",
 	})
 }
 func LogFail(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string, reason error) {
