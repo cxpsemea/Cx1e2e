@@ -4,6 +4,13 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
+  - Name: create a group
+    Groups:
+      - Name: e2e-test-group1
+        Test: C
+        ClientRoles:
+          - Client: ast-app
+            Roles: [ ast-scanner ]
   - Name: test user update
     Users:
       - Name: e2e-test-user1

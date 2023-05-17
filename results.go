@@ -163,9 +163,9 @@ func ResultTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 		}*/
 
 	var id uint64
-	for id = 0; id < results_count; id++ {
+	for id = 0; id < uint64(len(filtered_results)); id++ {
 		if id+1 == t.Number {
-			result := results[id]
+			result := filtered_results[id]
 			t.Result = &result
 			return nil
 		}
@@ -198,12 +198,16 @@ func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 }
 
 func ResultTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ResultCRUD) error {
-	var change Cx1ClientGo.ResultsPredicates
-	change.ProjectID = t.Project.ProjectID
-	change.SimilarityID = t.Result.SimilarityID
-	change.State = t.State
-	change.Severity = t.Severity
-	change.Comment = t.Comment
+	change := t.Result.CreateResultsPredicate(t.Project.ProjectID)
+	if t.State != "" {
+		change.State = t.State
+	}
+	if t.Severity != "" {
+		change.Severity = t.Severity
+	}
+	if t.Comment != "" {
+		change.Comment = t.Comment
+	}
 
 	err := cx1client.AddResultsPredicates([]Cx1ClientGo.ResultsPredicates{change})
 	return err

@@ -192,13 +192,13 @@ func (o *ResultFilter) String() string {
 		filters = append(filters, fmt.Sprintf("ResultHash = %v", o.ResultHash))
 	}
 	if o.Severity != "" {
-		filters = append(filters, fmt.Sprintf("Language = %v", o.Severity))
+		filters = append(filters, fmt.Sprintf("Severity = %v", o.Severity))
 	}
 	if o.State != "" {
 		filters = append(filters, fmt.Sprintf("State = %v", o.State))
 	}
 	if o.SimilarityID != 0 {
-		filters = append(filters, fmt.Sprintf("Language = %d", o.SimilarityID))
+		filters = append(filters, fmt.Sprintf("SimilarityID = %d", o.SimilarityID))
 	}
 
 	return strings.Join(filters, ", ")

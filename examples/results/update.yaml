@@ -1,45 +1,86 @@
 IAMURL: https://eu.iam.checkmarx.net
 Cx1URL: https://eu.ast.checkmarx.net
 Tenant: your_tenant_here
-#ProxyURL: http://127.0.0.1:8080
+ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: Read project scan results and update a finding
-    Scans:
-      - Project: e2e-test-project1
-        Test: R
+  - Name: Read project scan results and update some findings
     Results:
       - Project: e2e-test-project1
-        FindingNumber: 1 # ? improper resource access
-        State: CONFIRMED
-        Severity: HIGH
-        Comment: "Should be finding #1 (improper resource access?)"
+        FindingNumber: 1 # there will be one stored_xss finding
+        Filter:
+          Query: Stored_XSS
+          Severity: HIGH
         Test: RU
+        Severity: MEDIUM
+        Comment: "This Stored XSS is medium, not high"
       - Project: e2e-test-project1
-        ResultHash: "5u/viwHFlyaMUhEEqy6jBW3J+xk=" # stored xss
-        State: CONFIRMED
-        Severity: HIGH
-        Comment: "Should be stored xss with result hash 5u/viwHFlyaMUhEEqy6jBW3J+xk="
+        FindingNumber: 2 # there will be three reflected_xss_all_clients finding
+        Filter:
+          Query: Reflected_XSS_All_Clients
+          Severity: HIGH
         Test: RU
+        State: CONFIRMED
+        Comment: "This Reflected XSS is confirmed"
       - Project: e2e-test-project1
-        SimilarityID: -425684883 # spring overly permissive
-        State: CONFIRMED
-        Severity: HIGH
-        Comment: "Should be spring overly permissive, simID -425684883"
+        FindingNumber: 3 #
+        Filter:
+          Query: Reflected_XSS_All_Clients
+          Severity: HIGH
         Test: RU
+        State: URGENT
+        Severity: MEDIUM
+        Comment: "This Reflected XSS is urgent, but medium"
       - Project: e2e-test-project1
-        FindingNumber: 1
-        Name: Stored_XSS
-        Group: Java_High_Risk
-        Language: Java
-        Comment: "Should be stored xss finding #1"
-        State: CONFIRMED
-        Severity: HIGH
+        FindingNumber: 1 # there will be a Parameter_Tampering finding with this result hash
+        Filter:
+          ResultHash: "VMhOE8yTKUkdReXTf3ZkSjtBKoA="
         Test: RU
+        Comment: "This parameter tampering is actually high rish"
+        Severity: HIGH
       - Project: e2e-test-project1
-        FindingNumber: 2
-        ID: 8481125285487743346
-        Comment: "Should be queryid 8481125285487743346 (reflected xss) second finding"
-        State: CONFIRMED
-        Severity: HIGH
+        FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
+        Filter:
+          SimilarityID: 2014150247
         Test: RU
+        Comment: "This hardcoded password is my secret backdoor, not exploitable"
+        State: NOT_EXPLOITABLE
+  - Name: Read project scan results to verify the updates worked
+    Results:
+      - Project: e2e-test-project1
+        FindingNumber: 1 # the stored_xss finding should now be medium
+        Filter:
+          QueryID: 13625251660291496964
+          Severity: MEDIUM
+        Test: R
+      - Project: e2e-test-project1
+        FindingNumber: 1 # Only one of the reflected xss findings is "confirmed" now
+        Filter:
+          Query: Reflected_XSS_All_Clients
+          State: CONFIRMED
+        Test: R
+      - Project: e2e-test-project1
+        FindingNumber: 3 # there should no longer be 3 ref_xss HIGH findings, only two
+        Filter:
+          Query: Reflected_XSS_All_Clients
+          Severity: HIGH
+        Test: R
+        FailTest: true
+      - Project: e2e-test-project1
+        FindingNumber: 1 # this specific reflected xss finding is now medium
+        Filter:
+          SimilarityID: 1318375675
+          Severity: MEDIUM
+        Test: R
+      - Project: e2e-test-project1
+        FindingNumber: 1 # the only parameter tampering finding should now be High
+        Filter:
+          SimilarityID: -1732526860
+          Severity: HIGH
+        Test: R
+      - Project: e2e-test-project1
+        FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
+        Filter:
+          Query: Use_Of_Hardcoded_Password
+          State: NOT_EXPLOITABLE
+        Test: R

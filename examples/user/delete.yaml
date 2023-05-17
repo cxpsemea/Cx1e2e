@@ -9,3 +9,7 @@ Tests:
       - Name: e2e-test-user1
         Email: e2e_test_user1@cx.local
         Test: RD
+  - Name: delete temporary group
+    Groups:
+      - Name: e2e-test-group1
+        Test: RD

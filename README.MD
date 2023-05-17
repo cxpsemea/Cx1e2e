@@ -1,11 +1,21 @@
 This is an automated end-to-end workflow testing tool for Cx1 via the REST API, as exposed by Cx1ClientGo (https://github.com/cxpsemea/Cx1ClientGo/)
 
+# Quick Start 
 Usage:
 ```
     cx1e2e.exe tests.yaml APIKey
     cx1e2e.exe tests.yaml APIKey Cx1URL IAMURL Tenant
 ```
-Multiple example test.yaml definitions can be found in the examples directory.
+Multiple example test.yaml definitions can be found in the examples directory. To quickly try out an example configuration, you can do the following:
+
+``` 
+    git clone https://github.com/cxpsemea/cx1e2e
+    cd cx1e2e
+    go run . examples/all.yaml <API Key> <Cx1 URL> <IAM Url> <Your Tenant>
+```
+
+# Test configuration
+## Credentials
 
 The beginning of each test.yaml file will include standard items needed to connect to a Cx1 environment:
 ```
@@ -14,12 +24,16 @@ The beginning of each test.yaml file will include standard items needed to conne
     Tenant: your_tenant_here
     #ProxyURL: http://127.0.0.1:8080
 ```
+The IAMURL, Cx1URL, and Tenant parameters can be supplied through the command-line. This is the preferred approach when dealing with multiple Cx1 environments (eg: INT, DEV, Stage, Prod) so that the tests can be re-used easily. The proxy URL is optional and can be used for debugging.
 
-The proxy URL is optional and can be used for debugging.
 
-Tests are defined in Test Sets, each of which is named and can have a number of objects targeted for testing.
+## Test Sets
 
-Simple test to create a new role, create a new group with that role, and create a new user with the new role and also membership in the new group:
+Tests are defined in Test Sets, each of which is named and can have a number of objects targeted for testing. Test Sets are executed in order, and tests within a set are executed such that all [C]reate operations are run first, then [R]ead, then [U]pdate, then [D]elete.
+
+### Simple test set example
+
+A simple test to create a new role, create a new group with that role, and create a new user with the new role and also membership in the new group:
 ```
     Tests:
       - Name: simple test to create role & group & user
@@ -40,6 +54,8 @@ Simple test to create a new role, create a new group with that role, and create 
 ```
 In each of the above tests, the parameter "Test" includes the letter "C" - this indicates the test is to Create the relevant object.
 
+### More complex test set example
+
 More complicated set of 3 tests to create, read & update (set a permission), then delete a role:
 ```
     Tests:
@@ -59,28 +75,33 @@ More complicated set of 3 tests to create, read & update (set a permission), the
 ```
 In the tests above, each "Test" parameter includes different combinations of CRUD operations. Tests are selected through the "Test: CRUD" line which defines if the [C]reate, [R]ead, [U]pdate, or [D]elete tests are performed. 
 
+### Test sets across multiple YAML files
+
 Tests can also be defined in multiple files which are then referenced from the primary file. For example:
 ```
     Tests:
       - Name: my-special-tests
         File: special\tests.yaml
 ```
-This will load the indicated special\tests.yaml file and add the tests to the end of the set.
+This will load the indicated special\tests.yaml file and add the tests to the end of the set. 
+
+## Coverage
 
 Currently this testing tool covers the following objects:
 - Applications (CRUD)
 - Groups (CRUD)
 - Presets (CRUD)
 - Projects (CRUD)
-- Queries (Read only)
+- Queries (CRUD)
 - Results (RU)
 - Roles (CRUD)
-- Scans (CR)
+- Scans (CRD)
 - Users (CRUD)
 
 There are some limitations in this tool due to unimplemented functionality in the testing tool or in the underlying Cx1ClientGo library. Feel free to contribute (PR against dev branch please) or raise Issues.
 
-Example output:
+## Example output
+
 ```
 [INFO][2023-03-14 16:42:18.758] Created Cx1 client cx_tam_appsec_canary_michael_kubiaczyk on https://deu.ast.checkmarx.net
 [INFO][2023-03-14 16:42:18.892] PASS [0.133s]: Create Group Test 'simple test Create all' #1 (e2e-test-group1)

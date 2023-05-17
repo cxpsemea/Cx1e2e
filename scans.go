@@ -193,5 +193,5 @@ func ScanTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 }
 
 func ScanTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
-	return fmt.Errorf("not implemented")
+	return cx1client.DeleteScanByID(t.Scan.ScanID)
 }
