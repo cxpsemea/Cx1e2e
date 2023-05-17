@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -38,10 +39,27 @@ func main() {
 	}
 
 	var err error
-	Config, err = LoadConfig(os.Args[1])
+	Config, err = LoadConfig(logger, os.Args[1])
 	if err != nil {
 		logger.Fatalf("Failed to load configuration file %v: %s", os.Args[1], err)
 		return
+	}
+
+	switch strings.ToUpper(Config.LogLevel) {
+	case "":
+		break
+	case "TRACE":
+		logger.SetLevel(logrus.TraceLevel)
+	case "DEBUG":
+		logger.SetLevel(logrus.DebugLevel)
+	case "INFO":
+		logger.SetLevel(logrus.InfoLevel)
+	case "WARNING":
+		logger.SetLevel(logrus.WarnLevel)
+	case "ERROR":
+		logger.SetLevel(logrus.ErrorLevel)
+	case "FATAL":
+		logger.SetLevel(logrus.FatalLevel)
 	}
 
 	var cx1client *Cx1ClientGo.Cx1Client
@@ -79,31 +97,47 @@ func main() {
 	RunTests(cx1client, logger)
 
 	logger.Infof("Test result summary:\n")
-	failed_test := false
+	count_failed := 0
+	count_passed := 0
+	count_skipped := 0
+
 	for _, result := range TestResults {
-		if result.Result {
-			fmt.Printf("PASS %v - %v\n", result.Name, result.CRUD)
-		} else {
-			fmt.Printf("FAIL %v - %v\n", result.Name, result.CRUD)
-			failed_test = true
+		switch result.Result {
+		case 1:
+			fmt.Printf("PASS %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
+			count_passed++
+		case 0:
+			fmt.Printf("FAIL %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
+			count_failed++
+		case 2:
+			fmt.Printf("SKIP %v - %v: %v\n", result.Name, result.CRUD, result.TestObject)
+			count_skipped++
 		}
 	}
 	fmt.Println("")
-	if failed_test {
-		logger.Errorf("Some tests failed")
-	} else {
-		logger.Infof("All tests passed")
+	fmt.Printf("Ran %d tests\n", (count_failed + count_passed + count_skipped))
+	if count_failed > 0 {
+		fmt.Printf("FAILED %d tests", count_failed)
+	}
+	if count_skipped > 0 {
+		fmt.Printf("SKIPPED %d tests", count_skipped)
+	}
+	if count_passed > 0 {
+		fmt.Printf("PASSED %d tests", count_passed)
 	}
 }
 
-func LoadConfig(testconfig string) (TestConfig, error) {
+func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	var conf TestConfig
 
-	file, err := os.Open(testconfig)
-
+	file, err := os.Open(configPath)
 	if err != nil {
 		return conf, err
 	}
+
+	conf.ConfigPath, _ = filepath.Abs(file.Name())
+	currentRoot := filepath.Dir(file.Name())
+
 	defer file.Close()
 	d := yaml.NewDecoder(file)
 
@@ -112,21 +146,52 @@ func LoadConfig(testconfig string) (TestConfig, error) {
 		return conf, err
 	}
 
-	var sub_tests []TestSet
+	testSet := make([]TestSet, 0)
 
 	for _, set := range conf.Tests {
 		if set.File != "" {
-			conf2, err := LoadConfig(set.File)
+			configPath, err := getFilePath(currentRoot, set.File)
+			if err != nil {
+				return conf, err
+			}
+
+			conf2, err := LoadConfig(logger, configPath)
 			if err != nil {
 				return conf, fmt.Errorf("error loading sub-test %v: %s", set.File, err)
 			}
-			sub_tests = append(sub_tests, conf2.Tests...)
+			logger.Debugf("Loaded sub-config from %v", conf2.ConfigPath)
+			testSet = append(testSet, conf2.Tests...)
+		} else {
+			for id, scan := range set.Scans {
+				if scan.ZipFile != "" {
+					filePath, err := getFilePath(currentRoot, scan.ZipFile)
+					if err != nil {
+						return conf, fmt.Errorf("error locating scan zipfile %v", scan.ZipFile)
+					}
+					set.Scans[id].ZipFile = filePath
+				}
+			}
+			testSet = append(testSet, set)
 		}
 	}
-
-	conf.Tests = append(conf.Tests, sub_tests...)
+	conf.Tests = testSet
 
 	return conf, nil
+}
+
+func getFilePath(currentRoot, file string) (string, error) {
+	logger.Debugf("Trying to find config file %v, current root is %v", file, currentRoot)
+	if _, err := os.Stat(file); err == nil {
+		return filepath.Clean(file), nil
+	} else {
+		testPath := fmt.Sprintf("%v\\%v", currentRoot, file)
+		logger.Debugf("File doesn't exist, testing: %v", testPath)
+		if _, err := os.Stat(testPath); err == nil {
+			return filepath.Clean(testPath), nil
+		} else {
+			return "", fmt.Errorf("unable to find configuration file %v", file)
+		}
+	}
 }
 
 func IsCreate(test string) bool {
@@ -144,6 +209,10 @@ func IsDelete(test string) bool {
 
 func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
 	for _, t := range Config.Tests {
+		if t.Wait > 0 {
+			logger.Infof("Waiting for %d seconds", t.Wait)
+			time.Sleep(time.Duration(t.Wait) * time.Second)
+		}
 		TestCreate(cx1client, logger, t.Name, &t)
 		TestRead(cx1client, logger, t.Name, &t)
 		TestUpdate(cx1client, logger, t.Name, &t)
@@ -152,120 +221,53 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
 }
 
 func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	if len(tests.Groups) > 0 {
-		GroupTestsCreate(cx1client, logger, testname, &tests.Groups)
-	}
-	if len(tests.Applications) > 0 {
-		ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications)
-	}
-	if len(tests.Projects) > 0 {
-		ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
-	}
-	if len(tests.Roles) > 0 {
-		RoleTestsCreate(cx1client, logger, testname, &tests.Roles)
-	}
-	if len(tests.Users) > 0 {
-		UserTestsCreate(cx1client, logger, testname, &tests.Users)
-	}
-	if len(tests.Queries) > 0 {
-		QueryTestsCreate(cx1client, logger, testname, &tests.Queries)
-	}
-	if len(tests.Presets) > 0 {
-		PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
-	}
-	if len(tests.Scans) > 0 {
-		ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
-	}
-	if len(tests.Results) > 0 {
-		ResultTestsCreate(cx1client, logger, testname, &tests.Results)
-	}
+	GroupTestsCreate(cx1client, logger, testname, &tests.Groups)
+	ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications)
+	ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
+	RoleTestsCreate(cx1client, logger, testname, &tests.Roles)
+	UserTestsCreate(cx1client, logger, testname, &tests.Users)
+	QueryTestsCreate(cx1client, logger, testname, &tests.Queries)
+	PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
+	ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
+	ResultTestsCreate(cx1client, logger, testname, &tests.Results)
 }
 func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	if len(tests.Groups) > 0 {
-		GroupTestsRead(cx1client, logger, testname, &tests.Groups)
-	}
-	if len(tests.Applications) > 0 {
-		ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
-	}
-	if len(tests.Projects) > 0 {
-		ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
-	}
-	if len(tests.Roles) > 0 {
-		RoleTestsRead(cx1client, logger, testname, &tests.Roles)
-	}
-	if len(tests.Users) > 0 {
-		UserTestsRead(cx1client, logger, testname, &tests.Users)
-	}
-	if len(tests.Queries) > 0 {
-		QueryTestsRead(cx1client, logger, testname, &tests.Queries)
-	}
-	if len(tests.Presets) > 0 {
-		PresetTestsRead(cx1client, logger, testname, &tests.Presets)
-	}
-	if len(tests.Scans) > 0 {
-		ScanTestsRead(cx1client, logger, testname, &tests.Scans)
-	}
-	if len(tests.Results) > 0 {
-		ResultTestsRead(cx1client, logger, testname, &tests.Results)
-	}
+	GroupTestsRead(cx1client, logger, testname, &tests.Groups)
+	ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
+	ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
+	RoleTestsRead(cx1client, logger, testname, &tests.Roles)
+	UserTestsRead(cx1client, logger, testname, &tests.Users)
+	QueryTestsRead(cx1client, logger, testname, &tests.Queries)
+	PresetTestsRead(cx1client, logger, testname, &tests.Presets)
+	ScanTestsRead(cx1client, logger, testname, &tests.Scans)
+	ResultTestsRead(cx1client, logger, testname, &tests.Results)
 }
 func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	if len(tests.Groups) > 0 {
-		GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
-	}
-	if len(tests.Applications) > 0 {
-		ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
-	}
-	if len(tests.Projects) > 0 {
-		ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
-	}
-	if len(tests.Roles) > 0 {
-		RoleTestsUpdate(cx1client, logger, testname, &tests.Roles)
-	}
-	if len(tests.Users) > 0 {
-		UserTestsUpdate(cx1client, logger, testname, &tests.Users)
-	}
-	if len(tests.Queries) > 0 {
-		QueryTestsUpdate(cx1client, logger, testname, &tests.Queries)
-	}
-	if len(tests.Presets) > 0 {
-		PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
-	}
-	if len(tests.Scans) > 0 {
-		ScanTestsUpdate(cx1client, logger, testname, &tests.Scans)
-	}
-	if len(tests.Results) > 0 {
-		ResultTestsUpdate(cx1client, logger, testname, &tests.Results)
-	}
+	GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
+	ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
+	ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
+	RoleTestsUpdate(cx1client, logger, testname, &tests.Roles)
+	UserTestsUpdate(cx1client, logger, testname, &tests.Users)
+	QueryTestsUpdate(cx1client, logger, testname, &tests.Queries)
+	PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
+	ScanTestsUpdate(cx1client, logger, testname, &tests.Scans)
+	ResultTestsUpdate(cx1client, logger, testname, &tests.Results)
 }
 func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	if len(tests.Groups) > 0 {
-		GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
-	}
-	if len(tests.Applications) > 0 {
-		ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
-	}
-	if len(tests.Projects) > 0 {
-		ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)
-	}
-	if len(tests.Roles) > 0 {
-		RoleTestsDelete(cx1client, logger, testname, &tests.Roles)
-	}
-	if len(tests.Users) > 0 {
-		UserTestsDelete(cx1client, logger, testname, &tests.Users)
-	}
-	if len(tests.Queries) > 0 {
-		QueryTestsDelete(cx1client, logger, testname, &tests.Queries)
-	}
-	if len(tests.Presets) > 0 {
-		PresetTestsDelete(cx1client, logger, testname, &tests.Presets)
-	}
-	if len(tests.Scans) > 0 {
-		ScanTestsDelete(cx1client, logger, testname, &tests.Scans)
-	}
-	if len(tests.Results) > 0 {
-		ResultTestsDelete(cx1client, logger, testname, &tests.Results)
-	}
+	GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
+	ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
+	ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)
+	RoleTestsDelete(cx1client, logger, testname, &tests.Roles)
+	UserTestsDelete(cx1client, logger, testname, &tests.Users)
+	QueryTestsDelete(cx1client, logger, testname, &tests.Queries)
+	PresetTestsDelete(cx1client, logger, testname, &tests.Presets)
+	ScanTestsDelete(cx1client, logger, testname, &tests.Scans)
+	ResultTestsDelete(cx1client, logger, testname, &tests.Results)
+}
+
+func LogStart(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string) {
+	logger.Infof("")
+	logger.Infof("Starting %v Test '%v' #%d - %v", CRUD, testName, testId, testObject)
 }
 
 func LogPass(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string) {
@@ -273,30 +275,33 @@ func LogPass(failTest bool, logger *logrus.Logger, CRUD string, start int64, tes
 	if failTest {
 		logger.Errorf("FAIL [%.3fs]: %v FailTest '%v' #%d (%v) - %v", duration, CRUD, testName, testId, testObject, "test passed but was expected to fail")
 		TestResults = append(TestResults, TestResult{
-			failTest, false, CRUD, duration, testName, testId, testObject, "test passed but was expected to fail",
+			failTest, 0, CRUD, duration, testName, testId, testObject, "test passed but was expected to fail",
 		})
 	} else {
 		logger.Infof("PASS [%.3fs]: %v Test '%v' #%d (%v)", duration, CRUD, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
-			failTest, true, CRUD, duration, testName, testId, testObject, "",
+			failTest, 1, CRUD, duration, testName, testId, testObject, "",
 		})
 	}
 }
-func LogSkip(logger *logrus.Logger, CRUD string, start int64, testName string, testId int, reason string) {
+func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string, reason string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	logger.Warnf("SKIP [%.3fs]: %v Test '%v' #%d - %v", duration, CRUD, testName, testId, reason)
+	TestResults = append(TestResults, TestResult{
+		failTest, 2, CRUD, duration, testName, testId, testObject, "",
+	})
 }
 func LogFail(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string, reason error) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
 		logger.Infof("PASS [%.3fs]: %v FailTest '%v' #%d (%v)", duration, CRUD, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
-			failTest, true, CRUD, duration, testName, testId, testObject, "",
+			failTest, 1, CRUD, duration, testName, testId, testObject, "",
 		})
 	} else {
 		logger.Errorf("FAIL [%.3fs]: %v Test '%v' #%d (%v) - %s", duration, CRUD, testName, testId, testObject, reason)
 		TestResults = append(TestResults, TestResult{
-			failTest, false, CRUD, duration, testName, testId, testObject, reason.Error(),
+			failTest, 0, CRUD, duration, testName, testId, testObject, reason.Error(),
 		})
 	}
 }

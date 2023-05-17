@@ -14,8 +14,9 @@ func ApplicationTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" {
-				LogSkip(logger, "Create Application", start, testname, id+1, "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, "Create Application", start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
+				LogStart(t.FailTest, logger, "Create Application", start, testname, id+1, t.String())
 				err := ApplicationTestCreate(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
 					result = false
@@ -78,8 +79,9 @@ func ApplicationTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logge
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" {
-				LogSkip(logger, "Create", start, testname, id+1, "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, "Create", start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
+				LogStart(t.FailTest, logger, "Read Application", start, testname, id+1, t.String())
 				err := ApplicationTestRead(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
 					result = false
@@ -109,8 +111,9 @@ func ApplicationTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Application == nil {
-				LogSkip(logger, "Update", start, testname, id+1, "must read before updating")
+				LogSkip(t.FailTest, logger, "Update", start, testname, id+1, t.String(), "must read before updating")
 			} else {
+				LogStart(t.FailTest, logger, "Update Application", start, testname, id+1, t.String())
 				err := ApplicationTestUpdate(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
 					result = false
@@ -139,8 +142,9 @@ func ApplicationTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Application == nil {
-				LogSkip(logger, "Delete Application", start, testname, id+1, "invalid test (must read before deleting)")
+				LogSkip(t.FailTest, logger, "Delete Application", start, testname, id+1, t.String(), "invalid test (must read before deleting)")
 			} else {
+				LogStart(t.FailTest, logger, "Delete Application", start, testname, id+1, t.String())
 				err := ApplicationTestDelete(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
 					result = false

@@ -1,0 +1,29 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: delete query override, new corp query and preset
+    Queries:
+      - Name: Client_DOM_XSS
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: false
+          Project: e2e-test-burger1
+        Test: RD
+      - Name: e2e_test_cheeseburgers
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-test-burger1
+        Test: RD
+    Presets:
+      - Name: e2e-test-burger1
+        Test: RD
+  - Name: delete temporary project        
+    Projects:
+      - Name: e2e-test-burger1
+        Test: RD

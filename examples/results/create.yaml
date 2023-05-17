@@ -1,0 +1,41 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: create temporary project and scan
+    Projects:
+      - Name: e2e-test-project1
+        Test: C
+    Scans:
+      - Project: e2e-test-project1
+        ZipFile: ..\files\SSBAv0.7.zip
+        Branch: zip
+        Preset: All
+        Engine: sast
+        WaitForEnd: true
+        Test: C
+    Results:
+      - Project: e2e-test-project1
+        FindingNumber: 1 # there will be one stored_xss finding
+        Filter:
+          Query: Stored_XSS
+          Severity: HIGH
+        Test: R
+      - Project: e2e-test-project1
+        FindingNumber: 3 # there will be three reflected_xss_all_clients finding
+        Filter:
+          Query: Reflected_XSS_All_Clients
+          Severity: HIGH
+        Test: R
+      - Project: e2e-test-project1
+        FindingNumber: 1 # there will be a Parameter_Tampering finding with this result hash
+        Filter:
+          ResultHash: "VMhOE8yTKUkdReXTf3ZkSjtBKoA="
+        Test: R
+      - Project: e2e-test-project1
+        FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
+        Filter:
+          SimilarityID: 2014150247
+        Test: R
