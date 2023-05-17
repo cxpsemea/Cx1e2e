@@ -199,6 +199,10 @@ func IsDelete(test string) bool {
 
 func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
 	for _, t := range Config.Tests {
+		if t.Wait > 0 {
+			logger.Infof("Waiting for %d seconds", t.Wait)
+			time.Sleep(time.Duration(t.Wait) * time.Second)
+		}
 		TestCreate(cx1client, logger, t.Name, &t)
 		TestRead(cx1client, logger, t.Name, &t)
 		TestUpdate(cx1client, logger, t.Name, &t)

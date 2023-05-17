@@ -6,17 +6,31 @@ Tenant: your_tenant_here
 Tests:
   - Name: Application
     File: application\all.yaml
+  - Name: 10 second pause
+    Wait: 10
   - Name: Group
     File: group\all.yaml
+  - Name: 10 second pause
+    Wait: 10
   - Name: Project
     File: project\all.yaml
+  - Name: 10 second pause
+    Wait: 10
   - Name: Scan
     File: scan\all.yaml
+  - Name: 10 second pause
+    Wait: 10
   - Name: Query
     File: query\all.yaml
+  - Name: 10 second pause
+    Wait: 10
   - Name: Results
     File: results\all.yaml
+  - Name: 10 second pause
+    Wait: 10
   - Name: Role
     File: role\all.yaml
+  - Name: 10 second pause
+    Wait: 10
   - Name: User
     File: user\all.yaml

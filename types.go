@@ -271,6 +271,7 @@ type TestSet struct {
 	Roles        []RoleCRUD        `yaml:"Roles"`
 	Scans        []ScanCRUD        `yaml:"Scans"`
 	Results      []ResultCRUD      `yaml:"Results"`
+	Wait         uint              `yaml:"Wait"`
 }
 
 type TestConfig struct {
