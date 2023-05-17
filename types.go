@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 )
@@ -40,10 +41,12 @@ type CxQLCRUD struct {
 	Source        string    `yaml:"Source"`
 	Scope         CxQLScope `yaml:"Scope"`
 	Severity      string    `yaml:"Severity"`
+	IsExecutable  bool      `yaml:"IsExecutable"`
 	FailTest      bool      `yaml:"FailTest"`
 	Compile       bool      `yaml:"Compile"`
 	TestResult    bool
 	Query         *Cx1ClientGo.AuditQuery
+	LastScan      *Cx1ClientGo.Scan
 }
 
 func (s CxQLScope) String() string {
@@ -140,37 +143,65 @@ func (o *QueryCRUD) String() string {
 }
 
 type ResultCRUD struct {
-	QueryID       uint64 `yaml:"ID"`
+	ProjectName string       `yaml:"Project"`
+	Number      uint64       `yaml:"FindingNumber"`
+	State       string       `yaml:"State"`
+	Severity    string       `yaml:"Severity"`
+	Comment     string       `yaml:"Comment"`
+	Test        string       `yaml:"Test"`
+	FailTest    bool         `yaml:"FailTest"`
+	Filter      ResultFilter `yaml:"Filter"`
+	Result      *Cx1ClientGo.ScanResult
+	Project     *Cx1ClientGo.Project
+}
+
+type ResultFilter struct {
+	QueryID       uint64 `yaml:"QueryID"`
 	QueryLanguage string `yaml:"Language"`
 	QueryGroup    string `yaml:"Group"`
-	QueryName     string `yaml:"Name"`
-	ProjectName   string `yaml:"Project"`
-	Number        uint64 `yaml:"FindingNumber"`
+	QueryName     string `yaml:"Query"`
 	SimilarityID  int64  `yaml:"SimilarityID"`
 	ResultHash    string `yaml:"ResultHash"`
 	State         string `yaml:"State"`
 	Severity      string `yaml:"Severity"`
-	Comment       string `yaml:"Comment"`
-	Test          string `yaml:"Test"`
-	FailTest      bool   `yaml:"FailTest"`
-	Result        *Cx1ClientGo.ScanResult
-	Project       *Cx1ClientGo.Project
 }
 
 func (o *ResultCRUD) String() string {
-	if o.QueryName != "" {
-		return fmt.Sprintf("%v: %v -> %v -> %v finding #%d", o.ProjectName, o.QueryLanguage, o.QueryGroup, o.QueryName, o.Number)
-	}
-	if o.SimilarityID != 0 {
-		return fmt.Sprintf("%v: finding with simID %d", o.ProjectName, o.SimilarityID)
-	}
-	if o.ResultHash != "" {
-		return fmt.Sprintf("%v: finding with hash %v", o.ProjectName, o.ResultHash)
-	}
-	if o.QueryID != 0 {
-		return fmt.Sprintf("%v: QueryID #%d finding #%d", o.ProjectName, o.QueryID, o.Number)
+	filter := o.Filter.String()
+	if filter != "" {
+		return fmt.Sprintf("%v: finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
 	}
 	return fmt.Sprintf("%v: finding #%d", o.ProjectName, o.Number)
+}
+
+func (o *ResultFilter) String() string {
+	var filters []string
+	if o.QueryID != 0 {
+		filters = append(filters, fmt.Sprintf("QueryID = %d", o.QueryID))
+	}
+	if o.QueryLanguage != "" {
+		filters = append(filters, fmt.Sprintf("Language = %v", o.QueryLanguage))
+	}
+	if o.QueryGroup != "" {
+		filters = append(filters, fmt.Sprintf("Group = %v", o.QueryGroup))
+	}
+	if o.QueryName != "" {
+		filters = append(filters, fmt.Sprintf("Query = %v", o.QueryName))
+	}
+	if o.ResultHash != "" {
+		filters = append(filters, fmt.Sprintf("ResultHash = %v", o.ResultHash))
+	}
+	if o.Severity != "" {
+		filters = append(filters, fmt.Sprintf("Language = %v", o.Severity))
+	}
+	if o.State != "" {
+		filters = append(filters, fmt.Sprintf("State = %v", o.State))
+	}
+	if o.SimilarityID != 0 {
+		filters = append(filters, fmt.Sprintf("Language = %d", o.SimilarityID))
+	}
+
+	return strings.Join(filters, ", ")
 }
 
 type RoleCRUD struct {

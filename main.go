@@ -207,120 +207,48 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
 }
 
 func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	if len(tests.Groups) > 0 {
-		GroupTestsCreate(cx1client, logger, testname, &tests.Groups)
-	}
-	if len(tests.Applications) > 0 {
-		ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications)
-	}
-	if len(tests.Projects) > 0 {
-		ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
-	}
-	if len(tests.Roles) > 0 {
-		RoleTestsCreate(cx1client, logger, testname, &tests.Roles)
-	}
-	if len(tests.Users) > 0 {
-		UserTestsCreate(cx1client, logger, testname, &tests.Users)
-	}
-	if len(tests.Queries) > 0 {
-		QueryTestsCreate(cx1client, logger, testname, &tests.Queries)
-	}
-	if len(tests.Presets) > 0 {
-		PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
-	}
-	if len(tests.Scans) > 0 {
-		ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
-	}
-	if len(tests.Results) > 0 {
-		ResultTestsCreate(cx1client, logger, testname, &tests.Results)
-	}
+	GroupTestsCreate(cx1client, logger, testname, &tests.Groups)
+	ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications)
+	ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
+	RoleTestsCreate(cx1client, logger, testname, &tests.Roles)
+	UserTestsCreate(cx1client, logger, testname, &tests.Users)
+	QueryTestsCreate(cx1client, logger, testname, &tests.Queries)
+	PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
+	ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
+	ResultTestsCreate(cx1client, logger, testname, &tests.Results)
 }
 func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	if len(tests.Groups) > 0 {
-		GroupTestsRead(cx1client, logger, testname, &tests.Groups)
-	}
-	if len(tests.Applications) > 0 {
-		ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
-	}
-	if len(tests.Projects) > 0 {
-		ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
-	}
-	if len(tests.Roles) > 0 {
-		RoleTestsRead(cx1client, logger, testname, &tests.Roles)
-	}
-	if len(tests.Users) > 0 {
-		UserTestsRead(cx1client, logger, testname, &tests.Users)
-	}
-	if len(tests.Queries) > 0 {
-		QueryTestsRead(cx1client, logger, testname, &tests.Queries)
-	}
-	if len(tests.Presets) > 0 {
-		PresetTestsRead(cx1client, logger, testname, &tests.Presets)
-	}
-	if len(tests.Scans) > 0 {
-		ScanTestsRead(cx1client, logger, testname, &tests.Scans)
-	}
-	if len(tests.Results) > 0 {
-		ResultTestsRead(cx1client, logger, testname, &tests.Results)
-	}
+	GroupTestsRead(cx1client, logger, testname, &tests.Groups)
+	ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
+	ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
+	RoleTestsRead(cx1client, logger, testname, &tests.Roles)
+	UserTestsRead(cx1client, logger, testname, &tests.Users)
+	QueryTestsRead(cx1client, logger, testname, &tests.Queries)
+	PresetTestsRead(cx1client, logger, testname, &tests.Presets)
+	ScanTestsRead(cx1client, logger, testname, &tests.Scans)
+	ResultTestsRead(cx1client, logger, testname, &tests.Results)
 }
 func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	if len(tests.Groups) > 0 {
-		GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
-	}
-	if len(tests.Applications) > 0 {
-		ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
-	}
-	if len(tests.Projects) > 0 {
-		ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
-	}
-	if len(tests.Roles) > 0 {
-		RoleTestsUpdate(cx1client, logger, testname, &tests.Roles)
-	}
-	if len(tests.Users) > 0 {
-		UserTestsUpdate(cx1client, logger, testname, &tests.Users)
-	}
-	if len(tests.Queries) > 0 {
-		QueryTestsUpdate(cx1client, logger, testname, &tests.Queries)
-	}
-	if len(tests.Presets) > 0 {
-		PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
-	}
-	if len(tests.Scans) > 0 {
-		ScanTestsUpdate(cx1client, logger, testname, &tests.Scans)
-	}
-	if len(tests.Results) > 0 {
-		ResultTestsUpdate(cx1client, logger, testname, &tests.Results)
-	}
+	GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
+	ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
+	ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
+	RoleTestsUpdate(cx1client, logger, testname, &tests.Roles)
+	UserTestsUpdate(cx1client, logger, testname, &tests.Users)
+	QueryTestsUpdate(cx1client, logger, testname, &tests.Queries)
+	PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
+	ScanTestsUpdate(cx1client, logger, testname, &tests.Scans)
+	ResultTestsUpdate(cx1client, logger, testname, &tests.Results)
 }
 func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	if len(tests.Groups) > 0 {
-		GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
-	}
-	if len(tests.Applications) > 0 {
-		ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
-	}
-	if len(tests.Projects) > 0 {
-		ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)
-	}
-	if len(tests.Roles) > 0 {
-		RoleTestsDelete(cx1client, logger, testname, &tests.Roles)
-	}
-	if len(tests.Users) > 0 {
-		UserTestsDelete(cx1client, logger, testname, &tests.Users)
-	}
-	if len(tests.Queries) > 0 {
-		QueryTestsDelete(cx1client, logger, testname, &tests.Queries)
-	}
-	if len(tests.Presets) > 0 {
-		PresetTestsDelete(cx1client, logger, testname, &tests.Presets)
-	}
-	if len(tests.Scans) > 0 {
-		ScanTestsDelete(cx1client, logger, testname, &tests.Scans)
-	}
-	if len(tests.Results) > 0 {
-		ResultTestsDelete(cx1client, logger, testname, &tests.Results)
-	}
+	GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
+	ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
+	ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)
+	RoleTestsDelete(cx1client, logger, testname, &tests.Roles)
+	UserTestsDelete(cx1client, logger, testname, &tests.Users)
+	QueryTestsDelete(cx1client, logger, testname, &tests.Queries)
+	PresetTestsDelete(cx1client, logger, testname, &tests.Presets)
+	ScanTestsDelete(cx1client, logger, testname, &tests.Scans)
+	ResultTestsDelete(cx1client, logger, testname, &tests.Results)
 }
 
 func LogStart(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string) {
@@ -346,7 +274,7 @@ func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, start int64, tes
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	logger.Warnf("SKIP [%.3fs]: %v Test '%v' #%d - %v", duration, CRUD, testName, testId, reason)
 	TestResults = append(TestResults, TestResult{
-		failTest, 1, CRUD, duration, testName, testId, testObject, "",
+		failTest, 0, CRUD, duration, testName, testId, testObject, "",
 	})
 }
 func LogFail(failTest bool, logger *logrus.Logger, CRUD string, start int64, testName string, testId int, testObject string, reason error) {

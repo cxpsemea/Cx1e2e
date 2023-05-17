@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
@@ -36,20 +35,27 @@ func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return result
 }
 
-func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, projectId string) (string, error) {
-	lastscans, err := cx1client.GetLastScansByStatusAndID(projectId, 1, []string{"Completed"})
-	if err != nil {
-		logger.Errorf("Error getting last successful scan for project %v: %s", projectId, err)
-		return "", err
+func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error) {
+	if t.LastScan == nil {
+		proj, err := cx1client.GetProjectByName(t.Scope.Project)
+		if err != nil {
+			return "", err
+		}
+
+		lastscans, err := cx1client.GetLastScansByStatusAndID(proj.ProjectID, 1, []string{"Completed"})
+		if err != nil {
+			logger.Errorf("Error getting last successful scan for project %v: %s", proj.ProjectID, err)
+			return "", err
+		}
+
+		if len(lastscans) == 0 {
+			return "", fmt.Errorf("unable to create audit session: no Completed scans exist for project %v", proj.ProjectID)
+		}
+
+		t.LastScan = &lastscans[0]
 	}
 
-	if len(lastscans) == 0 {
-		return "", fmt.Errorf("unable to create audit session: no Completed scans exist for project %v", projectId)
-	}
-
-	lastscan := lastscans[0]
-
-	return cx1client.GetAuditSessionByID(projectId, lastscan.ScanID, true)
+	return cx1client.GetAuditSessionByID(t.LastScan.ProjectID, t.LastScan.ScanID, true)
 }
 
 func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error) {
@@ -85,49 +91,46 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCR
 		return nil
 	}
 
-	logger.Debugf("Found query %v", auditQuery.String())
+	//logger.Debugf("Found query %v", auditQuery.String())
 
 	return &auditQuery
 }
 
-func updateQuery(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuery, projectId string, t *CxQLCRUD) error {
-	session, err := getAuditSession(cx1client, projectId)
+func compileQuery(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuery, t *CxQLCRUD) error {
+	session, err := getAuditSession(cx1client, t)
 	if err != nil {
 		return err
 	}
 
-	switch strings.ToUpper(t.Severity) {
-	case "INFO":
-		query.Severity = 0
-	case "INFORMATION":
-		query.Severity = 0
-	case "LOW":
-		query.Severity = 1
-	case "MEDIUM":
-		query.Severity = 2
-	case "HIGH":
-		query.Severity = 3
+	err = cx1client.AuditCompileQuery(session, *query)
+	if err != nil {
+		return fmt.Errorf("error triggering query compile: %s", err)
 	}
+
+	err = cx1client.AuditCompilePollingByID(session)
+	if err != nil {
+		return fmt.Errorf("error while polling compiler: %s", err)
+	}
+	return nil
+}
+
+func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
+	t.Query.Severity = cx1client.GetSeverityID(t.Severity)
 
 	if t.Source != "" {
-		query.Source = t.Source
+		t.Query.Source = t.Source
 	}
+
+	t.Query.IsExecutable = t.IsExecutable
 
 	if t.Compile {
-		err = cx1client.AuditCompileQuery(session, *query)
+		err := compileQuery(cx1client, t.Query, t)
 		if err != nil {
-			logger.Errorf("Error triggering query compile: %s", err)
-			return err
-		}
-
-		err = cx1client.AuditCompilePollingByID(session)
-		if err != nil {
-			logger.Errorf("Error while polling compiler: %s", err)
 			return err
 		}
 	}
 
-	err = cx1client.UpdateQuery(session, *query)
+	err := cx1client.UpdateQuery(*t.Query)
 	if err != nil {
 		return err
 	}
@@ -136,24 +139,46 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuery
 }
 
 func QueryTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
-	query := getQuery(cx1client, logger, t)
-	proj, err := cx1client.GetProjectByName(t.Scope.Project)
-	if err != nil {
-		return err
-	}
+	t.Query = getQuery(cx1client, logger, t)
 
-	if query != nil {
-		logger.Infof("Found query: %v", query.String())
-		return updateQuery(cx1client, query, proj.ProjectID, t)
+	if t.Query != nil {
+		logger.Infof("Found query: %v", t.Query.String())
+		return updateQuery(cx1client, t)
 	} else {
 		// query does not exist at all so needs to be created on corp level
 		// Second query: create new corp/tenant query
-		newQuery, err := cx1client.AuditCreateQuery(t.QueryLanguage, t.QueryGroup, t.QueryName)
+
+		if !t.Scope.Corp {
+			return fmt.Errorf("query %v does not exist and must be created at Tenant level before it can be created on a Project or Application level", t.String())
+		}
+
+		newQuery, err := cx1client.AuditNewQuery(t.QueryLanguage, t.QueryGroup, t.QueryName)
 		if err != nil {
 			return err
 		}
 		newQuery.Source = t.Source
-		return updateQuery(cx1client, &newQuery, proj.ProjectID, t)
+		newQuery.Severity = cx1client.GetSeverityID(t.Severity)
+		newQuery.IsExecutable = t.IsExecutable
+
+		if t.Compile {
+			err = compileQuery(cx1client, &newQuery, t)
+			if err != nil {
+				return err
+			}
+		}
+
+		session, err := getAuditSession(cx1client, t)
+		if err != nil {
+			return err
+		}
+
+		newQuery, err = cx1client.AuditCreateCorpQuery(session, newQuery)
+		if err != nil {
+			return err
+		}
+		t.Query = &newQuery
+
+		return nil
 	}
 }
 
@@ -184,7 +209,7 @@ func QueryTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 	t.Query = getQuery(cx1client, logger, t)
 
 	if t.Query == nil {
-		return fmt.Errorf("no such query %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		return fmt.Errorf("no such query %v: %v -> %v -> %v exists", t.Scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
 
 	return nil
@@ -214,12 +239,7 @@ func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 }
 
 func QueryTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
-	proj, err := cx1client.GetProjectByName(t.Scope.Project)
-	if err != nil {
-		return err
-	}
-
-	return updateQuery(cx1client, t.Query, proj.ProjectID, t)
+	return updateQuery(cx1client, t)
 }
 
 func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) bool {

@@ -1,30 +1,142 @@
 IAMURL: https://eu.iam.checkmarx.net
 Cx1URL: https://eu.ast.checkmarx.net
 Tenant: your_tenant_here
-#ProxyURL: http://127.0.0.1:8080
+ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create temporary project and scan
+  - Name: create temporary project, new preset, run a scan
     Projects:
-      - Name: e2e-test-project1
-#        Test: C
+      - Name: e2e-test-burger1
+        Test: C
+    Presets:
+      - Name: e2e-test-burger1
+        Description: This is my test preset        
+        Queries:
+          - Language: JavaScript
+            Group: JavaScript_High_Risk
+            Name: Client_DOM_XSS
+        Test: C
     Scans:
-      - Project: e2e-test-project1
-        ZipFile: ..\files\SSBAv0.1.zip
+      - Project: e2e-test-burger1
+        ZipFile: ..\files\xss-burger.zip
         Branch: zip
-        Preset: All
+        Preset: e2e-test-burger1
         Engine: sast
         WaitForEnd: true
-#        Test: C
-  - Name: test create corp/tenant query override
+        Test: C
+    Results:
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # there will be one dom_xss finding
+        Filter:
+          Query: Client_DOM_XSS
+          Severity: HIGH
+        Test: R
+  - Name: create corp query override and run a scan
     Queries:
-      - Name: Spring_Missing_Expect_CT_Header
-        Group: Java_Spring
-        Language: Java
+      - Name: Client_DOM_XSS
+        Group: JavaScript_High_Risk
+        Language: JavaScript
         Scope: 
           Tenant: true
-          Project: e2e-test-project1
-        Source: "result = base.Spring_Missing_Expect_CT_Header();"
-        Severity: HIGH
+          Project: e2e-test-burger1
+        Source: "result = All.NewCxList();"
+        Severity: MEDIUM # currently, you cannot change anything except the source, but this should work june/july
         Compile: true
         Test: C
+    Scans:
+      - Project: e2e-test-burger1
+        ZipFile: ..\files\xss-burger.zip
+        Branch: zip
+        Preset: e2e-test-burger1
+        Engine: sast
+        WaitForEnd: true
+        Test: C
+    Results:
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # this finding should no longer be reported
+        Filter:
+          Query: Client_DOM_XSS
+          Severity: HIGH
+        Test: R
+        FailTest: true
+  - Name: create new corp query, add to preset, delete corp override
+    Queries:
+      - Name: e2e_test_cheeseburgers
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-test-burger1
+        Source: "result = Find_Strings().FindByName(\"cheeseburger\");"
+        Severity: HIGH
+        IsExecutable: true
+        Compile: true
+        Test: C
+      - Name: Client_DOM_XSS
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-test-burger1
+        Test: RD
+    Presets:
+      - Name: e2e-test-burger1
+        Description: This is my test preset        
+        Queries:
+          - Language: JavaScript
+            Group: JavaScript_High_Risk
+            Name: Client_DOM_XSS
+          - Language: JavaScript
+            Group: JavaScript_High_Risk
+            Name: e2e_test_cheeseburgers
+        Test: RU
+  - Name: run a scan with the new preset
+    Scans:
+      - Project: e2e-test-burger1
+        ZipFile: ..\files\xss-burger.zip
+        Branch: zip
+        Preset: e2e-test-burger1
+        Engine: sast
+        WaitForEnd: true
+        Test: C
+    Results:
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # this finding should be back
+        Filter:
+          Query: Client_DOM_XSS
+          Severity: HIGH
+        Test: R
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # this new finding should be reported now
+        Filter:
+          Query: e2e_test_cheeseburgers
+          Severity: HIGH
+        Test: R
+  - Name: create project query override and run a scan
+    Queries:
+      - Name: Client_DOM_XSS
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: false
+          Project: e2e-test-burger1
+        Source: "result = All.NewCxList();"
+        Severity: LOW
+        Compile: true
+        Test: C
+    Scans:
+      - Project: e2e-test-burger1
+        ZipFile: ..\files\xss-burger.zip
+        Branch: zip
+        Preset: e2e-test-burger1
+        Engine: sast
+        WaitForEnd: true
+        Test: C
+    Results:
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # this finding should be gone again
+        Filter:
+          Query: Client_DOM_XSS
+          Severity: HIGH
+        Test: R
+        FailTest: true

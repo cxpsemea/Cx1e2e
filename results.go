@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
@@ -27,8 +29,8 @@ func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		t := &(*results)[id]
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
-			if t.ProjectName == "" || (t.SimilarityID == 0 && t.ResultHash == "" && t.Number == 0) {
-				LogSkip(t.FailTest, logger, "Read Result", start, testname, id+1, t.String(), "invalid test (missing project and finding identifier - similarityId, resultHash, or finding number with optional query identifier)")
+			if t.ProjectName == "" || t.Number == 0 {
+				LogSkip(t.FailTest, logger, "Read Result", start, testname, id+1, t.String(), "invalid test (missing project and finding number with optional filter)")
 			} else {
 				LogStart(t.FailTest, logger, "Read Result", start, testname, id+1, t.String())
 				err := ResultTestRead(cx1client, logger, testname, &(*results)[id])
@@ -42,6 +44,34 @@ func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		}
 	}
 	return result
+}
+
+func (o ResultFilter) Matches(result Cx1ClientGo.ScanResult) bool {
+	if o.QueryID != 0 && o.QueryID != result.Data.QueryID {
+		return false
+	}
+	if o.QueryLanguage != "" && !strings.EqualFold(o.QueryLanguage, result.Data.LanguageName) {
+		return false
+	}
+	if o.QueryGroup != "" && !strings.EqualFold(o.QueryGroup, result.Data.Group) {
+		return false
+	}
+	if o.QueryName != "" && !strings.EqualFold(o.QueryName, result.Data.QueryName) {
+		return false
+	}
+	if o.ResultHash != "" && o.ResultHash != result.Data.ResultHash {
+		return false
+	}
+	if o.Severity != "" && strings.ToUpper(o.Severity) != result.Severity {
+		return false
+	}
+	if o.State != "" && strings.ToUpper(o.State) != result.State {
+		return false
+	}
+	if o.SimilarityID != 0 && o.SimilarityID != result.SimilarityID {
+		return false
+	}
+	return true
 }
 
 func ResultTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ResultCRUD) error {
@@ -70,58 +100,70 @@ func ResultTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 		return err
 	}
 
-	if t.QueryName != "" {
-		var counter uint64
-		for _, r := range results {
-			if r.Data.QueryName == t.QueryName && r.Data.LanguageName == t.QueryLanguage {
-				counter++
-				if counter == t.Number {
+	filtered_results := make([]Cx1ClientGo.ScanResult, 0)
+	for _, r := range results {
+		if t.Filter.Matches(r) {
+			filtered_results = append(filtered_results, r)
+		}
+	}
+
+	sort.SliceStable(filtered_results, func(i, j int) bool {
+		return filtered_results[i].Data.ResultHash < filtered_results[j].Data.ResultHash
+	})
+
+	/*
+		if t.QueryName != "" {
+			var counter uint64
+			for _, r := range results {
+				if r.Data.QueryName == t.QueryName && r.Data.LanguageName == t.QueryLanguage {
+					counter++
+					if counter == t.Number {
+						t.Result = &r
+						return nil
+					}
+				}
+			}
+
+			return fmt.Errorf("specified result not found")
+		}
+
+		if t.QueryID != 0 {
+			var counter uint64
+			for _, r := range results {
+				logger.Infof("  %d vs %d = %v", t.QueryID, r.Data.QueryID, t.QueryID == r.Data.QueryID)
+				if r.Data.QueryID == t.QueryID {
+					counter++
+					if counter == t.Number {
+						t.Result = &r
+						return nil
+					}
+				}
+			}
+			return fmt.Errorf("specified result not found")
+		}
+
+		if t.SimilarityID != 0 {
+			for _, r := range results {
+				if r.SimilarityID == t.SimilarityID {
 					t.Result = &r
 					return nil
 				}
 			}
+			return fmt.Errorf("specified result not found")
 		}
 
-		return fmt.Errorf("specified result not found")
-	}
-
-	if t.QueryID != 0 {
-		var counter uint64
-		for _, r := range results {
-			logger.Infof("  %d vs %d = %v", t.QueryID, r.Data.QueryID, t.QueryID == r.Data.QueryID)
-			if r.Data.QueryID == t.QueryID {
-				counter++
-				if counter == t.Number {
+		if t.ResultHash != "" {
+			for _, r := range results {
+				if r.Data.ResultHash == t.ResultHash {
 					t.Result = &r
 					return nil
 				}
 			}
-		}
-		return fmt.Errorf("specified result not found")
-	}
-
-	if t.SimilarityID != 0 {
-		for _, r := range results {
-			if r.SimilarityID == t.SimilarityID {
-				t.Result = &r
-				return nil
-			}
-		}
-		return fmt.Errorf("specified result not found")
-	}
-
-	if t.ResultHash != "" {
-		for _, r := range results {
-			if r.Data.ResultHash == t.ResultHash {
-				t.Result = &r
-				return nil
-			}
-		}
-		return fmt.Errorf("specified result not found")
-	}
+			return fmt.Errorf("specified result not found")
+		}*/
 
 	var id uint64
-	for ; id < results_count; id++ {
+	for id = 0; id < results_count; id++ {
 		if id+1 == t.Number {
 			result := results[id]
 			t.Result = &result
