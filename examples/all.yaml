@@ -2,7 +2,7 @@ IAMURL: https://eu.iam.checkmarx.net
 Cx1URL: https://eu.ast.checkmarx.net
 Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
-#LogLevel: WARNING # this will make it so there is no log output except for fails
+#LogLevel: DEBUG 
 Tests:
   - Name: Application
     File: application\all.yaml
@@ -15,7 +15,7 @@ Tests:
   - Name: Query
     File: query\all.yaml
   - Name: Results
-    File: results\update.yaml
+    File: results\all.yaml
   - Name: Role
     File: role\all.yaml
   - Name: User
