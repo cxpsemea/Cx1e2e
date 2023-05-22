@@ -10,7 +10,7 @@ Tests:
         Test: C
     Scans:
       - Project: e2e-test-project1
-        ZipFile: ..\files\SSBAv0.7.zip
+        ZipFile: ../files/SSBAv0.7.zip
         Branch: zip
         Preset: All
         Engine: sast
