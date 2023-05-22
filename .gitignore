@@ -1,5 +1,5 @@
 *.bat
 *.exe
 config
-cx1e2e.exe
-cx1e2e
+cx1e2e*
+*.html
