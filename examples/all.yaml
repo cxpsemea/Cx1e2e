@@ -5,32 +5,32 @@ Tenant: your_tenant_here
 #LogLevel: DEBUG # if you set this to WARNING, you will get no output except errors and a pass/fail report at the end
 Tests:
   - Name: Application
-    File: application\all.yaml
+    File: application/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: Group
-    File: group\all.yaml
+    File: group/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: Project
-    File: project\all.yaml
+    File: project/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: Scan
-    File: scan\all.yaml
+    File: scan/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: Query
-    File: query\all.yaml
+    File: query/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: Results
-    File: results\all.yaml
+    File: results/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: Role
-    File: role\all.yaml
+    File: role/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: User
-    File: user\all.yaml
+    File: user/all.yaml

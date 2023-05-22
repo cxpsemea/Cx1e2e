@@ -83,9 +83,9 @@ Tests can also be defined in multiple files which are then referenced from the p
 ```
     Tests:
       - Name: my-special-tests
-        File: special\tests.yaml
+        File: special/tests.yaml
 ```
-This will load the indicated special\tests.yaml file and add the tests to the end of the set. 
+This will load the indicated special/tests.yaml file and add the tests to the end of the set. 
 
 ## Coverage
 

@@ -12,7 +12,7 @@ Tests:
           - Test: tag2
     Scans:
       - Project: e2e-test-project1
-        ZipFile: ..\files\SSBAv0.1.zip
+        ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All
         Engine: sast
