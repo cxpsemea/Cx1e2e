@@ -23,7 +23,7 @@ var TestResults []TestResult
 
 func main() {
 	logger = logrus.New()
-	logger.SetLevel(logrus.InfoLevel)
+	logger.SetLevel(logrus.TraceLevel)
 	myformatter := &easy.Formatter{}
 	myformatter.TimestampFormat = "2006-01-02 15:04:05.000"
 	myformatter.LogFormat = "[%lvl%][%time%] %msg%\n"
@@ -47,7 +47,7 @@ func main() {
 
 	switch strings.ToUpper(Config.LogLevel) {
 	case "":
-		break
+		logger.SetLevel(logrus.InfoLevel)
 	case "TRACE":
 		logger.SetLevel(logrus.TraceLevel)
 	case "DEBUG":
@@ -180,16 +180,17 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 }
 
 func getFilePath(currentRoot, file string) (string, error) {
-	logger.Debugf("Trying to find config file %v, current root is %v", file, currentRoot)
-	if _, err := os.Stat(file); err == nil {
-		return filepath.Clean(file), nil
+	osPath := filepath.FromSlash(file)
+	logger.Debugf("Trying to find config file %v, current root is %v", osPath, currentRoot)
+	if _, err := os.Stat(osPath); err == nil {
+		return filepath.Clean(osPath), nil
 	} else {
-		testPath := fmt.Sprintf("%v\\%v", currentRoot, file)
+		testPath := filepath.Join(currentRoot, osPath)
 		logger.Debugf("File doesn't exist, testing: %v", testPath)
 		if _, err := os.Stat(testPath); err == nil {
 			return filepath.Clean(testPath), nil
 		} else {
-			return "", fmt.Errorf("unable to find configuration file %v", file)
+			return "", fmt.Errorf("unable to find configuration file %v", testPath)
 		}
 	}
 }

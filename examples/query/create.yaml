@@ -18,7 +18,7 @@ Tests:
         Test: C
     Scans:
       - Project: e2e-test-burger1
-        ZipFile: ..\files\xss-burger.zip
+        ZipFile: ../files/xss-burger.zip
         Branch: zip
         Preset: e2e-test-burger1
         Engine: sast
@@ -45,7 +45,7 @@ Tests:
         Test: C
     Scans:
       - Project: e2e-test-burger1
-        ZipFile: ..\files\xss-burger.zip
+        ZipFile: ../files/xss-burger.zip
         Branch: zip
         Preset: e2e-test-burger1
         Engine: sast
@@ -67,7 +67,7 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-burger1
-        Source: "result = Find_Strings().FindByName(\"cheeseburger\");"
+        Source: "result = Find_Strings().FindByName(/"cheeseburger/");"
         Severity: HIGH
         IsExecutable: true
         Compile: true
@@ -93,7 +93,7 @@ Tests:
   - Name: run a scan with the new preset
     Scans:
       - Project: e2e-test-burger1
-        ZipFile: ..\files\xss-burger.zip
+        ZipFile: ../files/xss-burger.zip
         Branch: zip
         Preset: e2e-test-burger1
         Engine: sast
@@ -126,7 +126,7 @@ Tests:
         Test: C
     Scans:
       - Project: e2e-test-burger1
-        ZipFile: ..\files\xss-burger.zip
+        ZipFile: ../files/xss-burger.zip
         Branch: zip
         Preset: e2e-test-burger1
         Engine: sast
