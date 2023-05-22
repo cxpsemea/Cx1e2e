@@ -67,7 +67,7 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-burger1
-        Source: "result = Find_Strings().FindByName(/"cheeseburger/");"
+        Source: "result = Find_Strings().FindByName(\"cheeseburger\");"
         Severity: HIGH
         IsExecutable: true
         Compile: true
