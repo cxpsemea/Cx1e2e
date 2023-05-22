@@ -14,15 +14,15 @@ func ProjectTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" {
-				LogSkip(t.FailTest, logger, "Create Project", start, testname, id+1, t.String(), "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, OP_CREATE, MOD_PROJECT, start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
-				LogStart(t.FailTest, logger, "Create Project", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_CREATE, MOD_PROJECT, start, testname, id+1, t.String())
 				err := ProjectTestCreate(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Create Project", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_CREATE, MOD_PROJECT, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Create Project", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_CREATE, MOD_PROJECT, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -74,15 +74,15 @@ func ProjectTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" {
-				LogSkip(t.FailTest, logger, "Read Project", start, testname, id+1, t.String(), "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, OP_READ, MOD_PROJECT, start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
-				LogStart(t.FailTest, logger, "Read Project", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_READ, MOD_PROJECT, start, testname, id+1, t.String())
 				err := ProjectTestRead(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Read Project", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_READ, MOD_PROJECT, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Read Project", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_READ, MOD_PROJECT, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -106,15 +106,15 @@ func ProjectTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Project == nil {
-				LogSkip(t.FailTest, logger, "Update Project", start, testname, id+1, t.String(), "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_PROJECT, start, testname, id+1, t.String(), "invalid test (must read before updating)")
 			} else {
-				LogStart(t.FailTest, logger, "Update Project", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_UPDATE, MOD_PROJECT, start, testname, id+1, t.String())
 				err := ProjectTestUpdate(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Update Project", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_UPDATE, MOD_PROJECT, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Update Project", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_UPDATE, MOD_PROJECT, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -156,15 +156,15 @@ func ProjectTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Project == nil {
-				LogSkip(t.FailTest, logger, "Delete Project", start, testname, id+1, t.String(), "invalid test (must read before deleting)")
+				LogSkip(t.FailTest, logger, OP_DELETE, MOD_PROJECT, start, testname, id+1, t.String(), "invalid test (must read before deleting)")
 			} else {
-				LogStart(t.FailTest, logger, "Delete Project", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_DELETE, MOD_PROJECT, start, testname, id+1, t.String())
 				err := ProjectTestDelete(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Delete Project", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_DELETE, MOD_PROJECT, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Delete Project", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_DELETE, MOD_PROJECT, start, testname, id+1, t.String())
 				}
 			}
 		}

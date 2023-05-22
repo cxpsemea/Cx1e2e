@@ -15,15 +15,15 @@ func UserTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" || t.Email == "" {
-				LogSkip(t.FailTest, logger, "Create User", start, testname, id+1, t.String(), "invalid test (missing name or email)")
+				LogSkip(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), "invalid test (missing name or email)")
 			} else {
-				LogStart(t.FailTest, logger, "Create User", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String())
 				err := UserTestCreate(cx1client, logger, testname, &(*users)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Create User", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Create User", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -143,15 +143,15 @@ func UserTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Name == "" && t.Email == "" {
-				LogSkip(t.FailTest, logger, "Read User", start, testname, id+1, t.String(), "invalid test (missing name or email)")
+				LogSkip(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), "invalid test (missing name or email)")
 			} else {
-				LogStart(t.FailTest, logger, "Read User", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String())
 				err := UserTestRead(cx1client, logger, testname, &(*users)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Read User", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Read User", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -175,15 +175,15 @@ func UserTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.User == nil {
-				LogSkip(t.FailTest, logger, "Update User", start, testname, id+1, t.String(), "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), "invalid test (must read before updating)")
 			} else {
-				LogStart(t.FailTest, logger, "Update User", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String())
 				err := UserTestUpdate(cx1client, logger, testname, &(*users)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Update User", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Update User", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -207,15 +207,15 @@ func UserTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
 			if t.User == nil {
-				LogSkip(t.FailTest, logger, "Delete User", start, testname, id+1, t.String(), "invalid test (must read before deleting)")
+				LogSkip(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), "invalid test (must read before deleting)")
 			} else {
-				LogStart(t.FailTest, logger, "Delete User", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String())
 				err := UserTestDelete(cx1client, logger, testname, &(*users)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Delete User", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Delete User", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String())
 				}
 			}
 		}
