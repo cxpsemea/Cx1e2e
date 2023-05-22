@@ -19,15 +19,15 @@ func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
 			if !t.IsValidQuery() {
-				LogSkip(t.FailTest, logger, "Create Query", start, testname, id+1, t.String(), "invalid test (missing query identifier)")
+				LogSkip(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), "invalid test (missing query identifier)")
 			} else {
-				LogStart(t.FailTest, logger, "Create Query", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String())
 				err := QueryTestCreate(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Create Query", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Create Query", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -44,8 +44,7 @@ func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, err
 
 		lastscans, err := cx1client.GetLastScansByStatusAndID(proj.ProjectID, 1, []string{"Completed"})
 		if err != nil {
-			logger.Errorf("Error getting last successful scan for project %v: %s", proj.ProjectID, err)
-			return "", err
+			return "", fmt.Errorf("error getting last successful scan for project %v: %s", proj.ProjectID, err)
 		}
 
 		if len(lastscans) == 0 {
@@ -189,15 +188,15 @@ func QueryTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if !t.IsValidQuery() {
-				LogSkip(t.FailTest, logger, "Read Query", start, testname, id+1, t.String(), "invalid test (missing name)")
+				LogSkip(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), "invalid test (missing name)")
 			} else {
-				LogStart(t.FailTest, logger, "Read Query", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String())
 				err := QueryTestRead(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Read Query", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Read Query", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -222,15 +221,15 @@ func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Query == nil {
-				LogSkip(t.FailTest, logger, "Update Query", start, testname, id+1, t.String(), "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), "invalid test (must read before updating)")
 			} else {
-				LogStart(t.FailTest, logger, "Update Query", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String())
 				err := QueryTestUpdate(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Update Query", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Update Query", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String())
 				}
 			}
 		}
@@ -249,15 +248,15 @@ func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Query == nil {
-				LogSkip(t.FailTest, logger, "Delete Query", start, testname, id+1, t.String(), "invalid test (must read before deleting)")
+				LogSkip(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), "invalid test (must read before deleting)")
 			} else {
-				LogStart(t.FailTest, logger, "Delete Query", start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String())
 				err := QueryTestDelete(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, "Delete Query", start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), err)
 				} else {
-					LogPass(t.FailTest, logger, "Delete Query", start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String())
 				}
 			}
 		}
