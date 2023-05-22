@@ -31,7 +31,7 @@ The IAMURL, Cx1URL, and Tenant parameters can be supplied through the command-li
 
 Tests are defined in Test Sets, each of which is named and can have a number of objects targeted for testing. Test Sets are executed in order, and tests within a set are executed such that all [C]reate operations are run first, then [R]ead, then [U]pdate, then [D]elete. Tests can have an optional Wait which causes the tests to pause for the specified number of seconds before continuing - this is to avoid getting blocked for spamming the API.
 
-Refer to the existing examples in the examples folder for a list of tests and their configuration options. The examples have been split according to the object being tested (eg: groups, roles) and each test set is structure with a "create.yaml" to create various objects, "update.yaml" to update the created objects, and findally a "delete.yaml" to remove the created objects. Running the "all.yaml" test sets should clean up after itself so that there are no left-over artifacts.
+Refer to the existing examples in the examples folder for a list of tests and their configuration options. The examples have been split according to the object being tested (eg: groups, roles) and each test set is structure with a "create.yaml" to create various objects, "update.yaml" to update the created objects, and findally a OP_DELETE, .yaml" to remove the created objects. Running the "all.yaml" test sets should clean up after itself so that there are no left-over artifacts.
 
 ### Simple test set example
 

@@ -288,9 +288,23 @@ type TestResult struct {
 	FailTest   bool
 	Result     int
 	CRUD       string
+	Module     string
 	Duration   float64
 	Name       string
 	Id         int
 	TestObject string
 	Reason     string
+}
+
+// test result output
+type Counter struct {
+	Pass uint
+	Fail uint
+	Skip uint
+}
+type CounterSet struct {
+	Create Counter
+	Read   Counter
+	Update Counter
+	Delete Counter
 }
