@@ -29,7 +29,7 @@ Tests:
   - Name: 10 second pause
     Wait: 10
   - Name: Reports
-    File: reports/all.yaml
+    File: report/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: Role
