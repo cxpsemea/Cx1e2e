@@ -31,6 +31,7 @@ const (
 	MOD_PRESET      = "Preset"
 	MOD_PROJECT     = "Project"
 	MOD_QUERY       = "Query"
+	MOD_REPORT      = "Report"
 	MOD_RESULT      = "Result"
 	MOD_ROLE        = "Role"
 	MOD_SCAN        = "Scan"
@@ -54,8 +55,7 @@ func main() {
 
 	if len(os.Args) != 3 && len(os.Args) != 6 {
 		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration.")
-		logger.Info("Expected arguments not provided. Usage:\n1)\tcx1e2e <test definition yaml file> <APIKey>\n")
-		logger.Info("2)\tcx1e2e <test definition yaml file> <APIKey> <Cx1 URL> <IAM URL> <Tenant>\n")
+		logger.Info("Expected arguments not provided. Usage:\n1)\tcx1e2e <test definition yaml file> <APIKey>\n2)\tcx1e2e <test definition yaml file> <APIKey> <Cx1 URL> <IAM URL> <Tenant>\n")
 		logger.Info("Note: API Key authentication is currently required and OIDC client/secret authentication is not supported.\n")
 		return
 	}
@@ -230,7 +230,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 
 	defer report.Close()
 
-	var Application, Group, Preset, Project, Query, Result, Role, Scan, User CounterSet
+	var Application, Group, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
 	for _, r := range *tests {
 		var set *CounterSet
 		switch r.Module {
@@ -246,6 +246,8 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 			set = &Query
 		case MOD_RESULT:
 			set = &Result
+		case MOD_REPORT:
+			set = &Report
 		case MOD_ROLE:
 			set = &Role
 		case MOD_SCAN:
@@ -290,6 +292,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	writeCounterSet(report, "Project", &Project)
 	writeCounterSet(report, "Query", &Query)
 	writeCounterSet(report, "Result", &Result)
+	writeCounterSet(report, "Report", &Report)
 	writeCounterSet(report, "Role", &Role)
 	writeCounterSet(report, "Scan", &Scan)
 	writeCounterSet(report, "User", &User)
@@ -345,6 +348,7 @@ func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
 	ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
 	ResultTestsCreate(cx1client, logger, testname, &tests.Results)
+	ReportTestsCreate(cx1client, logger, testname, &tests.Reports)
 }
 func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
 	GroupTestsRead(cx1client, logger, testname, &tests.Groups)
@@ -356,6 +360,7 @@ func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname 
 	PresetTestsRead(cx1client, logger, testname, &tests.Presets)
 	ScanTestsRead(cx1client, logger, testname, &tests.Scans)
 	ResultTestsRead(cx1client, logger, testname, &tests.Results)
+	ReportTestsRead(cx1client, logger, testname, &tests.Reports)
 }
 func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
 	GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
@@ -367,6 +372,7 @@ func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
 	ScanTestsUpdate(cx1client, logger, testname, &tests.Scans)
 	ResultTestsUpdate(cx1client, logger, testname, &tests.Results)
+	ReportTestsUpdate(cx1client, logger, testname, &tests.Reports)
 }
 func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
 	GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
@@ -378,6 +384,7 @@ func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	PresetTestsDelete(cx1client, logger, testname, &tests.Presets)
 	ScanTestsDelete(cx1client, logger, testname, &tests.Scans)
 	ResultTestsDelete(cx1client, logger, testname, &tests.Results)
+	ReportTestsDelete(cx1client, logger, testname, &tests.Reports)
 }
 
 func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string) {
