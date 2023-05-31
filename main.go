@@ -283,7 +283,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	if err != nil {
 		return err
 	}
-
+	report.WriteString("<h2>Summary</h2>")
 	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th rowspan=2>Area</th><th colspan=3>Create</th><th colspan=3>Read</th><th colspan=3>Update</th><th colspan=3>Delete</th></tr>\n")
 	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
 	writeCounterSet(report, "Application", &Application)
@@ -296,7 +296,24 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	writeCounterSet(report, "Role", &Role)
 	writeCounterSet(report, "Scan", &Scan)
 	writeCounterSet(report, "User", &User)
-	_, err = report.WriteString("</table></body></html>")
+	report.WriteString("</table><br>")
+
+	report.WriteString("<h2>Details</h2>")
+	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th>Test Set</th><th>Test</th><th>Result</th></tr>\n")
+
+	for _, t := range *tests {
+		result := "<span style='color:green'>PASS</span>"
+		if t.Result == TST_FAIL {
+			result = fmt.Sprintf("<span style='color:red'>FAIL: %v</span>", t.Reason)
+		} else if t.Result == TST_SKIP {
+			result = fmt.Sprintf("<span style='color:red'>SKIP: %v</span>", t.Reason)
+		}
+		report.WriteString(fmt.Sprintf("<tr><td>%v</td><td>%v %v: %v</td><td>%v</td></tr>\n", t.Name, t.CRUD, t.Module, t.TestObject, result))
+	}
+
+	report.WriteString("</table>\n")
+
+	_, err = report.WriteString("</body></html>")
 	if err != nil {
 		return err
 	}
@@ -304,12 +321,33 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	return report.Sync()
 }
 
+func writeCell(report *os.File, count uint, good bool) {
+	if count == 0 {
+		report.WriteString("<td>&nbsp;</td>")
+	} else if good {
+		report.WriteString(fmt.Sprintf("<td style='color:green;text-align:center;'>%d</td>", count))
+	} else {
+		report.WriteString(fmt.Sprintf("<td style='color:red;text-align:center;'>%d</td>", count))
+	}
+}
+
 func writeCounterSet(report *os.File, module string, count *CounterSet) {
 	report.WriteString(fmt.Sprintf("<tr><td>%v</td>", module))
-	report.WriteString(fmt.Sprintf("<td>%d</td><td>%d</td><td>%d</td>", count.Create.Pass, count.Create.Fail, count.Create.Skip))
-	report.WriteString(fmt.Sprintf("<td>%d</td><td>%d</td><td>%d</td>", count.Read.Pass, count.Read.Fail, count.Read.Skip))
-	report.WriteString(fmt.Sprintf("<td>%d</td><td>%d</td><td>%d</td>", count.Update.Pass, count.Update.Fail, count.Update.Skip))
-	report.WriteString(fmt.Sprintf("<td>%d</td><td>%d</td><td>%d</td></tr>\n", count.Delete.Pass, count.Delete.Fail, count.Delete.Skip))
+
+	writeCell(report, count.Create.Pass, true)
+	writeCell(report, count.Create.Fail, false)
+	writeCell(report, count.Create.Skip, false)
+	writeCell(report, count.Read.Pass, true)
+	writeCell(report, count.Read.Fail, false)
+	writeCell(report, count.Read.Skip, false)
+	writeCell(report, count.Update.Pass, true)
+	writeCell(report, count.Update.Fail, false)
+	writeCell(report, count.Update.Skip, false)
+	writeCell(report, count.Delete.Pass, true)
+	writeCell(report, count.Delete.Fail, false)
+	writeCell(report, count.Delete.Skip, false)
+
+	report.WriteString("</tr>\n")
 }
 
 func IsCreate(test string) bool {
