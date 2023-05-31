@@ -175,6 +175,40 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 
 	testSet := make([]TestSet, 0)
 
+	// propagate the filename to sub-tests
+	for id := range conf.Tests {
+		for id2 := range conf.Tests[id].Applications {
+			conf.Tests[id].Applications[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Groups {
+			conf.Tests[id].Groups[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Presets {
+			conf.Tests[id].Presets[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Projects {
+			conf.Tests[id].Projects[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Queries {
+			conf.Tests[id].Queries[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Reports {
+			conf.Tests[id].Reports[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Results {
+			conf.Tests[id].Results[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Roles {
+			conf.Tests[id].Roles[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Scans {
+			conf.Tests[id].Scans[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Users {
+			conf.Tests[id].Users[id2].TestSource = configPath
+		}
+	}
+
 	for _, set := range conf.Tests {
 		if set.File != "" {
 			configPath, err := getFilePath(currentRoot, set.File)
@@ -299,7 +333,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	report.WriteString("</table><br>")
 
 	report.WriteString("<h2>Details</h2>")
-	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th>Test Set</th><th>Test</th><th>Result</th></tr>\n")
+	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th>Test Set</th><th>Test</th><th>Duration (sec)</th><th>Result</th></tr>\n")
 
 	for _, t := range *tests {
 		result := "<span style='color:green'>PASS</span>"
@@ -308,7 +342,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 		} else if t.Result == TST_SKIP {
 			result = fmt.Sprintf("<span style='color:red'>SKIP: %v</span>", t.Reason)
 		}
-		report.WriteString(fmt.Sprintf("<tr><td>%v</td><td>%v %v: %v</td><td>%v</td></tr>\n", t.Name, t.CRUD, t.Module, t.TestObject, result))
+		report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v %v: %v</td><td>%.2f</td><td>%v</td></tr>\n", t.Name, t.TestSource, t.CRUD, t.Module, t.TestObject, t.Duration, result))
 	}
 
 	report.WriteString("</table>\n")
@@ -425,43 +459,43 @@ func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	ReportTestsDelete(cx1client, logger, testname, &tests.Reports)
 }
 
-func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string) {
+func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	logger.Infof("")
 	logger.Infof("Starting %v Test '%v %v' #%d - %v", CRUD, Module, testName, testId, testObject)
 }
 
-func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string) {
+func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
 		logger.Errorf("FAIL [%.3fs]: %v FailTest '%v %v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed but was expected to fail")
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed but was expected to fail",
+			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed but was expected to fail", testSource,
 		})
 	} else {
 		logger.Infof("PASS [%.3fs]: %v Test '%v %v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "",
+			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
 		})
 	}
 }
-func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, reason string) {
+func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	logger.Warnf("SKIP [%.3fs]: %v Test '%v %v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
 	TestResults = append(TestResults, TestResult{
-		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, "",
+		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, reason, testSource,
 	})
 }
-func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, reason error) {
+func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason error) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
 		logger.Infof("PASS [%.3fs]: %v FailTest '%v %v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "",
+			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
 		})
 	} else {
 		logger.Errorf("FAIL [%.3fs]: %v Test '%v %v' #%d (%v) - %s", duration, CRUD, Module, testName, testId, testObject, reason)
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, reason.Error(),
+			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, reason.Error(), testSource,
 		})
 	}
 }
