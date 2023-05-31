@@ -23,15 +23,15 @@ func ReportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
-				LogSkip(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), "invalid test (missing project name, scan number, or report format)")
+				LogSkip(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing project name, scan number, or report format)")
 			} else {
-				LogStart(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ReportTestCreate(cx1client, logger, testname, &(*Reports)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
-					LogPass(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				}
 			}
 		}
@@ -95,15 +95,15 @@ func ReportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), "invalid test (missing project)")
+				LogSkip(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing project)")
 			} else {
-				LogStart(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ReportTestRead(cx1client, logger, testname, &(*Reports)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
-					LogPass(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				}
 			}
 		}
@@ -122,15 +122,15 @@ func ReportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Scan == nil {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
 			} else {
-				LogStart(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ReportTestUpdate(cx1client, logger, testname, &(*Reports)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
-					LogPass(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				}
 			}
 		}
@@ -149,15 +149,15 @@ func ReportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Scan == nil {
-				LogSkip(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), "invalid test (must read before deleting)")
+				LogSkip(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before deleting)")
 			} else {
-				LogStart(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ReportTestDelete(cx1client, logger, testname, &(*Reports)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
-					LogPass(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				}
 			}
 		}
