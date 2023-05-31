@@ -299,7 +299,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	report.WriteString("</table><br>")
 
 	report.WriteString("<h2>Details</h2>")
-	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th>Test Set</th><th>Test</th><th>Result</th></tr>\n")
+	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th>Test Set</th><th>Test</th><th>Duration (sec)</th><th>Result</th></tr>\n")
 
 	for _, t := range *tests {
 		result := "<span style='color:green'>PASS</span>"
@@ -308,7 +308,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 		} else if t.Result == TST_SKIP {
 			result = fmt.Sprintf("<span style='color:red'>SKIP: %v</span>", t.Reason)
 		}
-		report.WriteString(fmt.Sprintf("<tr><td>%v</td><td>%v %v: %v</td><td>%v</td></tr>\n", t.Name, t.CRUD, t.Module, t.TestObject, result))
+		report.WriteString(fmt.Sprintf("<tr><td>%v</td><td>%v %v: %v</td><td>%.2f</td>td>%v</td></tr>\n", t.Name, t.CRUD, t.Module, t.TestObject, t.Duration, result))
 	}
 
 	report.WriteString("</table>\n")
