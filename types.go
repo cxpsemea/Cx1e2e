@@ -15,11 +15,11 @@ type ApplicationCRUD struct {
 	Rules       []ApplicationRule `yaml:"Rules"`
 	Tags        []Tag             `yaml:"Tags"`
 	FailTest    bool              `yaml:"FailTest"`
-	TestResult  bool
+	TestSource  string
 	Application *Cx1ClientGo.Application
 }
 
-func (o *ApplicationCRUD) String() string {
+func (o ApplicationCRUD) String() string {
 	return o.Name
 }
 
@@ -28,7 +28,7 @@ type ApplicationRule struct {
 	Value string `yaml:"Value"`
 }
 
-func (o *ApplicationRule) String() string {
+func (o ApplicationRule) String() string {
 	return fmt.Sprintf("%v: %v", o.Type, o.Value)
 }
 
@@ -44,7 +44,7 @@ type CxQLCRUD struct {
 	IsExecutable  bool      `yaml:"IsExecutable"`
 	FailTest      bool      `yaml:"FailTest"`
 	Compile       bool      `yaml:"Compile"`
-	TestResult    bool
+	TestSource    string
 	Query         *Cx1ClientGo.AuditQuery
 	LastScan      *Cx1ClientGo.Scan
 }
@@ -84,11 +84,11 @@ type GroupCRUD struct {
 		Roles  []string `yaml:"Roles"`
 	} `yaml:"ClientRoles"`
 	FailTest   bool `yaml:"FailTest"`
-	TestResult bool
+	TestSource string
 	Group      *Cx1ClientGo.Group
 }
 
-func (o *GroupCRUD) String() string {
+func (o GroupCRUD) String() string {
 	return o.Name
 }
 
@@ -99,10 +99,11 @@ type ProjectCRUD struct {
 	Application string   `yaml:"Application"`
 	Tags        []Tag    `yaml:"Tags"`
 	FailTest    bool     `yaml:"FailTest"`
+	TestSource  string
 	Project     *Cx1ClientGo.Project
 }
 
-func (o *ProjectCRUD) String() string {
+func (o ProjectCRUD) String() string {
 	return o.Name
 }
 
@@ -116,11 +117,12 @@ type PresetCRUD struct {
 		QueryGroup    string `yaml:"Group"`
 		QueryName     string `yaml:"Name"`
 	} `yaml:"Queries"`
-	FailTest bool `yaml:"FailTest"`
-	Preset   *Cx1ClientGo.Preset
+	FailTest   bool `yaml:"FailTest"`
+	TestSource string
+	Preset     *Cx1ClientGo.Preset
 }
 
-func (o *PresetCRUD) String() string {
+func (o PresetCRUD) String() string {
 	return o.Name
 }
 
@@ -131,10 +133,11 @@ type QueryCRUD struct {
 	QueryName     string `yaml:"Name"`
 	Test          string `yaml:"Test"`
 	FailTest      bool   `yaml:"FailTest"`
+	TestSource    string
 	Query         *Cx1ClientGo.Query
 }
 
-func (o *QueryCRUD) String() string {
+func (o QueryCRUD) String() string {
 	if o.QueryName != "" {
 		return fmt.Sprintf("%v -> %v -> %v", o.QueryLanguage, o.QueryGroup, o.QueryName)
 	} else {
@@ -142,17 +145,55 @@ func (o *QueryCRUD) String() string {
 	}
 }
 
+type ReportCRUD struct {
+	ProjectName string `yaml:"Project"`
+	Number      uint   `yaml:"Number"`
+	Status      string `yaml:"ScanStatus"`
+	Branch      string `yaml:"Branch"`
+	Format      string `yaml:"Format"`
+	Test        string `yaml:"Test"`
+	FailTest    bool   `yaml:"FailTest"`
+	TestSource  string
+	Scan        *Cx1ClientGo.Scan
+}
+
+func (o ReportCRUD) String() string {
+	filters := []string{}
+
+	if o.Status != "" {
+		filters = append(filters, fmt.Sprintf("Scan status: %v", o.Status))
+	}
+
+	if o.Branch != "" {
+		filters = append(filters, fmt.Sprintf("Branch: %v", o.Branch))
+	}
+
+	if len(filters) > 0 {
+		return fmt.Sprintf("Report for project %v scan #%d matching filter %v, in %v format", o.ProjectName, o.Number, strings.Join(filters, ", "), o.Format)
+	}
+	return fmt.Sprintf("Report for project %v scan #%d in %v format", o.ProjectName, o.Number, o.Format)
+}
+
 type ResultCRUD struct {
-	ProjectName string       `yaml:"Project"`
-	Number      uint64       `yaml:"FindingNumber"`
-	State       string       `yaml:"State"`
-	Severity    string       `yaml:"Severity"`
-	Comment     string       `yaml:"Comment"`
-	Test        string       `yaml:"Test"`
-	FailTest    bool         `yaml:"FailTest"`
+	ProjectName string `yaml:"Project"`
+	Number      uint64 `yaml:"FindingNumber"`
+	State       string `yaml:"State"`
+	Severity    string `yaml:"Severity"`
+	Comment     string `yaml:"Comment"`
+	Test        string `yaml:"Test"`
+	FailTest    bool   `yaml:"FailTest"`
+	TestSource  string
 	Filter      ResultFilter `yaml:"Filter"`
 	Result      *Cx1ClientGo.ScanResult
 	Project     *Cx1ClientGo.Project
+}
+
+func (o *ResultCRUD) String() string {
+	filter := o.Filter.String()
+	if filter != "" {
+		return fmt.Sprintf("%v: finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
+	}
+	return fmt.Sprintf("%v: finding #%d", o.ProjectName, o.Number)
 }
 
 type ResultFilter struct {
@@ -164,14 +205,6 @@ type ResultFilter struct {
 	ResultHash    string `yaml:"ResultHash"`
 	State         string `yaml:"State"`
 	Severity      string `yaml:"Severity"`
-}
-
-func (o *ResultCRUD) String() string {
-	filter := o.Filter.String()
-	if filter != "" {
-		return fmt.Sprintf("%v: finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
-	}
-	return fmt.Sprintf("%v: finding #%d", o.ProjectName, o.Number)
 }
 
 func (o *ResultFilter) String() string {
@@ -209,10 +242,11 @@ type RoleCRUD struct {
 	Test        string   `yaml:"Test"`
 	Permissions []string `yaml:"Permissions"`
 	FailTest    bool     `yaml:"FailTest"`
+	TestSource  string
 	Role        *Cx1ClientGo.Role
 }
 
-func (o *RoleCRUD) String() string {
+func (o RoleCRUD) String() string {
 	return o.Name
 }
 
@@ -227,10 +261,11 @@ type ScanCRUD struct {
 	ZipFile     string `yaml:"ZipFile"`
 	Preset      string `yaml:"Preset"`
 	FailTest    bool   `yaml:"FailTest"`
+	TestSource  string
 	Scan        *Cx1ClientGo.Scan
 }
 
-func (o *ScanCRUD) String() string {
+func (o ScanCRUD) String() string {
 	if o.Repository != "" {
 		return fmt.Sprintf("%v: repo %v, branch %v", o.Project, o.Repository, o.Branch)
 	} else {
@@ -239,18 +274,19 @@ func (o *ScanCRUD) String() string {
 }
 
 type UserCRUD struct {
-	Name      string   `yaml:"Name"`
-	Email     string   `yaml:"Email"`
-	Test      string   `yaml:"Test"`
-	FirstName string   `yaml:"FirstName"`
-	LastName  string   `yaml:"LastName"`
-	Groups    []string `yaml:"Groups"`
-	Roles     []string `yaml:"Roles"`
-	FailTest  bool     `yaml:"FailTest"`
-	User      *Cx1ClientGo.User
+	Name       string   `yaml:"Name"`
+	Email      string   `yaml:"Email"`
+	Test       string   `yaml:"Test"`
+	FirstName  string   `yaml:"FirstName"`
+	LastName   string   `yaml:"LastName"`
+	Groups     []string `yaml:"Groups"`
+	Roles      []string `yaml:"Roles"`
+	FailTest   bool     `yaml:"FailTest"`
+	TestSource string
+	User       *Cx1ClientGo.User
 }
 
-func (o *UserCRUD) String() string {
+func (o UserCRUD) String() string {
 	return fmt.Sprintf("%v (%v)", o.Name, o.Email)
 }
 
@@ -271,6 +307,7 @@ type TestSet struct {
 	Roles        []RoleCRUD        `yaml:"Roles"`
 	Scans        []ScanCRUD        `yaml:"Scans"`
 	Results      []ResultCRUD      `yaml:"Results"`
+	Reports      []ReportCRUD      `yaml:"Reports"`
 	Wait         uint              `yaml:"Wait"`
 }
 
@@ -294,6 +331,7 @@ type TestResult struct {
 	Id         int
 	TestObject string
 	Reason     string
+	TestSource string
 }
 
 // test result output

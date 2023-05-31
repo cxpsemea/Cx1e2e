@@ -16,7 +16,7 @@ func ResultTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		t := &(*results)[id]
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
-			LogSkip(t.FailTest, logger, OP_CREATE, MOD_RESULT, start, testname, id+1, t.String(), "action not supported")
+			LogSkip(t.FailTest, logger, OP_CREATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
 		}
 	}
 
@@ -30,15 +30,15 @@ func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
 			if t.ProjectName == "" || t.Number == 0 {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), "invalid test (missing project and finding number with optional filter)")
+				LogSkip(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing project and finding number with optional filter)")
 			} else {
-				LogStart(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
 				err := ResultTestRead(cx1client, logger, testname, &(*results)[id])
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
-					LogPass(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
 				}
 			}
 		}
@@ -181,15 +181,15 @@ func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		if IsUpdate(t.Test) {
 			start := time.Now().UnixNano()
 			if t.Result == nil {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), "invalid test (must read before updating)")
+				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
 			} else {
-				LogStart(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String())
+				LogStart(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
 				err := ResultTestUpdate(cx1client, logger, testname, t)
 				if err != nil {
 					result = false
-					LogFail(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), err)
+					LogFail(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
-					LogPass(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String())
+					LogPass(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
 				}
 			}
 		}
@@ -218,7 +218,7 @@ func ResultTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 		t := &(*results)[id]
 		if IsDelete(t.Test) {
 			start := time.Now().UnixNano()
-			LogSkip(t.FailTest, logger, OP_DELETE, MOD_RESULT, start, testname, id+1, t.String(), "invalid test (action not supported)")
+			LogSkip(t.FailTest, logger, OP_DELETE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "invalid test (action not supported)")
 		}
 	}
 	return true

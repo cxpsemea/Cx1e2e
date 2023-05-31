@@ -31,6 +31,7 @@ const (
 	MOD_PRESET      = "Preset"
 	MOD_PROJECT     = "Project"
 	MOD_QUERY       = "Query"
+	MOD_REPORT      = "Report"
 	MOD_RESULT      = "Result"
 	MOD_ROLE        = "Role"
 	MOD_SCAN        = "Scan"
@@ -54,8 +55,7 @@ func main() {
 
 	if len(os.Args) != 3 && len(os.Args) != 6 {
 		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration.")
-		logger.Info("Expected arguments not provided. Usage:\n1)\tcx1e2e <test definition yaml file> <APIKey>\n")
-		logger.Info("2)\tcx1e2e <test definition yaml file> <APIKey> <Cx1 URL> <IAM URL> <Tenant>\n")
+		logger.Info("Expected arguments not provided. Usage:\n1)\tcx1e2e <test definition yaml file> <APIKey>\n2)\tcx1e2e <test definition yaml file> <APIKey> <Cx1 URL> <IAM URL> <Tenant>\n")
 		logger.Info("Note: API Key authentication is currently required and OIDC client/secret authentication is not supported.\n")
 		return
 	}
@@ -175,6 +175,40 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 
 	testSet := make([]TestSet, 0)
 
+	// propagate the filename to sub-tests
+	for id := range conf.Tests {
+		for id2 := range conf.Tests[id].Applications {
+			conf.Tests[id].Applications[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Groups {
+			conf.Tests[id].Groups[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Presets {
+			conf.Tests[id].Presets[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Projects {
+			conf.Tests[id].Projects[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Queries {
+			conf.Tests[id].Queries[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Reports {
+			conf.Tests[id].Reports[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Results {
+			conf.Tests[id].Results[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Roles {
+			conf.Tests[id].Roles[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Scans {
+			conf.Tests[id].Scans[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Users {
+			conf.Tests[id].Users[id2].TestSource = configPath
+		}
+	}
+
 	for _, set := range conf.Tests {
 		if set.File != "" {
 			configPath, err := getFilePath(currentRoot, set.File)
@@ -230,7 +264,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 
 	defer report.Close()
 
-	var Application, Group, Preset, Project, Query, Result, Role, Scan, User CounterSet
+	var Application, Group, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
 	for _, r := range *tests {
 		var set *CounterSet
 		switch r.Module {
@@ -246,6 +280,8 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 			set = &Query
 		case MOD_RESULT:
 			set = &Result
+		case MOD_REPORT:
+			set = &Report
 		case MOD_ROLE:
 			set = &Role
 		case MOD_SCAN:
@@ -281,7 +317,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	if err != nil {
 		return err
 	}
-
+	report.WriteString("<h2>Summary</h2>")
 	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th rowspan=2>Area</th><th colspan=3>Create</th><th colspan=3>Read</th><th colspan=3>Update</th><th colspan=3>Delete</th></tr>\n")
 	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
 	writeCounterSet(report, "Application", &Application)
@@ -290,10 +326,28 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	writeCounterSet(report, "Project", &Project)
 	writeCounterSet(report, "Query", &Query)
 	writeCounterSet(report, "Result", &Result)
+	writeCounterSet(report, "Report", &Report)
 	writeCounterSet(report, "Role", &Role)
 	writeCounterSet(report, "Scan", &Scan)
 	writeCounterSet(report, "User", &User)
-	_, err = report.WriteString("</table></body></html>")
+	report.WriteString("</table><br>")
+
+	report.WriteString("<h2>Details</h2>")
+	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th>Test Set</th><th>Test</th><th>Duration (sec)</th><th>Result</th></tr>\n")
+
+	for _, t := range *tests {
+		result := "<span style='color:green'>PASS</span>"
+		if t.Result == TST_FAIL {
+			result = fmt.Sprintf("<span style='color:red'>FAIL: %v</span>", t.Reason)
+		} else if t.Result == TST_SKIP {
+			result = fmt.Sprintf("<span style='color:red'>SKIP: %v</span>", t.Reason)
+		}
+		report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v %v: %v</td><td>%.2f</td><td>%v</td></tr>\n", t.Name, t.TestSource, t.CRUD, t.Module, t.TestObject, t.Duration, result))
+	}
+
+	report.WriteString("</table>\n")
+
+	_, err = report.WriteString("</body></html>")
 	if err != nil {
 		return err
 	}
@@ -301,12 +355,33 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	return report.Sync()
 }
 
+func writeCell(report *os.File, count uint, good bool) {
+	if count == 0 {
+		report.WriteString("<td>&nbsp;</td>")
+	} else if good {
+		report.WriteString(fmt.Sprintf("<td style='color:green;text-align:center;'>%d</td>", count))
+	} else {
+		report.WriteString(fmt.Sprintf("<td style='color:red;text-align:center;'>%d</td>", count))
+	}
+}
+
 func writeCounterSet(report *os.File, module string, count *CounterSet) {
 	report.WriteString(fmt.Sprintf("<tr><td>%v</td>", module))
-	report.WriteString(fmt.Sprintf("<td>%d</td><td>%d</td><td>%d</td>", count.Create.Pass, count.Create.Fail, count.Create.Skip))
-	report.WriteString(fmt.Sprintf("<td>%d</td><td>%d</td><td>%d</td>", count.Read.Pass, count.Read.Fail, count.Read.Skip))
-	report.WriteString(fmt.Sprintf("<td>%d</td><td>%d</td><td>%d</td>", count.Update.Pass, count.Update.Fail, count.Update.Skip))
-	report.WriteString(fmt.Sprintf("<td>%d</td><td>%d</td><td>%d</td></tr>\n", count.Delete.Pass, count.Delete.Fail, count.Delete.Skip))
+
+	writeCell(report, count.Create.Pass, true)
+	writeCell(report, count.Create.Fail, false)
+	writeCell(report, count.Create.Skip, false)
+	writeCell(report, count.Read.Pass, true)
+	writeCell(report, count.Read.Fail, false)
+	writeCell(report, count.Read.Skip, false)
+	writeCell(report, count.Update.Pass, true)
+	writeCell(report, count.Update.Fail, false)
+	writeCell(report, count.Update.Skip, false)
+	writeCell(report, count.Delete.Pass, true)
+	writeCell(report, count.Delete.Fail, false)
+	writeCell(report, count.Delete.Skip, false)
+
+	report.WriteString("</tr>\n")
 }
 
 func IsCreate(test string) bool {
@@ -345,6 +420,7 @@ func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
 	ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
 	ResultTestsCreate(cx1client, logger, testname, &tests.Results)
+	ReportTestsCreate(cx1client, logger, testname, &tests.Reports)
 }
 func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
 	GroupTestsRead(cx1client, logger, testname, &tests.Groups)
@@ -356,6 +432,7 @@ func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname 
 	PresetTestsRead(cx1client, logger, testname, &tests.Presets)
 	ScanTestsRead(cx1client, logger, testname, &tests.Scans)
 	ResultTestsRead(cx1client, logger, testname, &tests.Results)
+	ReportTestsRead(cx1client, logger, testname, &tests.Reports)
 }
 func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
 	GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
@@ -367,6 +444,7 @@ func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
 	ScanTestsUpdate(cx1client, logger, testname, &tests.Scans)
 	ResultTestsUpdate(cx1client, logger, testname, &tests.Results)
+	ReportTestsUpdate(cx1client, logger, testname, &tests.Reports)
 }
 func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
 	GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
@@ -378,45 +456,46 @@ func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	PresetTestsDelete(cx1client, logger, testname, &tests.Presets)
 	ScanTestsDelete(cx1client, logger, testname, &tests.Scans)
 	ResultTestsDelete(cx1client, logger, testname, &tests.Results)
+	ReportTestsDelete(cx1client, logger, testname, &tests.Reports)
 }
 
-func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string) {
+func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	logger.Infof("")
 	logger.Infof("Starting %v Test '%v %v' #%d - %v", CRUD, Module, testName, testId, testObject)
 }
 
-func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string) {
+func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
 		logger.Errorf("FAIL [%.3fs]: %v FailTest '%v %v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed but was expected to fail")
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed but was expected to fail",
+			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed but was expected to fail", testSource,
 		})
 	} else {
 		logger.Infof("PASS [%.3fs]: %v Test '%v %v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "",
+			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
 		})
 	}
 }
-func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, reason string) {
+func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	logger.Warnf("SKIP [%.3fs]: %v Test '%v %v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
 	TestResults = append(TestResults, TestResult{
-		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, "",
+		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, reason, testSource,
 	})
 }
-func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, reason error) {
+func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason error) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
 		logger.Infof("PASS [%.3fs]: %v FailTest '%v %v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "",
+			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
 		})
 	} else {
 		logger.Errorf("FAIL [%.3fs]: %v Test '%v %v' #%d (%v) - %s", duration, CRUD, Module, testName, testId, testObject, reason)
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, reason.Error(),
+			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, reason.Error(), testSource,
 		})
 	}
 }
