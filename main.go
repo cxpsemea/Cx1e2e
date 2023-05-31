@@ -308,7 +308,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 		} else if t.Result == TST_SKIP {
 			result = fmt.Sprintf("<span style='color:red'>SKIP: %v</span>", t.Reason)
 		}
-		report.WriteString(fmt.Sprintf("<tr><td>%v</td><td>%v %v: %v</td><td>%.2f</td>td>%v</td></tr>\n", t.Name, t.CRUD, t.Module, t.TestObject, t.Duration, result))
+		report.WriteString(fmt.Sprintf("<tr><td>%v</td><td>%v %v: %v</td><td>%.2f</td><td>%v</td></tr>\n", t.Name, t.CRUD, t.Module, t.TestObject, t.Duration, result))
 	}
 
 	report.WriteString("</table>\n")
