@@ -482,7 +482,7 @@ func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, s
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	logger.Warnf("SKIP [%.3fs]: %v Test '%v %v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
 	TestResults = append(TestResults, TestResult{
-		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, "", testSource,
+		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, reason, testSource,
 	})
 }
 func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason error) {
