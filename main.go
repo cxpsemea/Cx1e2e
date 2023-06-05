@@ -461,18 +461,18 @@ func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 
 func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	logger.Infof("")
-	logger.Infof("Starting %v Test '%v %v' #%d - %v", CRUD, Module, testName, testId, testObject)
+	logger.Infof("Starting %v %v Test '%v' #%d - %v", CRUD, Module, testName, testId, testObject)
 }
 
 func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
-		logger.Errorf("FAIL [%.3fs]: %v FailTest '%v %v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed but was expected to fail")
+		logger.Errorf("FAIL [%.3fs]: %v %v FailTest '%v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed but was expected to fail")
 		TestResults = append(TestResults, TestResult{
 			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed but was expected to fail", testSource,
 		})
 	} else {
-		logger.Infof("PASS [%.3fs]: %v Test '%v %v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
+		logger.Infof("PASS [%.3fs]: %v %v Test '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
 			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
 		})
@@ -480,7 +480,7 @@ func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, s
 }
 func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
-	logger.Warnf("SKIP [%.3fs]: %v Test '%v %v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
+	logger.Warnf("SKIP [%.3fs]: %v %v Test '%v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
 	TestResults = append(TestResults, TestResult{
 		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, reason, testSource,
 	})
@@ -488,12 +488,12 @@ func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, s
 func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason error) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
-		logger.Infof("PASS [%.3fs]: %v FailTest '%v %v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
+		logger.Infof("PASS [%.3fs]: %v %v FailTest '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
 			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
 		})
 	} else {
-		logger.Errorf("FAIL [%.3fs]: %v Test '%v %v' #%d (%v) - %s", duration, CRUD, Module, testName, testId, testObject, reason)
+		logger.Errorf("FAIL [%.3fs]: %v %v Test '%v' #%d (%v) - %s", duration, CRUD, Module, testName, testId, testObject, reason)
 		TestResults = append(TestResults, TestResult{
 			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, reason.Error(), testSource,
 		})
