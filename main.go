@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"flag"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -53,17 +54,25 @@ func main() {
 	logger.SetFormatter(myformatter)
 	logger.SetOutput(os.Stdout)
 
-	if len(os.Args) != 3 && len(os.Args) != 6 {
-		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration.")
-		logger.Info("Expected arguments not provided. Usage:\n1)\tcx1e2e <test definition yaml file> <APIKey>\n2)\tcx1e2e <test definition yaml file> <APIKey> <Cx1 URL> <IAM URL> <Tenant>\n")
-		logger.Info("Note: API Key authentication is currently required and OIDC client/secret authentication is not supported.\n")
-		return
+	testConfig := flag.String("config", "", "Path to a test config.yaml")
+	APIKey := flag.String("apikey", "", "CheckmarxOne API Key (if not using client id/secret)")
+	ClientID := flag.String("client", "", "CheckmarxOne Client ID (if not using API Key)")
+	ClientSecret := flag.String("secret", "", "CheckmarxOne Client Secret (if not using API Key)")
+	Cx1URL := flag.String("cx1", "", "Optional: CheckmarxOne platform URL, if not defined in the test config.yaml")
+	IAMURL := flag.String("iam", "", "Optional: CheckmarxOne IAM URL, if not defined in the test config.yaml")
+	Tenant := flag.String("tenant", "", "Optional: CheckmarxOne tenant, if not defined in the test config.yaml")
+
+	flag.Parse()
+
+	if *testConfig == "" || (*APIKey == "" && (*ClientID == "" || *ClientSecret == "")) {
+		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration. For help run: cx1e2e.exe -h")
+		logger.Fatalf("Test configuration yaml or authentication (API Key or client+secret) not provided.")
 	}
 
 	var err error
-	Config, err := LoadConfig(logger, os.Args[1])
+	Config, err := LoadConfig(logger, *testConfig)
 	if err != nil {
-		logger.Fatalf("Failed to load configuration file %v: %s", os.Args[1], err)
+		logger.Fatalf("Failed to load configuration file %v: %s", *testConfig, err)
 		return
 	}
 
@@ -101,13 +110,21 @@ func main() {
 		logger.Infof("Running with proxy: %v", Config.ProxyURL)
 	}
 
-	if len(os.Args) == 6 {
-		Config.Cx1URL = os.Args[3]
-		Config.IAMURL = os.Args[4]
-		Config.Tenant = os.Args[5]
+	if *Tenant != "" {
+		Config.Tenant = *Tenant
+	}
+	if *Cx1URL != "" {
+		Config.Cx1URL = *Cx1URL
+	}
+	if *IAMURL != "" {
+		Config.IAMURL = *IAMURL
 	}
 
-	cx1client, err = Cx1ClientGo.NewAPIKeyClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, os.Args[2], logger)
+	if *APIKey != "" {
+		cx1client, err = Cx1ClientGo.NewAPIKeyClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, *APIKey, logger)
+	} else {
+		cx1client, err = Cx1ClientGo.NewOAuthClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, *ClientID, *ClientSecret, logger)
+	}
 
 	if err != nil {
 		logger.Fatalf("Failed to create Cx1 client: %s", err)
