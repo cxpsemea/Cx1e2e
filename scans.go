@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
@@ -49,14 +50,24 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	if err != nil {
 		return err
 	}
-	scanConfig := Cx1ClientGo.ScanConfiguration{}
-	scanConfig.ScanType = t.Engine
-	scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
+
+	scanConfigs := []Cx1ClientGo.ScanConfiguration{}
+
+	engines := strings.Split(t.Engine, " ")
+
+	for _, e := range engines {
+		scanConfig := Cx1ClientGo.ScanConfiguration{}
+		scanConfig.ScanType = e
+		if e == "sast" {
+			scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
+		}
+		scanConfigs = append(scanConfigs, scanConfig)
+	}
 
 	var test_Scan Cx1ClientGo.Scan
 
 	if t.ZipFile == "" {
-		test_Scan, err = cx1client.ScanProjectGitByID(project.ProjectID, t.Repository, t.Branch, []Cx1ClientGo.ScanConfiguration{scanConfig}, map[string]string{})
+		test_Scan, err = cx1client.ScanProjectGitByID(project.ProjectID, t.Repository, t.Branch, scanConfigs, map[string]string{})
 		if err != nil {
 			return err
 		}
@@ -71,7 +82,7 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 			return err
 		}
 
-		test_Scan, err = cx1client.ScanProjectZipByID(project.ProjectID, uploadURL, t.Branch, []Cx1ClientGo.ScanConfiguration{scanConfig}, map[string]string{})
+		test_Scan, err = cx1client.ScanProjectZipByID(project.ProjectID, uploadURL, t.Branch, scanConfigs, map[string]string{})
 		if err != nil {
 			return err
 		}
