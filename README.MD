@@ -3,15 +3,15 @@ This is an automated end-to-end workflow testing tool for Cx1 via the REST API, 
 # Quick Start 
 Usage:
 ```
-    cx1e2e.exe tests.yaml APIKey
-    cx1e2e.exe tests.yaml APIKey Cx1URL IAMURL Tenant
+    cx1e2e.exe --config tests.yaml --apikey APIKey
+    cx1e2e.exe --config tests.yaml --cx1 Cx1URL --iam IAMURL --tenant Tenant --client ClientID --secret ClientSecret
 ```
 Multiple example test.yaml definitions can be found in the examples directory. To quickly try out an example configuration, you can do the following:
 
 ``` 
     git clone https://github.com/cxpsemea/cx1e2e
     cd cx1e2e
-    go run . examples/all.yaml <API Key> <Cx1 URL> <IAM Url> <Your Tenant>
+    go run . --config examples/all.yaml --apikey <API Key> --cx1 <Cx1 URL> --iam <IAM Url> --tenant <Your Tenant>
 ```
 
 # Test configuration
