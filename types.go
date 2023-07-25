@@ -45,6 +45,7 @@ type CxQLCRUD struct {
 	FailTest      bool      `yaml:"FailTest"`
 	Compile       bool      `yaml:"Compile"`
 	TestSource    string
+	ScopeID       string
 	Query         *Cx1ClientGo.AuditQuery
 	LastScan      *Cx1ClientGo.Scan
 }

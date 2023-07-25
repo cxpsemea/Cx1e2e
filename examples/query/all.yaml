@@ -6,5 +6,13 @@ Tenant: your_tenant_here
 Tests:
   - Name: Create
     File: create.yaml
+  - Name: Project override
+    File: project.yaml
+  - Name: App override
+    File: app.yaml
+  - Name: Tenant override
+    File: corp.yaml
+  - Name: Tenant new query
+    File: newcorp.yaml
   - Name: Delete
     File: delete.yaml

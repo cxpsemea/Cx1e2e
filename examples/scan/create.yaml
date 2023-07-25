@@ -15,6 +15,7 @@ Tests:
         Repository: https://github.com/michaelkubiaczyk/ssba
         Branch: master
         Preset: All
-        Engine: sast sca kics apisec
+        Engine: sast #SAST only
+        #Engine: sast sca kics apisec #throw everything at it
         WaitForEnd: true
         Test: C

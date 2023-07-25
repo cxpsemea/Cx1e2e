@@ -1,0 +1,45 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: create app-level override and run a scan
+    Queries:
+      - Name: Client_DOM_XSS
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: false
+          Application: e2e-test-burgerapp1
+          Project: e2e-test-burger1
+        Source: "result = All.NewCxList();"
+        Severity: LOW
+        Compile: true
+        Test: C
+    Scans:
+      - Project: e2e-test-burger1
+        ZipFile: ../files/xss-burger.zip
+        Branch: zip
+        Preset: e2e-test-burger1
+        Engine: sast
+        WaitForEnd: true
+        Test: C
+    Results:
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # this finding should be gone again
+        Filter:
+          Query: Client_DOM_XSS
+          Severity: HIGH
+        Test: R
+        FailTest: true
+  - Name: Delete app-level override
+    Queries:
+      - Name: Client_DOM_XSS
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: false
+          Application: e2e-test-burgerapp1
+          Project: e2e-test-burger1
+        Test: RD
