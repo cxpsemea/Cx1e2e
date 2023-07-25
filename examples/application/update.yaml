@@ -7,9 +7,8 @@ Tests:
   - Name: App Update
     Applications:
       - Name: e2e-test-app1
-        Groups: []
         Criticality: 3
         Tags: 
-          - Test: tag1
-            Test2: tag2
+          - Key: tag1
+            Value: value1
         Test: RU

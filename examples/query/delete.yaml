@@ -4,26 +4,13 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: delete query override, new corp query and preset
-    Queries:
-      - Name: Client_DOM_XSS
-        Group: JavaScript_High_Risk
-        Language: JavaScript
-        Scope: 
-          Tenant: false
-          Project: e2e-test-burger1
-        Test: RD
-      - Name: e2e_test_cheeseburgers
-        Group: JavaScript_High_Risk
-        Language: JavaScript
-        Scope: 
-          Tenant: true
-          Project: e2e-test-burger1
-        Test: RD
+  - Name: delete preset, project, and app
     Presets:
       - Name: e2e-test-burger1
-        Test: RD
-  - Name: delete temporary project        
+        Test: RD      
     Projects:
       - Name: e2e-test-burger1
+        Test: RD     
+    Applications:
+      - Name: e2e-test-burgerapp1
         Test: RD

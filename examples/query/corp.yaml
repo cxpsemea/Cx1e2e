@@ -1,0 +1,43 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: create corp query override and run a scan
+    Queries:
+      - Name: Client_DOM_XSS
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-test-burger1
+        Source: "result = All.NewCxList();"
+        Severity: MEDIUM # currently, you cannot change anything except the source, but this should work june/july
+        Compile: true
+        Test: C
+    Scans:
+      - Project: e2e-test-burger1
+        ZipFile: ../files/xss-burger.zip
+        Branch: zip
+        Preset: e2e-test-burger1
+        Engine: sast
+        WaitForEnd: true
+        Test: C
+    Results:
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # this finding should no longer be reported
+        Filter:
+          Query: Client_DOM_XSS
+          Severity: HIGH
+        Test: R
+        FailTest: true
+  - Name: delete corp override
+    Queries:
+      - Name: Client_DOM_XSS
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-test-burger1
+        Test: RD
