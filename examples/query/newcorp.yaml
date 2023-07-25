@@ -1,0 +1,61 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: create new corp query, add to preset
+    Queries:
+      - Name: e2e_test_cheeseburgers
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-test-burger1
+        Source: "result = Find_Strings().FindByName(\"cheeseburger\");"
+        Severity: HIGH
+        IsExecutable: true
+        Compile: true
+        Test: C
+    Presets:
+      - Name: e2e-test-burger1
+        Description: This is my test preset        
+        Queries:
+          - Language: JavaScript
+            Group: JavaScript_High_Risk
+            Name: Client_DOM_XSS
+          - Language: JavaScript
+            Group: JavaScript_High_Risk
+            Name: e2e_test_cheeseburgers
+        Test: RU
+  - Name: run a scan with the new preset
+    Scans:
+      - Project: e2e-test-burger1
+        ZipFile: ../files/xss-burger.zip
+        Branch: zip
+        Preset: e2e-test-burger1
+        Engine: sast
+        WaitForEnd: true
+        Test: C
+    Results:
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # this finding should exist
+        Filter:
+          Query: Client_DOM_XSS
+          Severity: HIGH
+        Test: R
+      - Project: e2e-test-burger1
+        FindingNumber: 1 # this new finding should be reported now
+        Filter:
+          Query: e2e_test_cheeseburgers
+          Severity: HIGH
+        Test: R
+  - Name: Delete new corp query
+    Queries:
+      - Name: e2e_test_cheeseburgers
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-test-burger1
+        Test: RD

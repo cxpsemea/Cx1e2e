@@ -7,9 +7,11 @@ Tests:
   - Name: App Create
     Groups:
       - Name: e2e-test-group1
+        Test: C
     Projects:
-      - Name: e2e-test-group1
-        Groups: [ e2e-test-group1 ]
+      - Name: e2e-test-project1
+        Groups: [ e2e-test-group1 ]        
+        Test: C
     Applications:
       - Name: e2e-test-app1
         Rules: 

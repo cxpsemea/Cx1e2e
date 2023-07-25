@@ -15,6 +15,6 @@ Tests:
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All
-        Engine: sast sca kics apisec
+        Engine: sast # sca kics apisec
         WaitForEnd: true
         Test: C

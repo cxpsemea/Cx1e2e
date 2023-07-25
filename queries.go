@@ -9,7 +9,7 @@ import (
 )
 
 func (q *CxQLCRUD) IsValidQuery() bool {
-	return q.QueryLanguage != "" && q.QueryGroup != "" && q.QueryName != "" && q.Scope.Project != ""
+	return q.QueryLanguage != "" && q.QueryGroup != "" && q.QueryName != "" && (q.Scope.Project != "" || q.Scope.Application != "")
 }
 
 func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) bool {
@@ -61,12 +61,22 @@ func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error
 	scope := "Corp"
 	if !t.Scope.Corp {
 		if t.Scope.Application != "" {
+			fmt.Printf("Targeting app %v\n", t.Scope.Application)
+			appLevelQueries, err := cx1client.CheckFlag("AUDIT_APPLICATION_LEVEL_ENABLED")
+			if err != nil {
+				return "", fmt.Errorf("failed to check if application-level queries are enabled: %s", err)
+			}
+			if !appLevelQueries {
+				return "", fmt.Errorf("application-level queries are not enabled in this environment")
+			}
+
 			app, err := cx1client.GetApplicationByName(t.Scope.Application)
 			if err != nil {
 				return "", fmt.Errorf("failed to find application named %v", t.Scope.Application)
 			}
 			scope = app.ApplicationID
 		} else {
+			fmt.Printf("Targeting proj %v\n", t.Scope.Project)
 			proj, err := cx1client.GetProjectByName(t.Scope.Project)
 			if err != nil {
 				return "", fmt.Errorf("failed to find project named %v", t.Scope.Project)
@@ -84,13 +94,13 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCR
 		return nil
 	}
 
+	t.ScopeID = scope
+
 	auditQuery, err := cx1client.GetQueryByName(scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	if err != nil {
 		logger.Warnf("Error getting query %v: %s", t.String(), err)
 		return nil
 	}
-
-	//logger.Debugf("Found query %v", auditQuery.String())
 
 	return &auditQuery
 }
@@ -142,6 +152,24 @@ func QueryTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 
 	if t.Query != nil {
 		logger.Infof("Found query: %v", t.Query.String())
+
+		if t.Scope.Corp {
+			logger.Info("Will create corp override")
+			newq := t.Query.CreateTenantOverride()
+			t.Query = &newq
+		} else {
+			if t.Scope.Application != "" {
+				logger.Infof("Will create application override on %v", t.Scope.Application)
+				newq := t.Query.CreateApplicationOverrideByID(t.ScopeID)
+				t.Query = &newq
+			} else {
+				logger.Infof("Will create project override on %v", t.Scope.Project)
+				newq := t.Query.CreateProjectOverrideByID(t.ScopeID)
+				t.Query = &newq
+			}
+		}
+
+		logger.Infof("Updating query %v", t.Query.String())
 		return updateQuery(cx1client, t)
 	} else {
 		// query does not exist at all so needs to be created on corp level
