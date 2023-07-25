@@ -12,7 +12,7 @@ Tests:
         Scope: 
           Tenant: false
           Application: e2e-test-burgerapp1
-          Project: e2e-test-burger1
+          Project: e2e-test-burger1 #Project is still required since the web-audit session is opened in a project's context
         Source: "result = All.NewCxList();"
         Severity: LOW
         Compile: true
