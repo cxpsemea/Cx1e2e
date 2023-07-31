@@ -76,6 +76,18 @@ type CxQLScope struct {
 	Application string `yaml:"Application"`
 }
 
+type FlagCRUD struct {
+	Name       string `yaml:"Name"`
+	Test       string `yaml:"Test"`
+	Parent     string `yaml:"Parent"`
+	FailTest   bool   `yaml:"FailTest"`
+	TestSource string
+}
+
+func (o FlagCRUD) String() string {
+	return fmt.Sprintf("%v set to %v", o.Name, !o.FailTest)
+}
+
 type GroupCRUD struct {
 	Name        string `yaml:"Name"`
 	Test        string `yaml:"Test"`
@@ -299,6 +311,7 @@ type Tag struct {
 type TestSet struct {
 	Name         string            `yaml:"Name"`
 	File         string            `yaml:"File"`
+	Flags        []FlagCRUD        `yaml:"Flags"`
 	Groups       []GroupCRUD       `yaml:"Groups"`
 	Users        []UserCRUD        `yaml:"Users"`
 	Applications []ApplicationCRUD `yaml:"Applications"`

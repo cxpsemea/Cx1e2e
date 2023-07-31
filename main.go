@@ -28,6 +28,7 @@ const (
 
 const (
 	MOD_APPLICATION = "Application"
+	MOD_FLAG        = "Flag"
 	MOD_GROUP       = "Group"
 	MOD_PRESET      = "Preset"
 	MOD_PROJECT     = "Project"
@@ -197,6 +198,9 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 		for id2 := range conf.Tests[id].Applications {
 			conf.Tests[id].Applications[id2].TestSource = configPath
 		}
+		for id2 := range conf.Tests[id].Flags {
+			conf.Tests[id].Flags[id2].TestSource = configPath
+		}
 		for id2 := range conf.Tests[id].Groups {
 			conf.Tests[id].Groups[id2].TestSource = configPath
 		}
@@ -281,12 +285,14 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 
 	defer report.Close()
 
-	var Application, Group, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
+	var Application, Flag, Group, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
 	for _, r := range *tests {
 		var set *CounterSet
 		switch r.Module {
 		case MOD_APPLICATION:
 			set = &Application
+		case MOD_FLAG:
+			set = &Flag
 		case MOD_GROUP:
 			set = &Group
 		case MOD_PRESET:
@@ -338,6 +344,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th rowspan=2>Area</th><th colspan=3>Create</th><th colspan=3>Read</th><th colspan=3>Update</th><th colspan=3>Delete</th></tr>\n")
 	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
 	writeCounterSet(report, "Application", &Application)
+	writeCounterSet(report, "Flag", &Flag)
 	writeCounterSet(report, "Group", &Group)
 	writeCounterSet(report, "Preset", &Preset)
 	writeCounterSet(report, "Project", &Project)
@@ -428,6 +435,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 }
 
 func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	FlagTestsCreate(cx1client, logger, testname, &tests.Flags)
 	GroupTestsCreate(cx1client, logger, testname, &tests.Groups)
 	ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
@@ -440,6 +448,7 @@ func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	ReportTestsCreate(cx1client, logger, testname, &tests.Reports)
 }
 func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	FlagTestsRead(cx1client, logger, testname, &tests.Flags)
 	GroupTestsRead(cx1client, logger, testname, &tests.Groups)
 	ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
@@ -452,6 +461,7 @@ func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname 
 	ReportTestsRead(cx1client, logger, testname, &tests.Reports)
 }
 func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	FlagTestsUpdate(cx1client, logger, testname, &tests.Flags)
 	GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
 	ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
@@ -464,6 +474,7 @@ func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	ReportTestsUpdate(cx1client, logger, testname, &tests.Reports)
 }
 func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	FlagTestsDelete(cx1client, logger, testname, &tests.Flags)
 	GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
 	ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)
