@@ -28,7 +28,9 @@ const (
 
 const (
 	MOD_APPLICATION = "Application"
+	MOD_FLAG        = "Flag"
 	MOD_GROUP       = "Group"
+	MOD_IMPORT      = "Import"
 	MOD_PRESET      = "Preset"
 	MOD_PROJECT     = "Project"
 	MOD_QUERY       = "Query"
@@ -197,8 +199,14 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 		for id2 := range conf.Tests[id].Applications {
 			conf.Tests[id].Applications[id2].TestSource = configPath
 		}
+		for id2 := range conf.Tests[id].Flags {
+			conf.Tests[id].Flags[id2].TestSource = configPath
+		}
 		for id2 := range conf.Tests[id].Groups {
 			conf.Tests[id].Groups[id2].TestSource = configPath
+		}
+		for id2 := range conf.Tests[id].Imports {
+			conf.Tests[id].Imports[id2].TestSource = configPath
 		}
 		for id2 := range conf.Tests[id].Presets {
 			conf.Tests[id].Presets[id2].TestSource = configPath
@@ -227,6 +235,7 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	}
 
 	for _, set := range conf.Tests {
+		logger.Tracef("Checking TestSet %v for file references", set.Name)
 		if set.File != "" {
 			configPath, err := getFilePath(currentRoot, set.File)
 			if err != nil {
@@ -241,12 +250,30 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 			testSet = append(testSet, conf2.Tests...)
 		} else {
 			for id, scan := range set.Scans {
+				logger.Tracef(" - Checking Scan TestSet %v for file references", set.Name)
 				if scan.ZipFile != "" {
 					filePath, err := getFilePath(currentRoot, scan.ZipFile)
 					if err != nil {
 						return conf, fmt.Errorf("error locating scan zipfile %v", scan.ZipFile)
 					}
 					set.Scans[id].ZipFile = filePath
+				}
+			}
+			for id, imp := range set.Imports {
+				logger.Tracef(" - Checking Import TestSet %v for file references", set.Name)
+				if imp.ZipFile != "" {
+					filePath, err := getFilePath(currentRoot, imp.ZipFile)
+					if err != nil {
+						return conf, fmt.Errorf("error locating import zipfile %v", imp.ZipFile)
+					}
+					set.Imports[id].ZipFile = filePath
+				}
+				if imp.ProjectMapFile != "" {
+					filePath, err := getFilePath(currentRoot, imp.ProjectMapFile)
+					if err != nil {
+						return conf, fmt.Errorf("error locating import ProjectMapFile %v", imp.ProjectMapFile)
+					}
+					set.Imports[id].ProjectMapFile = filePath
 				}
 			}
 			testSet = append(testSet, set)
@@ -281,14 +308,18 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 
 	defer report.Close()
 
-	var Application, Group, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
+	var Application, Flag, Group, Import, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
 	for _, r := range *tests {
 		var set *CounterSet
 		switch r.Module {
 		case MOD_APPLICATION:
 			set = &Application
+		case MOD_FLAG:
+			set = &Flag
 		case MOD_GROUP:
 			set = &Group
+		case MOD_IMPORT:
+			set = &Import
 		case MOD_PRESET:
 			set = &Preset
 		case MOD_PROJECT:
@@ -338,7 +369,9 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th rowspan=2>Area</th><th colspan=3>Create</th><th colspan=3>Read</th><th colspan=3>Update</th><th colspan=3>Delete</th></tr>\n")
 	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
 	writeCounterSet(report, "Application", &Application)
+	writeCounterSet(report, "Flag", &Flag)
 	writeCounterSet(report, "Group", &Group)
+	writeCounterSet(report, "Import", &Import)
 	writeCounterSet(report, "Preset", &Preset)
 	writeCounterSet(report, "Project", &Project)
 	writeCounterSet(report, "Query", &Query)
@@ -416,6 +449,8 @@ func IsDelete(test string) bool {
 
 func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) {
 	for _, t := range Config.Tests {
+		logger.Tracef("Running test set: %v", t.Name)
+
 		if t.Wait > 0 {
 			logger.Infof("Waiting for %d seconds", t.Wait)
 			time.Sleep(time.Duration(t.Wait) * time.Second)
@@ -428,6 +463,10 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 }
 
 func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	logger.Tracef("Create tests: %v", testname)
+
+	FlagTestsCreate(cx1client, logger, testname, &tests.Flags)
+	ImportTestsCreate(cx1client, logger, testname, &tests.Imports)
 	GroupTestsCreate(cx1client, logger, testname, &tests.Groups)
 	ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
@@ -440,6 +479,10 @@ func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	ReportTestsCreate(cx1client, logger, testname, &tests.Reports)
 }
 func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	logger.Tracef("Read tests: %v", testname)
+
+	FlagTestsRead(cx1client, logger, testname, &tests.Flags)
+	ImportTestsRead(cx1client, logger, testname, &tests.Imports)
 	GroupTestsRead(cx1client, logger, testname, &tests.Groups)
 	ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
@@ -452,6 +495,10 @@ func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname 
 	ReportTestsRead(cx1client, logger, testname, &tests.Reports)
 }
 func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	logger.Tracef("Update tests: %v", testname)
+
+	FlagTestsUpdate(cx1client, logger, testname, &tests.Flags)
+	ImportTestsUpdate(cx1client, logger, testname, &tests.Imports)
 	GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
 	ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
@@ -464,6 +511,10 @@ func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	ReportTestsUpdate(cx1client, logger, testname, &tests.Reports)
 }
 func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
+	logger.Tracef("Delete tests: %v", testname)
+
+	FlagTestsDelete(cx1client, logger, testname, &tests.Flags)
+	ImportTestsDelete(cx1client, logger, testname, &tests.Imports)
 	GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
 	ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)

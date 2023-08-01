@@ -1,0 +1,13 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Check some flags
+    Flags:
+      - Name: AUDIT_APPLICATION_LEVEL_ENABLED
+        Test: R
+      - Name: ACCESS_MANAGEMENT_ENABLED
+        Test: R
+        #FailTest: true # this flag is not currently enabled in some environments

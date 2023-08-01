@@ -4,6 +4,8 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: DEBUG # if you set this to WARNING, you will get no output except errors and a pass/fail report at the end
 Tests:
+  - Name: Flags
+    File: flag/all.yaml
   - Name: Application
     File: application/all.yaml
   - Name: 10 second pause
@@ -38,3 +40,7 @@ Tests:
     Wait: 10
   - Name: User
     File: user/all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: Import
+    File: import/all.yaml
