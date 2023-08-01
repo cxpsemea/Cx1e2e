@@ -1,0 +1,21 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Delete imported data
+    Presets:
+      - Name: ImportBurgerTest
+        Test: RD
+    Queries:
+      - Name: Cheeseburgers
+        Group: JavaScript_Low_Visibility
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: BurgerImportTest
+        Test: RD
+    Projects:
+      - Name: BurgerImportTest
+        Test: RD

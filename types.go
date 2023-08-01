@@ -76,6 +76,18 @@ type CxQLScope struct {
 	Application string `yaml:"Application"`
 }
 
+type FlagCRUD struct {
+	Name       string `yaml:"Name"`
+	Test       string `yaml:"Test"`
+	Parent     string `yaml:"Parent"`
+	FailTest   bool   `yaml:"FailTest"`
+	TestSource string
+}
+
+func (o FlagCRUD) String() string {
+	return fmt.Sprintf("%v set to %v", o.Name, !o.FailTest)
+}
+
 type GroupCRUD struct {
 	Name        string `yaml:"Name"`
 	Test        string `yaml:"Test"`
@@ -90,6 +102,21 @@ type GroupCRUD struct {
 }
 
 func (o GroupCRUD) String() string {
+	return o.Name
+}
+
+type ImportCRUD struct {
+	Name           string `yaml:"Name"`
+	ZipFile        string `yaml:"ZipFile"`
+	EncryptionKey  string `yaml:"EncryptionKey"`
+	ProjectMapFile string `yaml:"ProjectMapFile"`
+	Test           string `yaml:"Test"`
+	Parent         string `yaml:"Parent"`
+	FailTest       bool   `yaml:"FailTest"`
+	TestSource     string
+}
+
+func (o ImportCRUD) String() string {
 	return o.Name
 }
 
@@ -299,6 +326,8 @@ type Tag struct {
 type TestSet struct {
 	Name         string            `yaml:"Name"`
 	File         string            `yaml:"File"`
+	Flags        []FlagCRUD        `yaml:"Flags"`
+	Imports      []ImportCRUD      `yaml:"Imports"`
 	Groups       []GroupCRUD       `yaml:"Groups"`
 	Users        []UserCRUD        `yaml:"Users"`
 	Applications []ApplicationCRUD `yaml:"Applications"`

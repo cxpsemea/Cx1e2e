@@ -1,0 +1,22 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Run scan and check for results
+    Scans:
+      - Project: BurgerImportTest
+        ZipFile: ../files/xss-burger.zip
+        Branch: zip
+        Preset: ImportBurgerTest
+        Engine: sast # sca kics apisec
+        WaitForEnd: true
+        Test: C
+    Results:
+      - Project: BurgerImportTest
+        FindingNumber: 1
+        Filter:
+          ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="
+          State: CONFIRMED
+        Test: R
