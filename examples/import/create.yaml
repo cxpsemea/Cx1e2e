@@ -1,0 +1,12 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+LogLevel: TRACE
+Tests:
+  - Name: Run an import with a preset, query, and project
+    Imports:
+      - Name: Burger Import
+        ZipFile: ../files/e2e_test.zip
+        EncryptionKey: "EcVwDpVhwFmiZhrthr/OUHL/PYFieSsSczWhxchfFh0="
+        Test: C

@@ -40,3 +40,7 @@ Tests:
     Wait: 10
   - Name: User
     File: user/all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: Import
+    File: import/all.yaml
