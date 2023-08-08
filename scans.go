@@ -103,7 +103,16 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 				logger.Errorf("Failed to get workflow update for scan %v: %s", test_Scan.ScanID, err)
 				return fmt.Errorf("scan finished with status: %v", test_Scan.Status)
 			} else {
-				return fmt.Errorf("scan finished with status: %v - %v", test_Scan.Status, workflow[len(workflow)-2].Info)
+				if len(workflow) == 0 {
+					return fmt.Errorf("scan finished with status: %v - there was no workflow log available for additional details", test_Scan.Status)
+				} else {
+					workflow_index := len(workflow) - 2
+					if workflow_index <= 0 {
+						workflow_index = 0
+					}
+
+					return fmt.Errorf("scan finished with status: %v - %v", test_Scan.Status, workflow[workflow_index].Info)
+				}
 			}
 
 		}
