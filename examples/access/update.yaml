@@ -4,7 +4,7 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: Remove access from project, add to app
+  - Name: Remove access from project, add user to group
     AccessAssignments:
       - EntityType: user
         EntityName: e2e-test-user1
@@ -12,9 +12,14 @@ Tests:
         ResourceName: e2e-test-project1
         Roles: [ ast-scanner ]
         Test: RD
+    Users:
+      - Name: e2e-test-user1
+        Groups: [ e2e-test-group1 ]
+        Test: RU
+  - Name: Give group access to Application
     AccessAssignments:
-      - EntityType: user
-        EntityName: e2e-test-user1
+      - EntityType: group
+        EntityName: e2e-test-group1
         ResourceType: application
         ResourceName: e2e-test-app1
         Roles: [ ast-scanner ]

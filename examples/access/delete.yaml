@@ -14,3 +14,6 @@ Tests:
     Users:
       - Name: e2e-test-user1
         Test: RD
+    Groups:
+      - Name: e2e-test-group1
+        Test: RD

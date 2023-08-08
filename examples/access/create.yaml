@@ -14,6 +14,9 @@ Tests:
           - Type: "project.name.in"
             Value: "e2e-test-project1"
         Test: C
+    Groups:
+      - Name: e2e-test-group1
+        Roles: [ ast-scanner ]
     Users:
       - Name: e2e-test-user1
         Email: e2e_test_user1@cx.local
