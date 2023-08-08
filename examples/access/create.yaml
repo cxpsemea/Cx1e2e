@@ -17,11 +17,13 @@ Tests:
     Groups:
       - Name: e2e-test-group1
         Roles: [ ast-scanner ]
+        Test: C
     Users:
       - Name: e2e-test-user1
         Email: e2e_test_user1@cx.local
         Roles: [ ast-scanner ]
         Test: C
+  - Name: Grant user access to project        
     AccessAssignments:
       - EntityType: user
         EntityName: e2e-test-user1
@@ -29,3 +31,11 @@ Tests:
         ResourceName: e2e-test-project1
         Roles: [ ast-scanner ]
         Test: C
+  - Name: Verify access
+    AccessAssignments:
+      - EntityType: user
+        EntityName: e2e-test-user1
+        ResourceType: project
+        ResourceName: e2e-test-project1
+        Roles: [ ast-scanner ]
+        Test: R
