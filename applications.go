@@ -7,8 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ApplicationTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, applications *[]ApplicationCRUD) bool {
-	result := true
+func ApplicationTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, applications *[]ApplicationCRUD) {
 	for id := range *applications {
 		t := &(*applications)[id]
 		if IsCreate(t.Test) {
@@ -19,7 +18,6 @@ func ApplicationTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource)
 				err := ApplicationTestCreate(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource)
@@ -27,7 +25,6 @@ func ApplicationTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 			}
 		}
 	}
-	return result
 }
 
 func updateApplication(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *ApplicationCRUD) error {
@@ -72,8 +69,7 @@ func ApplicationTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func ApplicationTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, applications *[]ApplicationCRUD) bool {
-	result := true
+func ApplicationTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, applications *[]ApplicationCRUD) {
 	for id := range *applications {
 		t := &(*applications)[id]
 		if IsRead(t.Test) {
@@ -84,7 +80,6 @@ func ApplicationTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logge
 				LogStart(t.FailTest, logger, OP_READ, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource)
 				err := ApplicationTestRead(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource)
@@ -92,7 +87,6 @@ func ApplicationTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logge
 			}
 		}
 	}
-	return result
 }
 
 func ApplicationTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ApplicationCRUD) error {
@@ -104,8 +98,7 @@ func ApplicationTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger
 	return nil
 }
 
-func ApplicationTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, applications *[]ApplicationCRUD) bool {
-	result := true
+func ApplicationTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, applications *[]ApplicationCRUD) {
 	for id := range *applications {
 		t := &(*applications)[id]
 		if IsUpdate(t.Test) {
@@ -116,7 +109,6 @@ func ApplicationTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource)
 				err := ApplicationTestUpdate(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource)
@@ -124,7 +116,6 @@ func ApplicationTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 			}
 		}
 	}
-	return result
 }
 
 func ApplicationTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ApplicationCRUD) error {
@@ -135,8 +126,7 @@ func ApplicationTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func ApplicationTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, applications *[]ApplicationCRUD) bool {
-	result := true
+func ApplicationTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, applications *[]ApplicationCRUD) {
 	for id := range *applications {
 		t := &(*applications)[id]
 		if IsDelete(t.Test) {
@@ -147,7 +137,6 @@ func ApplicationTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource)
 				err := ApplicationTestDelete(cx1client, logger, testname, &(*applications)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_APPLICATION, start, testname, id+1, t.String(), t.TestSource)
@@ -155,7 +144,6 @@ func ApplicationTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 			}
 		}
 	}
-	return result
 }
 
 func ApplicationTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ApplicationCRUD) error {

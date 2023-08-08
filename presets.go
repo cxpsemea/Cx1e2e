@@ -8,8 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func PresetTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) bool {
-	result := true
+func PresetTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) {
 	for id := range *presets {
 		t := &(*presets)[id]
 		if IsCreate(t.Test) {
@@ -20,7 +19,6 @@ func PresetTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
 				err := PresetTestCreate(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
@@ -29,7 +27,6 @@ func PresetTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 
 		}
 	}
-	return result
 }
 
 func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *PresetCRUD) ([]uint64, error) {
@@ -64,8 +61,7 @@ func PresetTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return nil
 }
 
-func PresetTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) bool {
-	result := true
+func PresetTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) {
 	for id := range *presets {
 		t := &(*presets)[id]
 		if IsRead(t.Test) {
@@ -76,7 +72,6 @@ func PresetTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_READ, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
 				err := PresetTestRead(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
@@ -84,7 +79,6 @@ func PresetTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func PresetTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *PresetCRUD) error {
@@ -96,8 +90,7 @@ func PresetTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return nil
 }
 
-func PresetTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) bool {
-	result := true
+func PresetTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) {
 	for id := range *presets {
 		t := &(*presets)[id]
 		if IsUpdate(t.Test) {
@@ -108,7 +101,6 @@ func PresetTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
 				err := PresetTestUpdate(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
@@ -117,7 +109,6 @@ func PresetTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 
 		}
 	}
-	return result
 }
 
 func PresetTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *PresetCRUD) error {
@@ -131,8 +122,7 @@ func PresetTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return err
 }
 
-func PresetTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) bool {
-	result := true
+func PresetTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) {
 	for id := range *presets {
 		t := &(*presets)[id]
 		if IsDelete(t.Test) {
@@ -143,7 +133,6 @@ func PresetTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
 				err := PresetTestDelete(cx1client, logger, testname, &(*presets)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
@@ -151,7 +140,6 @@ func PresetTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			}
 		}
 	}
-	return result
 }
 
 func PresetTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *PresetCRUD) error {

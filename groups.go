@@ -8,8 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func GroupTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) bool {
-	result := true
+func GroupTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) {
 	for id := range *groups {
 		t := &(*groups)[id]
 		if IsCreate(t.Test) {
@@ -20,7 +19,6 @@ func GroupTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
 				err := GroupTestCreate(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
@@ -28,7 +26,6 @@ func GroupTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			}
 		}
 	}
-	return result
 }
 
 func updateGroup(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *GroupCRUD) error {
@@ -80,8 +77,7 @@ func GroupTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	return nil
 }
 
-func GroupTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) bool {
-	result := true
+func GroupTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) {
 	for id := range *groups {
 		t := &(*groups)[id]
 		if IsRead(t.Test) {
@@ -92,7 +88,6 @@ func GroupTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 				LogStart(t.FailTest, logger, OP_READ, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
 				err := GroupTestRead(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
@@ -100,7 +95,6 @@ func GroupTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 			}
 		}
 	}
-	return result
 }
 
 func GroupTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *GroupCRUD) error {
@@ -118,8 +112,7 @@ func GroupTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 	return nil
 }
 
-func GroupTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) bool {
-	result := true
+func GroupTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) {
 	for id := range *groups {
 		t := &(*groups)[id]
 		if IsUpdate(t.Test) {
@@ -130,7 +123,6 @@ func GroupTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
 				err := GroupTestUpdate(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
@@ -138,7 +130,6 @@ func GroupTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			}
 		}
 	}
-	return result
 }
 
 func GroupTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *GroupCRUD) error {
@@ -150,8 +141,7 @@ func GroupTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	return nil
 }
 
-func GroupTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) bool {
-	result := true
+func GroupTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) {
 	for id := range *groups {
 		t := &(*groups)[id]
 		if IsDelete(t.Test) {
@@ -162,7 +152,6 @@ func GroupTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
 				err := GroupTestDelete(cx1client, logger, testname, &(*groups)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
@@ -170,7 +159,6 @@ func GroupTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			}
 		}
 	}
-	return result
 }
 
 func GroupTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *GroupCRUD) error {

@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ResultTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) bool {
+func ResultTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) {
 
 	for id := range *results {
 		t := &(*results)[id]
@@ -19,12 +19,9 @@ func ResultTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			LogSkip(t.FailTest, logger, OP_CREATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
 		}
 	}
-
-	return true
 }
 
-func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) bool {
-	result := true
+func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) {
 	for id := range *results {
 		t := &(*results)[id]
 		if IsRead(t.Test) {
@@ -35,7 +32,6 @@ func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
 				err := ResultTestRead(cx1client, logger, testname, &(*results)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
@@ -43,7 +39,6 @@ func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func (o ResultFilter) Matches(result Cx1ClientGo.ScanResult) bool {
@@ -174,8 +169,7 @@ func ResultTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return fmt.Errorf("specified result not found")
 }
 
-func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) bool {
-	result := true
+func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) {
 	for id := range *results {
 		t := &(*results)[id]
 		if IsUpdate(t.Test) {
@@ -186,7 +180,6 @@ func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
 				err := ResultTestUpdate(cx1client, logger, testname, t)
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
@@ -194,7 +187,6 @@ func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			}
 		}
 	}
-	return result
 }
 
 func ResultTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ResultCRUD) error {
@@ -213,7 +205,7 @@ func ResultTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return err
 }
 
-func ResultTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) bool {
+func ResultTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) {
 	for id := range *results {
 		t := &(*results)[id]
 		if IsDelete(t.Test) {
@@ -221,5 +213,4 @@ func ResultTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			LogSkip(t.FailTest, logger, OP_DELETE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "invalid test (action not supported)")
 		}
 	}
-	return true
 }

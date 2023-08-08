@@ -27,6 +27,7 @@ const (
 )
 
 const (
+	MOD_ACCESS      = "AccessAssignment"
 	MOD_APPLICATION = "Application"
 	MOD_FLAG        = "Flag"
 	MOD_GROUP       = "Group"
@@ -195,7 +196,11 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	testSet := make([]TestSet, 0)
 
 	// propagate the filename to sub-tests
+	// TODO: refactor this to use generics?
 	for id := range conf.Tests {
+		for id2 := range conf.Tests[id].AccessAssignments {
+			conf.Tests[id].AccessAssignments[id2].TestSource = configPath
+		}
 		for id2 := range conf.Tests[id].Applications {
 			conf.Tests[id].Applications[id2].TestSource = configPath
 		}
@@ -308,10 +313,12 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 
 	defer report.Close()
 
-	var Application, Flag, Group, Import, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
+	var Access, Application, Flag, Group, Import, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
 	for _, r := range *tests {
 		var set *CounterSet
 		switch r.Module {
+		case MOD_ACCESS:
+			set = &Access
 		case MOD_APPLICATION:
 			set = &Application
 		case MOD_FLAG:
@@ -368,6 +375,7 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	report.WriteString("<h2>Summary</h2>")
 	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th rowspan=2>Area</th><th colspan=3>Create</th><th colspan=3>Read</th><th colspan=3>Update</th><th colspan=3>Delete</th></tr>\n")
 	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
+	writeCounterSet(report, "Access Assignment", &Access)
 	writeCounterSet(report, "Application", &Application)
 	writeCounterSet(report, "Flag", &Flag)
 	writeCounterSet(report, "Group", &Group)
@@ -472,6 +480,7 @@ func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
 	RoleTestsCreate(cx1client, logger, testname, &tests.Roles)
 	UserTestsCreate(cx1client, logger, testname, &tests.Users)
+	AccessTestsCreate(cx1client, logger, testname, &tests.AccessAssignments)
 	QueryTestsCreate(cx1client, logger, testname, &tests.Queries)
 	PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
 	ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
@@ -487,6 +496,7 @@ func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname 
 	ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
 	RoleTestsRead(cx1client, logger, testname, &tests.Roles)
+	AccessTestsRead(cx1client, logger, testname, &tests.AccessAssignments)
 	UserTestsRead(cx1client, logger, testname, &tests.Users)
 	QueryTestsRead(cx1client, logger, testname, &tests.Queries)
 	PresetTestsRead(cx1client, logger, testname, &tests.Presets)
@@ -503,6 +513,7 @@ func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
 	RoleTestsUpdate(cx1client, logger, testname, &tests.Roles)
+	AccessTestsUpdate(cx1client, logger, testname, &tests.AccessAssignments)
 	UserTestsUpdate(cx1client, logger, testname, &tests.Users)
 	QueryTestsUpdate(cx1client, logger, testname, &tests.Queries)
 	PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
@@ -519,6 +530,7 @@ func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 	ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
 	ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)
 	RoleTestsDelete(cx1client, logger, testname, &tests.Roles)
+	AccessTestsDelete(cx1client, logger, testname, &tests.AccessAssignments)
 	UserTestsDelete(cx1client, logger, testname, &tests.Users)
 	QueryTestsDelete(cx1client, logger, testname, &tests.Queries)
 	PresetTestsDelete(cx1client, logger, testname, &tests.Presets)

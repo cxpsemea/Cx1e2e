@@ -8,23 +8,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (q *CxQLCRUD) IsValidQuery() bool {
+func (q *CxQLCRUD) IsValid() bool {
 	return q.QueryLanguage != "" && q.QueryGroup != "" && q.QueryName != "" && (q.Scope.Project != "" || q.Scope.Application != "")
 }
 
-func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) bool {
-	result := true
+func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
 	for id := range *queries {
 		t := &(*queries)[id]
 		if IsCreate(t.Test) {
 			start := time.Now().UnixNano()
-			if !t.IsValidQuery() {
+			if !t.IsValid() {
 				LogSkip(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing query identifier)")
 			} else {
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
 				err := QueryTestCreate(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
@@ -32,7 +30,6 @@ func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			}
 		}
 	}
-	return result
 }
 
 func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error) {
@@ -209,19 +206,17 @@ func QueryTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	}
 }
 
-func QueryTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) bool {
-	result := true
+func QueryTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
 	for id := range *queries {
 		t := &(*queries)[id]
 		if IsRead(t.Test) {
 			start := time.Now().UnixNano()
-			if !t.IsValidQuery() {
+			if !t.IsValid() {
 				LogSkip(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name)")
 			} else {
 				LogStart(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
 				err := QueryTestRead(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
@@ -229,7 +224,6 @@ func QueryTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 			}
 		}
 	}
-	return result
 }
 
 func QueryTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
@@ -242,8 +236,7 @@ func QueryTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 	return nil
 }
 
-func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) bool {
-	result := true
+func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
 	for id := range *queries {
 		t := &(*queries)[id]
 		if IsUpdate(t.Test) {
@@ -254,7 +247,6 @@ func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
 				err := QueryTestUpdate(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
@@ -262,15 +254,13 @@ func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			}
 		}
 	}
-	return result
 }
 
 func QueryTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
 	return updateQuery(cx1client, t)
 }
 
-func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) bool {
-	result := true
+func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
 	for id := range *queries {
 		t := &(*queries)[id]
 		if IsDelete(t.Test) {
@@ -281,7 +271,6 @@ func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
 				err := QueryTestDelete(cx1client, logger, testname, &(*queries)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
@@ -289,7 +278,6 @@ func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			}
 		}
 	}
-	return result
 }
 
 func QueryTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
