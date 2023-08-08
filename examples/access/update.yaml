@@ -24,3 +24,11 @@ Tests:
         ResourceName: e2e-test-app1
         Roles: [ ast-scanner ]
         Test: C
+  - Name: Verify group access to Application
+    AccessAssignments:
+      - EntityType: group
+        EntityName: e2e-test-group1
+        ResourceType: application
+        ResourceName: e2e-test-app1
+        Roles: [ ast-scanner ]
+        Test: R
