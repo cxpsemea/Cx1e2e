@@ -8,5 +8,6 @@ Tests:
     Imports:
       - Name: Burger Import
         ZipFile: ../files/e2e_test.zip
+        ProjectMapFile: ../files/e2e_project_name_mapping.json
         EncryptionKey: "EcVwDpVhwFmiZhrthr/OUHL/PYFieSsSczWhxchfFh0="
         Test: C

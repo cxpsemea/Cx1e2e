@@ -19,3 +19,6 @@ Tests:
     Projects:
       - Name: BurgerImportTest
         Test: RD
+    Applications:
+      - Name: e2e-ImportTestApp
+        Test: RD

@@ -16,6 +16,14 @@ func (t AccessAssignmentCRUD) IsValid() bool {
 	return true
 }
 
+func CheckAMFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
+	flag, err := cx1client.CheckFlag("ACCESS_MANAGEMENT_ENABLED")
+	if err != nil {
+		return false
+	}
+	return flag
+}
+
 func AccessTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, accessAssignments *[]AccessAssignmentCRUD) {
 	for id := range *accessAssignments {
 		t := &(*accessAssignments)[id]
@@ -23,6 +31,8 @@ func AccessTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
 				LogSkip(t.FailTest, logger, OP_CREATE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing entity, resource, or roles)")
+			} else if !CheckAMFlag(cx1client) {
+				LogSkip(t.FailTest, logger, OP_CREATE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource, "invalid test (access management is not enabled)")
 			} else {
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource)
 				err := AccessTestCreate(cx1client, logger, testname, &(*accessAssignments)[id])
@@ -108,6 +118,8 @@ func AccessTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
 				LogSkip(t.FailTest, logger, OP_READ, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing entity, resource, or roles)")
+			} else if !CheckAMFlag(cx1client) {
+				LogSkip(t.FailTest, logger, OP_READ, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource, "invalid test (access management is not enabled)")
 			} else {
 				LogStart(t.FailTest, logger, OP_READ, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource)
 				err := AccessTestRead(cx1client, logger, testname, &(*accessAssignments)[id])
@@ -155,6 +167,8 @@ func AccessTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
 				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing entity, resource, or roles)")
+			} else if !CheckAMFlag(cx1client) {
+				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource, "invalid test (access management is not enabled)")
 			} else {
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource)
 				err := AccessTestUpdate(cx1client, logger, testname, &(*accessAssignments)[id])
@@ -195,6 +209,8 @@ func AccessTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
 				LogSkip(t.FailTest, logger, OP_DELETE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing entity, resource, or roles)")
+			} else if !CheckAMFlag(cx1client) {
+				LogSkip(t.FailTest, logger, OP_DELETE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource, "invalid test (access management is not enabled)")
 			} else {
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_ACCESS, start, testname, id+1, t.String(), t.TestSource)
 				err := AccessTestDelete(cx1client, logger, testname, &(*accessAssignments)[id])

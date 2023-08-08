@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
@@ -89,7 +90,24 @@ func ProjectTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	if err != nil {
 		return err
 	}
+
 	t.Project = &test_Project
+
+	if t.Application != "" {
+		app, err := cx1client.GetApplicationByName(t.Application)
+		if err != nil {
+			return err
+		}
+
+		for _, p := range app.ProjectIds {
+			if p == t.Project.ProjectID {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("expected project %v to live under application %v but it does not", t.Name, t.Application)
+	}
+
 	return nil
 }
 

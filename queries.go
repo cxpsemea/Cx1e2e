@@ -12,6 +12,14 @@ func (q *CxQLCRUD) IsValid() bool {
 	return q.QueryLanguage != "" && q.QueryGroup != "" && q.QueryName != "" && (q.Scope.Project != "" || q.Scope.Application != "")
 }
 
+func CheckALQFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
+	appLevelQueries, err := cx1client.CheckFlag("AUDIT_APPLICATION_LEVEL_ENABLED")
+	if err != nil {
+		return false
+	}
+	return appLevelQueries
+}
+
 func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
 	for id := range *queries {
 		t := &(*queries)[id]
@@ -19,6 +27,8 @@ func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
 				LogSkip(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing query identifier)")
+			} else if !CheckALQFlag(cx1client) && t.Scope.Application != "" {
+				LogSkip(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (application-level queries are not enabled)")
 			} else {
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
 				err := QueryTestCreate(cx1client, logger, testname, &(*queries)[id])
@@ -58,22 +68,12 @@ func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error
 	scope := "Corp"
 	if !t.Scope.Corp {
 		if t.Scope.Application != "" {
-			fmt.Printf("Targeting app %v\n", t.Scope.Application)
-			appLevelQueries, err := cx1client.CheckFlag("AUDIT_APPLICATION_LEVEL_ENABLED")
-			if err != nil {
-				return "", fmt.Errorf("failed to check if application-level queries are enabled: %s", err)
-			}
-			if !appLevelQueries {
-				return "", fmt.Errorf("application-level queries are not enabled in this environment")
-			}
-
 			app, err := cx1client.GetApplicationByName(t.Scope.Application)
 			if err != nil {
 				return "", fmt.Errorf("failed to find application named %v", t.Scope.Application)
 			}
 			scope = app.ApplicationID
 		} else {
-			fmt.Printf("Targeting proj %v\n", t.Scope.Project)
 			proj, err := cx1client.GetProjectByName(t.Scope.Project)
 			if err != nil {
 				return "", fmt.Errorf("failed to find project named %v", t.Scope.Project)
@@ -213,6 +213,8 @@ func QueryTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 			start := time.Now().UnixNano()
 			if !t.IsValid() {
 				LogSkip(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name)")
+			} else if !CheckALQFlag(cx1client) && t.Scope.Application != "" {
+				LogSkip(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (application-level queries are not enabled)")
 			} else {
 				LogStart(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
 				err := QueryTestRead(cx1client, logger, testname, &(*queries)[id])
@@ -243,6 +245,8 @@ func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			start := time.Now().UnixNano()
 			if t.Query == nil {
 				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
+			} else if !CheckALQFlag(cx1client) && t.Scope.Application != "" {
+				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (application-level queries are not enabled)")
 			} else {
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
 				err := QueryTestUpdate(cx1client, logger, testname, &(*queries)[id])
@@ -267,6 +271,8 @@ func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			start := time.Now().UnixNano()
 			if t.Query == nil {
 				LogSkip(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before deleting)")
+			} else if !CheckALQFlag(cx1client) && t.Scope.Application != "" {
+				LogSkip(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (application-level queries are not enabled)")
 			} else {
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
 				err := QueryTestDelete(cx1client, logger, testname, &(*queries)[id])
