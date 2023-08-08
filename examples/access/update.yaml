@@ -1,0 +1,21 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Remove access from project, add to app
+    AccessAssignments:
+      - EntityType: user
+        EntityName: e2e-test-user1
+        ResourceType: project
+        ResourceName: e2e-test-project1
+        Roles: [ ast-scanner ]
+        Test: RD
+    AccessAssignments:
+      - EntityType: user
+        EntityName: e2e-test-user1
+        ResourceType: application
+        ResourceName: e2e-test-app1
+        Roles: [ ast-scanner ]
+        Test: C

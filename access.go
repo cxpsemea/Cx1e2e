@@ -45,9 +45,9 @@ func CreateAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 
 	switch t.EntityType {
 	case "user":
-		user, err := cx1client.GetUserByEmail(t.EntityName)
+		user, err := cx1client.GetUserByUserName(t.EntityName)
 		if err != nil {
-			return fmt.Errorf("failed to retrieve user with email %v: %s", t.EntityName, err)
+			return fmt.Errorf("failed to retrieve user with username %v: %s", t.EntityName, err)
 		}
 		access.EntityName = user.UserName
 		access.EntityID = user.UserID
