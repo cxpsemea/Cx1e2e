@@ -82,6 +82,8 @@ func CreateAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 		access.ResourceID = project.ProjectID
 	}
 
+	access.EntityRoles = t.Roles
+
 	err := cx1client.AddAccessAssignment(access)
 	if err != nil {
 		return err
