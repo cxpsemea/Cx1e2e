@@ -101,7 +101,7 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 			expectedResult = t.Status
 		}
 
-		if test_Scan.Status != expectedResult {
+		if (test_Scan.Status == "Completed" || test_Scan.Status == "Failed" || test_Scan.Status == "Partial") && test_Scan.Status != expectedResult {
 			workflow, err := cx1client.GetScanWorkflowByID(test_Scan.ScanID)
 			if err != nil {
 				logger.Errorf("Failed to get workflow update for scan %v: %s", test_Scan.ScanID, err)
