@@ -118,7 +118,6 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 					return fmt.Errorf("scan finished with status: %v - %v", test_Scan.Status, workflow[workflow_index].Info)
 				}
 			}
-
 		}
 	}
 
