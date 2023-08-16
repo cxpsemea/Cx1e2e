@@ -49,6 +49,20 @@ const (
 )
 
 func main() {
+	retval := run()
+
+	if retval == 0 {
+		os.Exit(1) // all tests failed
+	}
+
+	if retval == 1 {
+		os.Exit(0) // all tests passed
+	}
+
+	os.Exit(2) // partial success
+}
+
+func run() float32 {
 	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)
 	myformatter := &easy.Formatter{}
@@ -76,7 +90,7 @@ func main() {
 	Config, err := LoadConfig(logger, *testConfig)
 	if err != nil {
 		logger.Fatalf("Failed to load configuration file %v: %s", *testConfig, err)
-		return
+		return 0
 	}
 
 	switch strings.ToUpper(Config.LogLevel) {
@@ -103,7 +117,7 @@ func main() {
 		proxyURL, err := url.Parse(Config.ProxyURL)
 		if err != nil {
 			logger.Fatalf("Failed to parse specified proxy address %v: %s", Config.ProxyURL, err)
-			return
+			return 0
 		}
 		transport := &http.Transport{}
 		transport.Proxy = http.ProxyURL(proxyURL)
@@ -131,7 +145,7 @@ func main() {
 
 	if err != nil {
 		logger.Fatalf("Failed to create Cx1 client: %s", err)
-		return
+		return 0
 	}
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
@@ -172,6 +186,8 @@ func main() {
 	if err != nil {
 		logger.Errorf("Failed to generate HTML report: %s", err)
 	}
+
+	return float32(count_passed) / float32(count_failed+count_passed+count_skipped)
 }
 
 func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
