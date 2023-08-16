@@ -8,8 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func RoleTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, roles *[]RoleCRUD) bool {
-	result := true
+func RoleTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, roles *[]RoleCRUD) {
 	for id := range *roles {
 		t := &(*roles)[id]
 		if IsCreate(t.Test) {
@@ -20,7 +19,6 @@ func RoleTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource)
 				err := RoleTestCreate(cx1client, logger, testname, &(*roles)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource)
@@ -28,7 +26,6 @@ func RoleTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func getRole(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, roleID string) (*Cx1ClientGo.Role, error) {
@@ -111,8 +108,7 @@ func RoleTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return updateRole(cx1client, logger, t)
 }
 
-func RoleTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, roles *[]RoleCRUD) bool {
-	result := true
+func RoleTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, roles *[]RoleCRUD) {
 	for id := range *roles {
 		t := &(*roles)[id]
 		if IsRead(t.Test) {
@@ -123,7 +119,6 @@ func RoleTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 				LogStart(t.FailTest, logger, OP_READ, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource)
 				err := RoleTestRead(cx1client, logger, testname, &(*roles)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource)
@@ -131,7 +126,6 @@ func RoleTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 			}
 		}
 	}
-	return result
 }
 
 func RoleTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *RoleCRUD) error {
@@ -143,8 +137,7 @@ func RoleTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testn
 	return nil
 }
 
-func RoleTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, roles *[]RoleCRUD) bool {
-	result := true
+func RoleTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, roles *[]RoleCRUD) {
 	for id := range *roles {
 		t := &(*roles)[id]
 		if IsUpdate(t.Test) {
@@ -155,7 +148,6 @@ func RoleTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource)
 				err := RoleTestUpdate(cx1client, logger, testname, &(*roles)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource)
@@ -163,15 +155,13 @@ func RoleTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func RoleTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *RoleCRUD) error {
 	return updateRole(cx1client, logger, t)
 }
 
-func RoleTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, roles *[]RoleCRUD) bool {
-	result := true
+func RoleTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, roles *[]RoleCRUD) {
 	for id := range *roles {
 		t := &(*roles)[id]
 		if IsDelete(t.Test) {
@@ -182,7 +172,6 @@ func RoleTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource)
 				err := RoleTestDelete(cx1client, logger, testname, &(*roles)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_ROLE, start, testname, id+1, t.String(), t.TestSource)
@@ -190,7 +179,6 @@ func RoleTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func RoleTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *RoleCRUD) error {

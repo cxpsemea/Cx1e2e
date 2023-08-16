@@ -9,7 +9,8 @@ Tests:
       - Name: e2e-test-project1
         Test: C
         Tags: 
-          - Test: tag1
+          - Key: tag1key
+            Value: tag1value
     Scans:
       - Project: e2e-test-project1
         Repository: https://github.com/michaelkubiaczyk/ssba
@@ -18,4 +19,6 @@ Tests:
         Engine: sast #SAST only
         #Engine: sast sca kics apisec #throw everything at it
         WaitForEnd: true
+        Timeout: 300 #300 seconds, 5min
+        Status: Completed #Failed, Partial
         Test: C

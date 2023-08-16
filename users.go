@@ -8,8 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func UserTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) bool {
-	result := true
+func UserTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) {
 	for id := range *users {
 		t := &(*users)[id]
 		if IsCreate(t.Test) {
@@ -20,7 +19,6 @@ func UserTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
 				err := UserTestCreate(cx1client, logger, testname, &(*users)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
@@ -28,7 +26,6 @@ func UserTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func updateUserFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *UserCRUD) error {
@@ -136,8 +133,7 @@ func UserTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return nil
 }
 
-func UserTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) bool {
-	result := true
+func UserTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) {
 	for id := range *users {
 		t := &(*users)[id]
 		if IsRead(t.Test) {
@@ -148,7 +144,6 @@ func UserTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 				LogStart(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
 				err := UserTestRead(cx1client, logger, testname, &(*users)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
@@ -156,7 +151,6 @@ func UserTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 			}
 		}
 	}
-	return result
 }
 
 func UserTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *UserCRUD) error {
@@ -168,8 +162,7 @@ func UserTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testn
 	return nil
 }
 
-func UserTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) bool {
-	result := true
+func UserTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) {
 	for id := range *users {
 		t := &(*users)[id]
 		if IsUpdate(t.Test) {
@@ -180,7 +173,6 @@ func UserTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
 				err := UserTestUpdate(cx1client, logger, testname, &(*users)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
@@ -188,7 +180,6 @@ func UserTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func UserTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *UserCRUD) error {
@@ -200,8 +191,7 @@ func UserTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return cx1client.UpdateUser(t.User)
 }
 
-func UserTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) bool {
-	result := true
+func UserTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) {
 	for id := range *users {
 		t := &(*users)[id]
 		if IsDelete(t.Test) {
@@ -212,7 +202,6 @@ func UserTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
 				err := UserTestDelete(cx1client, logger, testname, &(*users)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
@@ -220,7 +209,6 @@ func UserTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func UserTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *UserCRUD) error {

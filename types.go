@@ -7,6 +7,21 @@ import (
 	"github.com/cxpsemea/Cx1ClientGo"
 )
 
+type AccessAssignmentCRUD struct {
+	Test         string   `yaml:"Test"`
+	EntityType   string   `yaml:"EntityType"`
+	EntityName   string   `yaml:"EntityName"`
+	ResourceType string   `yaml:"ResourceType"`
+	ResourceName string   `yaml:"ResourceName"`
+	Roles        []string `yaml:"Roles"`
+	FailTest     bool     `yaml:"FailTest"`
+	TestSource   string
+}
+
+func (o AccessAssignmentCRUD) String() string {
+	return fmt.Sprintf("%v %v to access %v %v with roles: %v", o.EntityType, o.EntityName, o.ResourceType, o.ResourceName, strings.Join(o.Roles, ", "))
+}
+
 type ApplicationCRUD struct {
 	Name        string            `yaml:"Name"`
 	Test        string            `yaml:"Test"`
@@ -288,6 +303,8 @@ type ScanCRUD struct {
 	WaitForEnd  bool   `yaml:"WaitForEnd"`
 	ZipFile     string `yaml:"ZipFile"`
 	Preset      string `yaml:"Preset"`
+	Status      string `yaml:"Status"`
+	Timeout     int    `yaml:"Timeout"`
 	FailTest    bool   `yaml:"FailTest"`
 	TestSource  string
 	Scan        *Cx1ClientGo.Scan
@@ -324,21 +341,23 @@ type Tag struct {
 }
 
 type TestSet struct {
-	Name         string            `yaml:"Name"`
-	File         string            `yaml:"File"`
-	Flags        []FlagCRUD        `yaml:"Flags"`
-	Imports      []ImportCRUD      `yaml:"Imports"`
-	Groups       []GroupCRUD       `yaml:"Groups"`
-	Users        []UserCRUD        `yaml:"Users"`
-	Applications []ApplicationCRUD `yaml:"Applications"`
-	Projects     []ProjectCRUD     `yaml:"Projects"`
-	Queries      []CxQLCRUD        `yaml:"Queries"`
-	Presets      []PresetCRUD      `yaml:"Presets"`
-	Roles        []RoleCRUD        `yaml:"Roles"`
-	Scans        []ScanCRUD        `yaml:"Scans"`
-	Results      []ResultCRUD      `yaml:"Results"`
-	Reports      []ReportCRUD      `yaml:"Reports"`
-	Wait         uint              `yaml:"Wait"`
+	Name              string                 `yaml:"Name"`
+	File              string                 `yaml:"File"`
+	AccessAssignments []AccessAssignmentCRUD `yaml:"AccessAssignments"`
+	Applications      []ApplicationCRUD      `yaml:"Applications"`
+	Flags             []FlagCRUD             `yaml:"Flags"`
+	Groups            []GroupCRUD            `yaml:"Groups"`
+	Imports           []ImportCRUD           `yaml:"Imports"`
+	Presets           []PresetCRUD           `yaml:"Presets"`
+	Projects          []ProjectCRUD          `yaml:"Projects"`
+	Queries           []CxQLCRUD             `yaml:"Queries"`
+	Reports           []ReportCRUD           `yaml:"Reports"`
+	Results           []ResultCRUD           `yaml:"Results"`
+	Roles             []RoleCRUD             `yaml:"Roles"`
+	Scans             []ScanCRUD             `yaml:"Scans"`
+	Users             []UserCRUD             `yaml:"Users"`
+
+	Wait uint `yaml:"Wait"`
 }
 
 type TestConfig struct {
