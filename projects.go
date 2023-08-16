@@ -1,14 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
-func ProjectTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, projects *[]ProjectCRUD) bool {
-	result := true
+func ProjectTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, projects *[]ProjectCRUD) {
 	for id := range *projects {
 		t := &(*projects)[id]
 		if IsCreate(t.Test) {
@@ -19,7 +19,6 @@ func ProjectTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource)
 				err := ProjectTestCreate(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource)
@@ -27,7 +26,6 @@ func ProjectTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 			}
 		}
 	}
-	return result
 }
 
 func ProjectTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ProjectCRUD) error {
@@ -67,8 +65,7 @@ func ProjectTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 	return nil
 }
 
-func ProjectTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, projects *[]ProjectCRUD) bool {
-	result := true
+func ProjectTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, projects *[]ProjectCRUD) {
 	for id := range *projects {
 		t := &(*projects)[id]
 		if IsRead(t.Test) {
@@ -79,7 +76,6 @@ func ProjectTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 				LogStart(t.FailTest, logger, OP_READ, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource)
 				err := ProjectTestRead(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource)
@@ -87,7 +83,6 @@ func ProjectTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 			}
 		}
 	}
-	return result
 }
 
 func ProjectTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ProjectCRUD) error {
@@ -95,12 +90,28 @@ func ProjectTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	if err != nil {
 		return err
 	}
+
 	t.Project = &test_Project
+
+	if t.Application != "" {
+		app, err := cx1client.GetApplicationByName(t.Application)
+		if err != nil {
+			return err
+		}
+
+		for _, p := range app.ProjectIds {
+			if p == t.Project.ProjectID {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("expected project %v to live under application %v but it does not", t.Name, t.Application)
+	}
+
 	return nil
 }
 
-func ProjectTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, projects *[]ProjectCRUD) bool {
-	result := true
+func ProjectTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, projects *[]ProjectCRUD) {
 	for id := range *projects {
 		t := &(*projects)[id]
 		if IsUpdate(t.Test) {
@@ -111,7 +122,6 @@ func ProjectTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource)
 				err := ProjectTestUpdate(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource)
@@ -119,7 +129,6 @@ func ProjectTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 			}
 		}
 	}
-	return result
 }
 
 func ProjectTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ProjectCRUD) error {
@@ -149,8 +158,7 @@ func ProjectTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 	return nil
 }
 
-func ProjectTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, projects *[]ProjectCRUD) bool {
-	result := true
+func ProjectTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, projects *[]ProjectCRUD) {
 	for id := range *projects {
 		t := &(*projects)[id]
 		if IsDelete(t.Test) {
@@ -161,7 +169,6 @@ func ProjectTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource)
 				err := ProjectTestDelete(cx1client, logger, testname, &(*projects)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_PROJECT, start, testname, id+1, t.String(), t.TestSource)
@@ -169,7 +176,6 @@ func ProjectTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger,
 			}
 		}
 	}
-	return result
 }
 
 func ProjectTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ProjectCRUD) error {

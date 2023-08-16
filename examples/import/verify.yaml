@@ -4,6 +4,14 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
+  - Name: Check that the imported project exists in the new application
+    Applications:
+      - Name: e2e-ImportTestApp
+        Test: R
+    Projects:
+      - Name: BurgerImportTest
+        Application: e2e-ImportTestApp
+        Test: R
   - Name: Run scan and check for results
     Scans:
       - Project: BurgerImportTest

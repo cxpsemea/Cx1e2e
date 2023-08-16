@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func FlagTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Flags *[]FlagCRUD) bool {
+func FlagTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Flags *[]FlagCRUD) {
 	for id := range *Flags {
 		t := &(*Flags)[id]
 		if IsCreate(t.Test) {
@@ -16,11 +16,9 @@ func FlagTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			LogSkip(t.FailTest, logger, OP_CREATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
 		}
 	}
-	return true
 }
 
-func FlagTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Flags *[]FlagCRUD) bool {
-	result := true
+func FlagTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Flags *[]FlagCRUD) {
 	for id := range *Flags {
 		t := &(*Flags)[id]
 		if IsRead(t.Test) {
@@ -31,7 +29,6 @@ func FlagTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 				LogStart(t.FailTest, logger, OP_READ, MOD_FLAG, start, testname, id+1, t.String(), t.TestSource)
 				err := FlagTestRead(cx1client, logger, testname, &(*Flags)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_FLAG, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_FLAG, start, testname, id+1, t.String(), t.TestSource)
@@ -39,7 +36,6 @@ func FlagTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 			}
 		}
 	}
-	return result
 }
 
 func FlagTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *FlagCRUD) error {
@@ -57,7 +53,7 @@ func FlagTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testn
 	return nil
 }
 
-func FlagTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Flags *[]FlagCRUD) bool {
+func FlagTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Flags *[]FlagCRUD) {
 	for id := range *Flags {
 		t := &(*Flags)[id]
 		if IsCreate(t.Test) {
@@ -65,10 +61,9 @@ func FlagTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			LogSkip(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
 		}
 	}
-	return true
 }
 
-func FlagTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Flags *[]FlagCRUD) bool {
+func FlagTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Flags *[]FlagCRUD) {
 	for id := range *Flags {
 		t := &(*Flags)[id]
 		if IsCreate(t.Test) {
@@ -76,5 +71,4 @@ func FlagTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			LogSkip(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
 		}
 	}
-	return true
 }

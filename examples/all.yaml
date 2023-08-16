@@ -44,3 +44,7 @@ Tests:
     Wait: 10
   - Name: Import
     File: import/all.yaml
+  - Name: 10 second pause
+    Wait: 10
+  - Name: New Access Management
+    File: access/all.yaml

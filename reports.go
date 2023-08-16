@@ -16,8 +16,7 @@ func (t ReportCRUD) IsValid() bool {
 	return true
 }
 
-func ReportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Reports *[]ReportCRUD) bool {
-	result := true
+func ReportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Reports *[]ReportCRUD) {
 	for id := range *Reports {
 		t := &(*Reports)[id]
 		if IsCreate(t.Test) {
@@ -28,7 +27,6 @@ func ReportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ReportTestCreate(cx1client, logger, testname, &(*Reports)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
@@ -36,7 +34,6 @@ func ReportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			}
 		}
 	}
-	return result
 }
 
 func ReportTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ReportCRUD) error {
@@ -88,8 +85,7 @@ func ReportTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return nil
 }
 
-func ReportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Reports *[]ReportCRUD) bool {
-	result := true
+func ReportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Reports *[]ReportCRUD) {
 	for id := range *Reports {
 		t := &(*Reports)[id]
 		if IsRead(t.Test) {
@@ -100,7 +96,6 @@ func ReportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ReportTestRead(cx1client, logger, testname, &(*Reports)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
@@ -108,15 +103,13 @@ func ReportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func ReportTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ReportCRUD) error {
 	return fmt.Errorf("not supported")
 }
 
-func ReportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Reports *[]ReportCRUD) bool {
-	result := true
+func ReportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Reports *[]ReportCRUD) {
 	for id := range *Reports {
 		t := &(*Reports)[id]
 		if IsUpdate(t.Test) {
@@ -127,7 +120,6 @@ func ReportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ReportTestUpdate(cx1client, logger, testname, &(*Reports)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
@@ -135,15 +127,13 @@ func ReportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			}
 		}
 	}
-	return result
 }
 
 func ReportTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ReportCRUD) error {
 	return fmt.Errorf("not supported")
 }
 
-func ReportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Reports *[]ReportCRUD) bool {
-	result := true
+func ReportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Reports *[]ReportCRUD) {
 	for id := range *Reports {
 		t := &(*Reports)[id]
 		if IsDelete(t.Test) {
@@ -154,7 +144,6 @@ func ReportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ReportTestDelete(cx1client, logger, testname, &(*Reports)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_REPORT, start, testname, id+1, t.String(), t.TestSource)
@@ -162,7 +151,6 @@ func ReportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			}
 		}
 	}
-	return result
 }
 
 func ReportTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ReportCRUD) error {

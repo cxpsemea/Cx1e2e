@@ -9,8 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ImportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) bool {
-	result := true
+func ImportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) {
 	for id := range *Imports {
 		t := &(*Imports)[id]
 		if IsCreate(t.Test) {
@@ -21,7 +20,6 @@ func ImportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource)
 				err := ImportTestCreate(cx1client, logger, testname, &(*Imports)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource)
@@ -29,7 +27,6 @@ func ImportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			}
 		}
 	}
-	return result
 }
 
 func ImportTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ImportCRUD) error {
@@ -63,7 +60,7 @@ func ImportTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return nil
 }
 
-func ImportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) bool {
+func ImportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) {
 	for id := range *Imports {
 		t := &(*Imports)[id]
 		if IsRead(t.Test) {
@@ -71,10 +68,9 @@ func ImportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			LogSkip(t.FailTest, logger, OP_READ, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
 		}
 	}
-	return true
 }
 
-func ImportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) bool {
+func ImportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) {
 	for id := range *Imports {
 		t := &(*Imports)[id]
 		if IsUpdate(t.Test) {
@@ -82,10 +78,9 @@ func ImportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			LogSkip(t.FailTest, logger, OP_UPDATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
 		}
 	}
-	return true
 }
 
-func ImportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) bool {
+func ImportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) {
 	for id := range *Imports {
 		t := &(*Imports)[id]
 		if IsDelete(t.Test) {
@@ -93,5 +88,4 @@ func ImportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 			LogSkip(t.FailTest, logger, OP_UPDATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
 		}
 	}
-	return true
 }

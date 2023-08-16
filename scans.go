@@ -22,8 +22,7 @@ func (t *ScanCRUD) IsValid() bool {
 	return true
 }
 
-func ScanTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) bool {
-	result := true
+func ScanTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) {
 	for id := range *scans {
 		t := &(*scans)[id]
 		if IsCreate(t.Test) {
@@ -34,7 +33,6 @@ func ScanTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_CREATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
 				err := ScanTestCreate(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_CREATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_CREATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
@@ -42,7 +40,6 @@ func ScanTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
@@ -52,6 +49,8 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	}
 
 	scanConfigs := []Cx1ClientGo.ScanConfiguration{}
+
+	scanDelay := cx1client.GetClientVars().ScanPollingDelaySeconds
 
 	engines := strings.Split(t.Engine, " ")
 
@@ -90,30 +89,42 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 
 	t.Scan = &test_Scan
 	if t.WaitForEnd {
-		test_Scan, err = cx1client.ScanPollingDetailed(&test_Scan)
+		test_Scan, err = cx1client.ScanPollingWithTimeout(&test_Scan, true, scanDelay, t.Timeout)
 		if err != nil {
 			return err
 		}
 
 		t.Scan = &test_Scan
 
-		if test_Scan.Status != "Completed" {
+		expectedResult := "Completed"
+		if t.Status != "" {
+			expectedResult = t.Status
+		}
+
+		if (test_Scan.Status == "Completed" || test_Scan.Status == "Failed" || test_Scan.Status == "Partial") && test_Scan.Status != expectedResult {
 			workflow, err := cx1client.GetScanWorkflowByID(test_Scan.ScanID)
 			if err != nil {
 				logger.Errorf("Failed to get workflow update for scan %v: %s", test_Scan.ScanID, err)
 				return fmt.Errorf("scan finished with status: %v", test_Scan.Status)
 			} else {
-				return fmt.Errorf("scan finished with status: %v - %v", test_Scan.Status, workflow[len(workflow)-2].Info)
-			}
+				if len(workflow) == 0 {
+					return fmt.Errorf("scan finished with status: %v - there was no workflow log available for additional details", test_Scan.Status)
+				} else {
+					workflow_index := len(workflow) - 2
+					if workflow_index <= 0 {
+						workflow_index = 0
+					}
 
+					return fmt.Errorf("scan finished with status: %v - %v", test_Scan.Status, workflow[workflow_index].Info)
+				}
+			}
 		}
 	}
 
 	return nil
 }
 
-func ScanTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) bool {
-	result := true
+func ScanTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) {
 	for id := range *scans {
 		t := &(*scans)[id]
 		if IsRead(t.Test) {
@@ -124,7 +135,6 @@ func ScanTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 				LogStart(t.FailTest, logger, OP_READ, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
 				err := ScanTestRead(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_READ, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_READ, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
@@ -132,7 +142,6 @@ func ScanTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 			}
 		}
 	}
-	return result
 }
 
 func ScanTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
@@ -153,8 +162,7 @@ func ScanTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testn
 	return nil
 }
 
-func ScanTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) bool {
-	result := true
+func ScanTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) {
 	for id := range *scans {
 		t := &(*scans)[id]
 		if IsUpdate(t.Test) {
@@ -165,7 +173,6 @@ func ScanTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_UPDATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
 				err := ScanTestUpdate(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_UPDATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_UPDATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
@@ -173,15 +180,13 @@ func ScanTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func ScanTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
 	return fmt.Errorf("not implemented")
 }
 
-func ScanTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) bool {
-	result := true
+func ScanTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) {
 	for id := range *scans {
 		t := &(*scans)[id]
 		if IsDelete(t.Test) {
@@ -192,7 +197,6 @@ func ScanTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 				LogStart(t.FailTest, logger, OP_DELETE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
 				err := ScanTestDelete(cx1client, logger, testname, &(*scans)[id])
 				if err != nil {
-					result = false
 					LogFail(t.FailTest, logger, OP_DELETE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, err)
 				} else {
 					LogPass(t.FailTest, logger, OP_DELETE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
@@ -200,7 +204,6 @@ func ScanTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 			}
 		}
 	}
-	return result
 }
 
 func ScanTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
