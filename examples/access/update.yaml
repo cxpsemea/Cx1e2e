@@ -7,28 +7,28 @@ Tests:
   - Name: Remove access from project, add user to group
     AccessAssignments:
       - EntityType: user
-        EntityName: e2e-test-user1
+        EntityName: e2e-test-access-user%E2E_RUN_SUFFIX%
         ResourceType: project
-        ResourceName: e2e-test-project1
+        ResourceName: e2e-test-access-project%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
         Test: RD
     Users:
-      - Name: e2e-test-user1
-        Groups: [ e2e-test-group1 ]
+      - Name: e2e-test-access-user%E2E_RUN_SUFFIX%
+        Groups: [ e2e-test-access-group%E2E_RUN_SUFFIX% ]
         Test: RU
   - Name: Give group access to Application
     AccessAssignments:
       - EntityType: group
-        EntityName: e2e-test-group1
+        EntityName: e2e-test-access-group%E2E_RUN_SUFFIX%
         ResourceType: application
-        ResourceName: e2e-test-app1
+        ResourceName: e2e-test-access-app%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
         Test: C
   - Name: Verify group access to Application
     AccessAssignments:
       - EntityType: group
-        EntityName: e2e-test-group1
+        EntityName: e2e-test-access-group%E2E_RUN_SUFFIX%
         ResourceType: application
-        ResourceName: e2e-test-app1
+        ResourceName: e2e-test-access-app%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
         Test: R

@@ -6,5 +6,5 @@ Tenant: your_tenant_here
 Tests:
   - Name: Group Delete
     Groups:
-      - Name: e2e-test-group1
+      - Name: e2e-test-group-group%E2E_RUN_SUFFIX%
         Test: RD
