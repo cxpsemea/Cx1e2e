@@ -6,7 +6,7 @@ ProxyURL: http://127.0.0.1:8080
 Tests:
   - Name: Read project scan results and update some findings
     Results:
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there will be one stored_xss finding
         Filter:
           Query: Stored_XSS
@@ -14,7 +14,7 @@ Tests:
         Test: RU
         Severity: MEDIUM
         Comment: "This Stored XSS is medium, not high"
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 2 # there will be three reflected_xss_all_clients finding
         Filter:
           Query: Reflected_XSS_All_Clients
@@ -22,7 +22,7 @@ Tests:
         Test: RU
         State: CONFIRMED
         Comment: "This Reflected XSS is confirmed"
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 #
         Filter:
           Query: Reflected_XSS_All_Clients
@@ -31,14 +31,14 @@ Tests:
         State: URGENT
         Severity: MEDIUM
         Comment: "This Reflected XSS is urgent, but medium"
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there will be a Parameter_Tampering finding with this result hash
         Filter:
           ResultHash: "VMhOE8yTKUkdReXTf3ZkSjtBKoA="
         Test: RU
         Comment: "This parameter tampering is actually high rish"
         Severity: HIGH
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
         Filter:
           SimilarityID: 2014150247
@@ -47,38 +47,38 @@ Tests:
         State: NOT_EXPLOITABLE
   - Name: Read project scan results to verify the updates worked
     Results:
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # the stored_xss finding should now be medium
         Filter:
           QueryID: 13625251660291496964
           Severity: MEDIUM
         Test: R
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # Only one of the reflected xss findings is "confirmed" now
         Filter:
           Query: Reflected_XSS_All_Clients
           State: CONFIRMED
         Test: R
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 # there should no longer be 3 ref_xss HIGH findings, only two
         Filter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
         Test: R
         FailTest: true
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # this specific reflected xss finding is now medium
         Filter:
           SimilarityID: 1318375675
           Severity: MEDIUM
         Test: R
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # the only parameter tampering finding should now be High
         Filter:
           SimilarityID: -1732526860
           Severity: HIGH
         Test: R
-      - Project: e2e-test-project1
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
         Filter:
           Query: Use_Of_Hardcoded_Password

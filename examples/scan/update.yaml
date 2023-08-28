@@ -6,12 +6,13 @@ Tenant: your_tenant_here
 Tests:
   - Name: Update Project
     Projects:
-      - Name: e2e-test-project1
+      - Name: e2e-test-scan-project%E2E_RUN_SUFFIX%
         Test: RU
         Tags: 
-          - Test: tag2
+          - Key: tag2
+            Value: tag2
     Scans:
-      - Project: e2e-test-project1
+      - Project: e2e-test-scan-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All

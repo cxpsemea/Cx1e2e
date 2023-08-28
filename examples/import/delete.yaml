@@ -6,7 +6,7 @@ Tenant: your_tenant_here
 Tests:
   - Name: Delete imported data
     Presets:
-      - Name: ImportBurgerTest
+      - Name: e2e-test-import-preset
         Test: RD
     Queries:
       - Name: Cheeseburgers
@@ -14,11 +14,11 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: true
-          Project: BurgerImportTest
+          Project: e2e-test-import-project
         Test: RD
     Projects:
-      - Name: BurgerImportTest
+      - Name: e2e-test-import-project
         Test: RD
     Applications:
-      - Name: e2e-ImportTestApp
+      - Name: e2e-test-import-app
         Test: RD

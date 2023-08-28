@@ -11,14 +11,14 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: true
-          Project: e2e-test-burger1
+          Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         Source: "result = Find_Strings().FindByName(\"cheeseburger\");"
         Severity: HIGH
         IsExecutable: true
         Compile: true
         Test: C
     Presets:
-      - Name: e2e-test-burger1
+      - Name: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        
         Queries:
           - Language: JavaScript
@@ -30,21 +30,21 @@ Tests:
         Test: RU
   - Name: run a scan with the new preset
     Scans:
-      - Project: e2e-test-burger1
+      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-test-burger1
+        Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Engine: sast
         WaitForEnd: true
         Test: C
     Results:
-      - Project: e2e-test-burger1
+      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # this finding should exist
         Filter:
           Query: Client_DOM_XSS
           Severity: HIGH
         Test: R
-      - Project: e2e-test-burger1
+      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # this new finding should be reported now
         Filter:
           Query: e2e_test_cheeseburgers
@@ -57,5 +57,5 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: true
-          Project: e2e-test-burger1
+          Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         Test: RD

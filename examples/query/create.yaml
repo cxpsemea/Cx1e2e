@@ -6,16 +6,16 @@ Tenant: your_tenant_here
 Tests:
   - Name: create temporary application, project, new preset, run a scan
     Projects:
-      - Name: e2e-test-burger1
+      - Name: e2e-test-query-project%E2E_RUN_SUFFIX%
         Test: C
     Applications:
-      - Name: e2e-test-burgerapp1
+      - Name: e2e-test-query-app%E2E_RUN_SUFFIX%
         Rules: 
           - Type: "project.name.in"
-            Value: "e2e-test-burger1"
+            Value: "e2e-test-query-project%E2E_RUN_SUFFIX%"
         Test: C
     Presets:
-      - Name: e2e-test-burger1
+      - Name: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        
         Queries:
           - Language: JavaScript
@@ -23,15 +23,15 @@ Tests:
             Name: Client_DOM_XSS
         Test: C
     Scans:
-      - Project: e2e-test-burger1
+      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-test-burger1
+        Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Engine: sast
         WaitForEnd: true
         Test: C
     Results:
-      - Project: e2e-test-burger1
+      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there will be one dom_xss finding
         Filter:
           Query: Client_DOM_XSS

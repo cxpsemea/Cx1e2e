@@ -4,10 +4,12 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: Create Project
-    Projects:
-      - Name: e2e-test-project1
+  - Name: Create App & Project
+    Applications:
+      - Name: e2e-test-project-app%E2E_RUN_SUFFIX%
         Test: C
-        Tags: 
-          - Test: tag1
+    Projects:
+      - Name: e2e-test-project-project%E2E_RUN_SUFFIX%
+        Test: C
+        Application: e2e-test-project-app%E2E_RUN_SUFFIX%
         

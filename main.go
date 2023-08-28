@@ -4,10 +4,12 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -202,7 +204,19 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	currentRoot := filepath.Dir(file.Name())
 
 	defer file.Close()
-	d := yaml.NewDecoder(file)
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		return conf, err
+	}
+
+	re := regexp.MustCompile(`%([0-9a-zA-Z_]+)%`)
+	fileContents := string(fileBytes)
+	for matches := re.FindStringSubmatch(fileContents); len(matches) > 0; matches = re.FindStringSubmatch(fileContents) {
+		fileContents = strings.ReplaceAll(fileContents, fmt.Sprintf("%%%v%%", matches[1]), os.Getenv(matches[1]))
+	}
+
+	d := yaml.NewDecoder(strings.NewReader(fileContents))
 
 	err = d.Decode(&conf)
 	if err != nil {
