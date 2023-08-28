@@ -6,12 +6,12 @@ Tenant: your_tenant_here
 Tests:
   - Name: Create Project
     Projects:
-      - Name: e2e-test-project1
+      - Name: e2e-test-report-project%E2E_RUN_SUFFIX%
         Test: C
         Tags: 
           - Test: tag1
     Scans:
-      - Project: e2e-test-project1
+      - Project: e2e-test-report-project%E2E_RUN_SUFFIX%
         Repository: https://github.com/michaelkubiaczyk/ssba
         Branch: master
         Preset: All

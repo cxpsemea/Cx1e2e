@@ -6,11 +6,11 @@ Tenant: your_tenant_here
 Tests:
   - Name: App, Project, and Group Delete
     Groups:
-      - Name: e2e-test-group1
+      - Name: e2e-test-app-group%E2E_RUN_SUFFIX%
         Test: RD
     Projects:
-      - Name: e2e-test-project1     
+      - Name: e2e-test-app-project%E2E_RUN_SUFFIX%    
         Test: RD
     Applications:
-      - Name: e2e-test-app1
+      - Name: e2e-test-app-app%E2E_RUN_SUFFIX%
         Test: RD

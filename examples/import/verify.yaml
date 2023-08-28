@@ -6,23 +6,23 @@ Tenant: your_tenant_here
 Tests:
   - Name: Check that the imported project exists in the new application
     Applications:
-      - Name: e2e-ImportTestApp
+      - Name: e2e-test-import-app
         Test: R
     Projects:
-      - Name: BurgerImportTest
-        Application: e2e-ImportTestApp
+      - Name: e2e-test-import-project
+        Application: e2e-test-import-app
         Test: R
   - Name: Run scan and check for results
     Scans:
-      - Project: BurgerImportTest
+      - Project: e2e-test-import-project
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: ImportBurgerTest
+        Preset: e2e-test-import-preset
         Engine: sast # sca kics apisec
         WaitForEnd: true
         Test: C
     Results:
-      - Project: BurgerImportTest
+      - Project: e2e-test-import-project
         FindingNumber: 1
         Filter:
           ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="

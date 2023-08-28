@@ -6,6 +6,6 @@ Tenant: your_tenant_here
 Tests:
   - Name: test user create
     Users:
-      - Name: e2e-test-user1
+      - Name: e2e-test-user-user%E2E_RUN_SUFFIX%
         Email: e2e_test_user1@cx.local
         Test: C

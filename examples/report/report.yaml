@@ -6,7 +6,7 @@ ProxyURL: http://127.0.0.1:8080
 Tests:
   - Name: Generate report
     Reports:
-      - Project: e2e-test-project1
+      - Project: e2e-test-report-project%E2E_RUN_SUFFIX%
         Branch: master
         Status: Completed
         Number: 1
