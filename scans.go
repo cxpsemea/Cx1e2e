@@ -101,7 +101,40 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 			expectedResult = t.Status
 		}
 
+		getWorkflow := false
+
+		missingEngines := make([]string, 0)
+
 		if (test_Scan.Status == "Completed" || test_Scan.Status == "Failed" || test_Scan.Status == "Partial") && test_Scan.Status != expectedResult {
+			// the scan was not cancelled but did not have the expected result, so get the details
+			getWorkflow = true
+		} else if test_Scan.Status == "Completed" && expectedResult == "Completed" {
+			// expected the scan to complete, so make sure that all of the requested engines had this status.
+			for _, eng := range engines {
+				matched := false
+				for _, status := range test_Scan.StatusDetails {
+					if strings.EqualFold(status.Name, eng) {
+						matched = true
+						if status.Status != expectedResult {
+							// user asked for this engine to ran and it ran, but the result was unexpected
+							getWorkflow = true
+						}
+					}
+				}
+				if !matched {
+					// user asked for this engine to run, but it did not. the workflow won't say anything about that.
+					missingEngines = append(missingEngines, eng)
+				}
+			}
+		}
+
+		if len(missingEngines) > 0 {
+			err := fmt.Errorf("scan finished with expected status %v however the following requested scan engines did not run: %v", test_Scan.Status, strings.Join(missingEngines, ", "))
+			logger.Infof("Engines didn't return a status: %s", err)
+			return err
+		}
+
+		if getWorkflow {
 			workflow, err := cx1client.GetScanWorkflowByID(test_Scan.ScanID)
 			if err != nil {
 				logger.Errorf("Failed to get workflow update for scan %v: %s", test_Scan.ScanID, err)

@@ -1,0 +1,18 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Run a scan that will fail because the engine didn't run
+    # this test should trigger a scan using an engine that is not allowed per the license
+    # since that is complicated, instead we simulate the same behavior by using the "system" engine which is allowed but doesn't return a status.
+    Scans:
+      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+        ZipFile: ../files/SSBAv0.1.zip
+        Branch: zip
+        Preset: All
+        Engine: system # somehow system is an option but doesn't do anything, this may not last forever.
+        WaitForEnd: true
+        FailTest: true
+        Test: C
