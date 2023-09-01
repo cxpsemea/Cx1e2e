@@ -577,9 +577,9 @@ func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, 
 func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
-		logger.Errorf("FAIL [%.3fs]: %v %v FailTest '%v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed but was expected to fail")
+		logger.Errorf("FAIL [%.3fs]: %v %v Negative Test '%v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed unexpectedly")
 		TestResults = append(TestResults, TestResult{
-			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed but was expected to fail", testSource,
+			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed unexpectedly", testSource,
 		})
 	} else {
 		logger.Infof("PASS [%.3fs]: %v %v Test '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
@@ -598,7 +598,7 @@ func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, s
 func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason error) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
-		logger.Infof("PASS [%.3fs]: %v %v FailTest '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
+		logger.Infof("PASS [%.3fs]: %v %v Negative Test '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
 			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
 		})

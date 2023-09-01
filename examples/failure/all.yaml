@@ -1,0 +1,19 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Create test project
+    File: create.yaml
+  - Name: General failure
+    File: general.yaml
+  - Name: Non-existent engine failure
+    File: noengine.yaml
+  - Name: SAST failure
+    File: sast.yaml
+  - Name: Verify
+    File: verify.yaml
+  - Name: Delete test project
+    File: delete.yaml
+# TODO: add other engine-specific failures. If you have suggestions, please let me know via github issue
