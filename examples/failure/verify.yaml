@@ -1,0 +1,13 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Check that the project has 3 failed scans
+    Scans:
+      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+        Test: R
+        Filter:
+          Index: 3 # there should be three failed scans
+          Statuses: [ "Failed" ]

@@ -23,7 +23,7 @@ Tests:
         Preset: All
         Engine: sast
         WaitForEnd: true
-        FailTest: true
+        Status: Failed # it won't be failed though
         Test: C
   - Name: delete project query override
     Queries:

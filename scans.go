@@ -182,16 +182,42 @@ func ScanTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testn
 	if err != nil {
 		return err
 	}
-	scans, err := cx1client.GetLastScansByID(project.ProjectID, 1)
-	if err != nil {
-		return err
-	}
 
-	if len(scans) == 0 {
-		return fmt.Errorf("no scan found")
-	}
+	var scans []Cx1ClientGo.Scan
 
-	t.Scan = &scans[0]
+	if t.Filter != nil {
+		fmt.Println("filter is: ", t.Filter)
+		if t.Filter.Index == 0 {
+			t.Filter.Index = 1 //
+		}
+		t.Cx1ScanFilter = &(Cx1ClientGo.ScanFilter{
+			Offset:   0,
+			Limit:    t.Filter.Index,
+			Statuses: t.Filter.Statuses,
+			Branches: t.Filter.Branches,
+		})
+
+		scans, err = cx1client.GetLastScansByIDFiltered(project.ProjectID, *t.Cx1ScanFilter)
+		if err != nil {
+			return err
+		}
+
+		if len(scans) != t.Filter.Index {
+			return fmt.Errorf("requested %d scans matching filter %v but only received %d", t.Filter.Index, t.Filter.String(), len(scans))
+		}
+
+		t.Scan = &scans[len(scans)]
+	} else {
+		scans, err = cx1client.GetLastScansByID(project.ProjectID, 1)
+		if err != nil {
+			return err
+		}
+		if len(scans) == 0 {
+			return fmt.Errorf("no scan found")
+		}
+
+		t.Scan = &scans[0]
+	}
 	return nil
 }
 

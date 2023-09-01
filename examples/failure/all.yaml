@@ -12,6 +12,8 @@ Tests:
     File: noengine.yaml
   - Name: SAST failure
     File: sast.yaml
+  - Name: Verify
+    File: verify.yaml
   - Name: Delete test project
     File: delete.yaml
 # TODO: add other engine-specific failures. If you have suggestions, please let me know via github issue
