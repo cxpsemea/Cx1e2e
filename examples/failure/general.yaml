@@ -4,21 +4,15 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: Create Project
-    Projects:
-      - Name: e2e-test-scan-project%E2E_RUN_SUFFIX%
-        Test: C
-        Tags: 
-          - Key: tag1key
-            Value: tag1value
+  - Name: Run a scan that will fail on the General step (bad branch)
     Scans:
-      - Project: e2e-test-scan-project%E2E_RUN_SUFFIX%
+      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
         Repository: https://github.com/michaelkubiaczyk/ssba
-        Branch: master
+        Branch: cecinestpasunebranche
         Preset: All
         Engine: sast #SAST only
         #Engine: sast sca kics apisec #throw everything at it
         WaitForEnd: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
-        Status: Completed #Failed, Partial
+        Status: Failed # the branch does not exist so this scan should fail
         Test: C

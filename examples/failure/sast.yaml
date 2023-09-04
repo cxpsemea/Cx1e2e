@@ -1,0 +1,36 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Create a query override that will fail
+    Queries:   
+      - Name: Stored_XSS
+        Group: Java_High_Risk
+        Language: Java
+        Scope: 
+          Tenant: false
+          Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+        Source: "result = hello this is not valid code ;)"
+        Compile: false
+        Test: C
+  - Name: Run a SAST scan that will fail
+    Scans:
+      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+        ZipFile: ../files/SSBAv0.1.zip
+        Branch: zip
+        Preset: All
+        Engine: sast
+        WaitForEnd: true
+        Status: Failed # it won't be failed though
+        Test: C
+  - Name: delete project query override
+    Queries:
+      - Name: Stored_XSS
+        Group: Java_High_Risk
+        Language: Java
+        Scope: 
+          Tenant: false
+          Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+        Test: RD

@@ -135,21 +135,6 @@ func (o ImportCRUD) String() string {
 	return o.Name
 }
 
-type ProjectCRUD struct {
-	Name        string   `yaml:"Name"`
-	Test        string   `yaml:"Test"`
-	Groups      []string `yaml:"Groups"`
-	Application string   `yaml:"Application"`
-	Tags        []Tag    `yaml:"Tags"`
-	FailTest    bool     `yaml:"FailTest"`
-	TestSource  string
-	Project     *Cx1ClientGo.Project
-}
-
-func (o ProjectCRUD) String() string {
-	return o.Name
-}
-
 type PresetCRUD struct {
 	Name        string `yaml:"Name"`
 	Description string `yaml:"Description"`
@@ -166,6 +151,21 @@ type PresetCRUD struct {
 }
 
 func (o PresetCRUD) String() string {
+	return o.Name
+}
+
+type ProjectCRUD struct {
+	Name        string   `yaml:"Name"`
+	Test        string   `yaml:"Test"`
+	Groups      []string `yaml:"Groups"`
+	Application string   `yaml:"Application"`
+	Tags        []Tag    `yaml:"Tags"`
+	FailTest    bool     `yaml:"FailTest"`
+	TestSource  string
+	Project     *Cx1ClientGo.Project
+}
+
+func (o ProjectCRUD) String() string {
 	return o.Name
 }
 
@@ -294,20 +294,22 @@ func (o RoleCRUD) String() string {
 }
 
 type ScanCRUD struct {
-	Test        string `yaml:"Test"`
-	Project     string `yaml:"Project"`
-	Branch      string `yaml:"Branch"`
-	Repository  string `yaml:"Repository"`
-	Engine      string `yaml:"Engine"`
-	Incremental bool   `yaml:"Incremental"`
-	WaitForEnd  bool   `yaml:"WaitForEnd"`
-	ZipFile     string `yaml:"ZipFile"`
-	Preset      string `yaml:"Preset"`
-	Status      string `yaml:"Status"`
-	Timeout     int    `yaml:"Timeout"`
-	FailTest    bool   `yaml:"FailTest"`
-	TestSource  string
-	Scan        *Cx1ClientGo.Scan
+	Test          string      `yaml:"Test"`
+	Project       string      `yaml:"Project"`
+	Branch        string      `yaml:"Branch"`
+	Repository    string      `yaml:"Repository"`
+	Engine        string      `yaml:"Engine"`
+	Incremental   bool        `yaml:"Incremental"`
+	WaitForEnd    bool        `yaml:"WaitForEnd"`
+	ZipFile       string      `yaml:"ZipFile"`
+	Preset        string      `yaml:"Preset"`
+	Status        string      `yaml:"Status"`
+	Timeout       int         `yaml:"Timeout"`
+	FailTest      bool        `yaml:"FailTest"`
+	Filter        *ScanFilter `yaml:"Filter"`
+	Cx1ScanFilter *Cx1ClientGo.ScanFilter
+	TestSource    string
+	Scan          *Cx1ClientGo.Scan
 }
 
 func (o ScanCRUD) String() string {
@@ -316,6 +318,27 @@ func (o ScanCRUD) String() string {
 	} else {
 		return fmt.Sprintf("%v: zip %v, branch %v", o.Project, o.ZipFile, o.Branch)
 	}
+}
+
+type ScanFilter struct {
+	Index    int      `yaml:"Index"` // which scan are we looking for
+	Statuses []string `yaml:"Statuses"`
+	Branches []string `yaml:"Branches"`
+}
+
+func (f ScanFilter) String() string {
+	var str string
+	if len(f.Statuses) > 0 {
+		str = "with status " + strings.Join(f.Statuses, " or ")
+	}
+	if len(f.Branches) > 0 {
+		if str == "" {
+			str = "for branch " + strings.Join(f.Branches, " or ")
+		} else {
+			str += ", for branch " + strings.Join(f.Branches, " or ")
+		}
+	}
+	return str
 }
 
 type UserCRUD struct {
