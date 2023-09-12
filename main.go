@@ -160,15 +160,19 @@ func run() float32 {
 	count_skipped := 0
 
 	for _, result := range TestResults {
+		var testtype = "Test"
+		if result.FailTest {
+			testtype = "Negative-Test"
+		}
 		switch result.Result {
 		case 1:
-			fmt.Printf("PASS %v - %v %v: %v\n", result.Name, result.CRUD, result.Module, result.TestObject)
+			fmt.Printf("PASS %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
 			count_passed++
 		case 0:
-			fmt.Printf("FAIL %v - %v %v: %v\n", result.Name, result.CRUD, result.Module, result.TestObject)
+			fmt.Printf("FAIL %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
 			count_failed++
 		case 2:
-			fmt.Printf("SKIP %v - %v %v: %v\n", result.Name, result.CRUD, result.Module, result.TestObject)
+			fmt.Printf("SKIP %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
 			count_skipped++
 		}
 	}
