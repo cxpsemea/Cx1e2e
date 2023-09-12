@@ -148,25 +148,25 @@ func QueryTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	t.Query = getQuery(cx1client, logger, t)
 
 	if t.Query != nil {
-		logger.Infof("Found query: %v", t.Query.String())
+		logger.Debugf("Found query: %v", t.Query.String())
 
 		if t.Scope.Corp {
-			logger.Info("Will create corp override")
+			//logger.Info("Will create corp override")
 			newq := t.Query.CreateTenantOverride()
 			t.Query = &newq
 		} else {
 			if t.Scope.Application != "" {
-				logger.Infof("Will create application override on %v", t.Scope.Application)
+				logger.Debugf("Will create application override on %v", t.Scope.Application)
 				newq := t.Query.CreateApplicationOverrideByID(t.ScopeID)
 				t.Query = &newq
 			} else {
-				logger.Infof("Will create project override on %v", t.Scope.Project)
+				logger.Debugf("Will create project override on %v", t.Scope.Project)
 				newq := t.Query.CreateProjectOverrideByID(t.ScopeID)
 				t.Query = &newq
 			}
 		}
 
-		logger.Infof("Updating query %v", t.Query.String())
+		logger.Debugf("Updating query %v", t.Query.String())
 		return updateQuery(cx1client, t)
 	} else {
 		// query does not exist at all so needs to be created on corp level
