@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -9,6 +9,10 @@ import (
 )
 
 func (t *ImportCRUD) Validate(CRUD string) error {
+	if CRUD != OP_CREATE {
+		return fmt.Errorf("test type is not supported")
+	}
+
 	if t.Name == "" {
 		return fmt.Errorf("import name is missing")
 	}
@@ -19,6 +23,11 @@ func (t *ImportCRUD) Validate(CRUD string) error {
 
 	return nil
 }
+
+func (t *ImportCRUD) IsSupported(CRUD string) bool {
+	return CRUD == OP_CREATE
+}
+
 func (t *ImportCRUD) GetModule() string {
 	return MOD_IMPORT
 }

@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -8,7 +8,11 @@ import (
 )
 
 func (t *CxQLCRUD) Validate(CRUD string) error {
-	if t.QueryLanguage != "" && t.QueryGroup != "" && t.QueryName != "" {
+	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Query == nil {
+		return fmt.Errorf("must read before updating or deleting")
+	}
+
+	if t.QueryLanguage == "" || t.QueryGroup == "" || t.QueryName == "" {
 		return fmt.Errorf("query language, group, or name is missing")
 	}
 
@@ -18,6 +22,11 @@ func (t *CxQLCRUD) Validate(CRUD string) error {
 
 	return nil
 }
+
+func (t *CxQLCRUD) IsSupported(CRUD string) bool {
+	return true
+}
+
 func (t *CxQLCRUD) GetModule() string {
 	return MOD_QUERY
 }

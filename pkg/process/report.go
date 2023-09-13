@@ -1,9 +1,11 @@
-package main
+package process
 
 import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/cxpsemea/cx1e2e/pkg/types"
 )
 
 func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
@@ -18,44 +20,44 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 	for _, r := range *tests {
 		var set *CounterSet
 		switch r.Module {
-		case MOD_ACCESS:
+		case types.MOD_ACCESS:
 			set = &Access
-		case MOD_APPLICATION:
+		case types.MOD_APPLICATION:
 			set = &Application
-		case MOD_FLAG:
+		case types.MOD_FLAG:
 			set = &Flag
-		case MOD_GROUP:
+		case types.MOD_GROUP:
 			set = &Group
-		case MOD_IMPORT:
+		case types.MOD_IMPORT:
 			set = &Import
-		case MOD_PRESET:
+		case types.MOD_PRESET:
 			set = &Preset
-		case MOD_PROJECT:
+		case types.MOD_PROJECT:
 			set = &Project
-		case MOD_QUERY:
+		case types.MOD_QUERY:
 			set = &Query
-		case MOD_RESULT:
+		case types.MOD_RESULT:
 			set = &Result
-		case MOD_REPORT:
+		case types.MOD_REPORT:
 			set = &Report
-		case MOD_ROLE:
+		case types.MOD_ROLE:
 			set = &Role
-		case MOD_SCAN:
+		case types.MOD_SCAN:
 			set = &Scan
-		case MOD_USER:
+		case types.MOD_USER:
 			set = &User
 		}
 
 		var count *Counter
 
 		switch r.CRUD {
-		case OP_CREATE:
+		case types.OP_CREATE:
 			count = &(set.Create)
-		case OP_READ:
+		case types.OP_READ:
 			count = &(set.Read)
-		case OP_UPDATE:
+		case types.OP_UPDATE:
 			count = &(set.Update)
-		case OP_DELETE:
+		case types.OP_DELETE:
 			count = &(set.Delete)
 		}
 

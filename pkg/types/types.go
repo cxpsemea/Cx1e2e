@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -7,10 +7,27 @@ import (
 	"github.com/cxpsemea/Cx1ClientGo"
 )
 
+const (
+	MOD_ACCESS      = "AccessAssignment"
+	MOD_APPLICATION = "Application"
+	MOD_FLAG        = "Flag"
+	MOD_GROUP       = "Group"
+	MOD_IMPORT      = "Import"
+	MOD_PRESET      = "Preset"
+	MOD_PROJECT     = "Project"
+	MOD_QUERY       = "Query"
+	MOD_REPORT      = "Report"
+	MOD_RESULT      = "Result"
+	MOD_ROLE        = "Role"
+	MOD_SCAN        = "Scan"
+	MOD_USER        = "User"
+)
+
 type CRUDTest struct {
-	Test       string `yaml:"Test"` // CRUD [create, read, update, delete]
-	FailTest   bool   `yaml:"FailTest"`
-	TestSource string // filename
+	Test       string   `yaml:"Test"`         // CRUD [create, read, update, delete]
+	FailTest   bool     `yaml:"FailTest"`     // is it a negative test
+	Flags      []string `yaml:"FeatureFlags"` // are there specific feature flags needed for this test
+	TestSource string   // filename
 }
 
 type AccessAssignmentCRUD struct {
@@ -334,7 +351,10 @@ type UserCRUD struct {
 }
 
 func (o UserCRUD) String() string {
-	return fmt.Sprintf("%v (%v)", o.Name, o.Email)
+	if o.Email != "" {
+		return fmt.Sprintf("%v (%v)", o.Name, o.Email)
+	}
+	return fmt.Sprintf("%v", o.Name)
 }
 
 type Tag struct {

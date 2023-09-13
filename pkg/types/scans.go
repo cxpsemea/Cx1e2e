@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -10,15 +10,27 @@ import (
 )
 
 func (t *ScanCRUD) Validate(CRUD string) error {
+	if CRUD == OP_UPDATE {
+		return fmt.Errorf("test type is not supported")
+	}
+	if CRUD == OP_DELETE && t.Scan == nil {
+		return fmt.Errorf("must read before deleting")
+	}
+
 	if t.Project == "" {
 		return fmt.Errorf("project name is missing")
 	}
-	if (t.Repository == "" || t.Branch == "") && t.ZipFile == "" {
+	if CRUD == OP_CREATE && ((t.Repository == "" && t.Branch == "") && t.ZipFile == "") {
 		return fmt.Errorf("project repository and branch or zip file is missing")
 	}
 
 	return nil
 }
+
+func (t *ScanCRUD) IsSupported(CRUD string) bool {
+	return !(CRUD == OP_UPDATE)
+}
+
 func (t *ScanCRUD) GetModule() string {
 	return MOD_SCAN
 }
@@ -119,17 +131,17 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 			workflow, err := cx1client.GetScanWorkflowByID(test_Scan.ScanID)
 			if err != nil {
 				logger.Errorf("Failed to get workflow update for scan %v: %s", test_Scan.ScanID, err)
-				return fmt.Errorf("scan finished with status: %v", test_Scan.Status)
+				return fmt.Errorf("scan finished with status '%v' but %v was expected", test_Scan.Status, expectedResult)
 			} else {
 				if len(workflow) == 0 {
-					return fmt.Errorf("scan finished with status: %v - there was no workflow log available for additional details", test_Scan.Status)
+					return fmt.Errorf("scan finished with status '%v' but %v was expected, there was no workflow log available for additional details", test_Scan.Status, expectedResult)
 				} else {
 					workflow_index := len(workflow) - 2
 					if workflow_index <= 0 {
 						workflow_index = 0
 					}
 
-					return fmt.Errorf("scan finished with status: %v - %v", test_Scan.Status, workflow[workflow_index].Info)
+					return fmt.Errorf("scan finished with status '%v - %v' but %v was expected", test_Scan.Status, workflow[workflow_index].Info, expectedResult)
 				}
 			}
 		}

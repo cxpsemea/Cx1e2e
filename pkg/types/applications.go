@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -8,12 +8,20 @@ import (
 )
 
 func (t *ApplicationCRUD) Validate(CRUD string) error {
+	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Application == nil {
+		return fmt.Errorf("must read before updating or deleting")
+	}
 	if t.Name == "" {
 		return fmt.Errorf("application name is missing")
 	}
 
 	return nil
 }
+
+func (t *ApplicationCRUD) IsSupported(CRUD string) bool {
+	return true
+}
+
 func (t *ApplicationCRUD) GetModule() string {
 	return MOD_APPLICATION
 }

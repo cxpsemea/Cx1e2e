@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -10,6 +10,10 @@ import (
 )
 
 func (t *ResultCRUD) Validate(CRUD string) error {
+	if CRUD != OP_READ && CRUD != OP_UPDATE {
+		return fmt.Errorf("test type is not supported")
+	}
+
 	if t.ProjectName == "" {
 		return fmt.Errorf("project name is missing")
 	}
@@ -19,6 +23,11 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 
 	return nil
 }
+
+func (t *ResultCRUD) IsSupported(CRUD string) bool {
+	return CRUD == OP_UPDATE || CRUD == OP_READ
+}
+
 func (t *ResultCRUD) GetModule() string {
 	return MOD_RESULT
 }

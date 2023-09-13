@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -13,6 +13,10 @@ func CheckAMFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
 		return false
 	}
 	return flag
+}
+
+func (t *AccessAssignmentCRUD) IsSupported(CRUD string) bool {
+	return true
 }
 
 func (t *AccessAssignmentCRUD) Validate(CRUD string) error {

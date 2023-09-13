@@ -8,6 +8,7 @@ Tests:
     AccessAssignments:
       - EntityType: user
         EntityName: e2e-test-access-user%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         ResourceType: project
         ResourceName: e2e-test-access-project%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
@@ -15,6 +16,7 @@ Tests:
     Users:
       - Name: e2e-test-access-user%E2E_RUN_SUFFIX%
         Groups: [ e2e-test-access-group%E2E_RUN_SUFFIX% ]
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: RU
   - Name: Give group access to Application
     AccessAssignments:
@@ -23,6 +25,7 @@ Tests:
         ResourceType: application
         ResourceName: e2e-test-access-app%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: C
   - Name: Verify group access to Application
     AccessAssignments:
@@ -31,4 +34,5 @@ Tests:
         ResourceType: application
         ResourceName: e2e-test-access-app%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: R

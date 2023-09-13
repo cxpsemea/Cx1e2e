@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -8,15 +8,24 @@ import (
 )
 
 func (t *UserCRUD) Validate(CRUD string) error {
+	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.User == nil {
+		return fmt.Errorf("must read before updating or deleting")
+	}
+
 	if t.Name == "" {
 		return fmt.Errorf("user name is missing")
 	}
-	if t.Email == "" {
+	if CRUD == OP_CREATE && t.Email == "" {
 		return fmt.Errorf("user email is missing")
 	}
 
 	return nil
 }
+
+func (t *UserCRUD) IsSupported(CRUD string) bool {
+	return true
+}
+
 func (t *UserCRUD) GetModule() string {
 	return MOD_USER
 }

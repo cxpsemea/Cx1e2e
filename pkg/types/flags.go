@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"fmt"
@@ -14,6 +14,11 @@ func (t *FlagCRUD) Validate(CRUD string) error {
 
 	return nil
 }
+
+func (t *FlagCRUD) IsSupported(CRUD string) bool {
+	return CRUD == OP_READ
+}
+
 func (t *FlagCRUD) GetModule() string {
 	return MOD_FLAG
 }
