@@ -160,15 +160,19 @@ func run() float32 {
 	count_skipped := 0
 
 	for _, result := range TestResults {
+		var testtype = "Test"
+		if result.FailTest {
+			testtype = "Negative-Test"
+		}
 		switch result.Result {
 		case 1:
-			fmt.Printf("PASS %v - %v %v: %v\n", result.Name, result.CRUD, result.Module, result.TestObject)
+			fmt.Printf("PASS %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
 			count_passed++
 		case 0:
-			fmt.Printf("FAIL %v - %v %v: %v\n", result.Name, result.CRUD, result.Module, result.TestObject)
+			fmt.Printf("FAIL %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
 			count_failed++
 		case 2:
-			fmt.Printf("SKIP %v - %v %v: %v\n", result.Name, result.CRUD, result.Module, result.TestObject)
+			fmt.Printf("SKIP %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
 			count_skipped++
 		}
 	}
@@ -430,7 +434,11 @@ func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
 		} else if t.Result == TST_SKIP {
 			result = fmt.Sprintf("<span style='color:red'>SKIP: %v</span>", t.Reason)
 		}
-		report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v %v: %v</td><td>%.2f</td><td>%v</td></tr>\n", t.Name, t.TestSource, t.CRUD, t.Module, t.TestObject, t.Duration, result))
+		testtype := "Test"
+		if t.FailTest {
+			testtype = "Negative-Test"
+		}
+		report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v %v %v: %v</td><td>%.2f</td><td>%v</td></tr>\n", t.Name, t.TestSource, t.CRUD, t.Module, testtype, t.TestObject, t.Duration, result))
 	}
 
 	report.WriteString("</table>\n")
@@ -571,13 +579,17 @@ func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testnam
 
 func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	logger.Infof("")
-	logger.Infof("Starting %v %v Test '%v' #%d - %v", CRUD, Module, testName, testId, testObject)
+	if failTest {
+		logger.Infof("Starting %v %v Negative-Test '%v' #%d - %v", CRUD, Module, testName, testId, testObject)
+	} else {
+		logger.Infof("Starting %v %v Test '%v' #%d - %v", CRUD, Module, testName, testId, testObject)
+	}
 }
 
 func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
-		logger.Errorf("FAIL [%.3fs]: %v %v Negative Test '%v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed unexpectedly")
+		logger.Errorf("FAIL [%.3fs]: %v %v Negative-Test '%v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed unexpectedly")
 		TestResults = append(TestResults, TestResult{
 			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed unexpectedly", testSource,
 		})
@@ -590,7 +602,11 @@ func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, s
 }
 func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason string) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
-	logger.Warnf("SKIP [%.3fs]: %v %v Test '%v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
+	if failTest {
+		logger.Warnf("SKIP [%.3fs]: %v %v Negative-Test '%v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
+	} else {
+		logger.Warnf("SKIP [%.3fs]: %v %v Test '%v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
+	}
 	TestResults = append(TestResults, TestResult{
 		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, reason, testSource,
 	})
@@ -598,7 +614,7 @@ func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, s
 func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason error) {
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if failTest {
-		logger.Infof("PASS [%.3fs]: %v %v Negative Test '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
+		logger.Infof("PASS [%.3fs]: %v %v Negative-Test '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
 		TestResults = append(TestResults, TestResult{
 			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
 		})
