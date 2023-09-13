@@ -63,7 +63,7 @@ func main() {
 
 func run() float32 {
 	logger := logrus.New()
-	logger.SetLevel(logrus.TraceLevel)
+	logger.SetLevel(logrus.InfoLevel)
 	myformatter := &easy.Formatter{}
 	myformatter.TimestampFormat = "2006-01-02 15:04:05.000"
 	myformatter.LogFormat = "[%lvl%][%time%] %msg%\n"
@@ -92,7 +92,7 @@ func run() float32 {
 		return 0
 	}
 
-	/*switch strings.ToUpper(Config.LogLevel) {
+	switch strings.ToUpper(Config.LogLevel) {
 	case "":
 		logger.SetLevel(logrus.InfoLevel)
 	case "TRACE":
@@ -107,7 +107,7 @@ func run() float32 {
 		logger.SetLevel(logrus.ErrorLevel)
 	case "FATAL":
 		logger.SetLevel(logrus.FatalLevel)
-	}*/
+	}
 
 	var cx1client *Cx1ClientGo.Cx1Client
 	httpClient := &http.Client{}
