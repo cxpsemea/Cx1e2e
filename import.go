@@ -3,33 +3,27 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
-func ImportTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) {
-	for id := range *Imports {
-		t := &(*Imports)[id]
-		if IsCreate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Name == "" || t.ZipFile == "" || t.EncryptionKey == "" {
-				LogSkip(t.FailTest, logger, OP_CREATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name, zipfile, or encryption key)")
-			} else {
-				LogStart(t.FailTest, logger, OP_CREATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource)
-				err := ImportTestCreate(cx1client, logger, testname, &(*Imports)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_CREATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_CREATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
+func (t *ImportCRUD) Validate(CRUD string) error {
+	if t.Name == "" {
+		return fmt.Errorf("import name is missing")
 	}
+
+	if t.ZipFile == "" || t.EncryptionKey == "" {
+		return fmt.Errorf("missing zipfile or encryption key")
+	}
+
+	return nil
+}
+func (t *ImportCRUD) GetModule() string {
+	return MOD_IMPORT
 }
 
-func ImportTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ImportCRUD) error {
+func (t *ImportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	fileContents, err := os.ReadFile(t.ZipFile)
 	if err != nil {
 		return fmt.Errorf("failed to read %v: %s", t.ZipFile, err)
@@ -60,32 +54,14 @@ func ImportTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return nil
 }
 
-func ImportTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) {
-	for id := range *Imports {
-		t := &(*Imports)[id]
-		if IsRead(t.Test) {
-			start := time.Now().UnixNano()
-			LogSkip(t.FailTest, logger, OP_READ, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
-		}
-	}
+func (t *ImportCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+	return fmt.Errorf("not supported")
 }
 
-func ImportTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) {
-	for id := range *Imports {
-		t := &(*Imports)[id]
-		if IsUpdate(t.Test) {
-			start := time.Now().UnixNano()
-			LogSkip(t.FailTest, logger, OP_UPDATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
-		}
-	}
+func (t *ImportCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+	return fmt.Errorf("not supported")
 }
 
-func ImportTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, Imports *[]ImportCRUD) {
-	for id := range *Imports {
-		t := &(*Imports)[id]
-		if IsDelete(t.Test) {
-			start := time.Now().UnixNano()
-			LogSkip(t.FailTest, logger, OP_UPDATE, MOD_IMPORT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
-		}
-	}
+func (t *ImportCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+	return fmt.Errorf("not supported")
 }

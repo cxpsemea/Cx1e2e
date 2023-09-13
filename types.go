@@ -7,15 +7,19 @@ import (
 	"github.com/cxpsemea/Cx1ClientGo"
 )
 
+type CRUDTest struct {
+	Test       string `yaml:"Test"` // CRUD [create, read, update, delete]
+	FailTest   bool   `yaml:"FailTest"`
+	TestSource string // filename
+}
+
 type AccessAssignmentCRUD struct {
-	Test         string   `yaml:"Test"`
+	CRUDTest     `yaml:",inline"`
 	EntityType   string   `yaml:"EntityType"`
 	EntityName   string   `yaml:"EntityName"`
 	ResourceType string   `yaml:"ResourceType"`
 	ResourceName string   `yaml:"ResourceName"`
 	Roles        []string `yaml:"Roles"`
-	FailTest     bool     `yaml:"FailTest"`
-	TestSource   string
 }
 
 func (o AccessAssignmentCRUD) String() string {
@@ -23,14 +27,12 @@ func (o AccessAssignmentCRUD) String() string {
 }
 
 type ApplicationCRUD struct {
+	CRUDTest    `yaml:",inline"`
 	Name        string            `yaml:"Name"`
-	Test        string            `yaml:"Test"`
 	Groups      []string          `yaml:"Groups"`
 	Criticality uint              `yaml:"Criticality"`
 	Rules       []ApplicationRule `yaml:"Rules"`
 	Tags        []Tag             `yaml:"Tags"`
-	FailTest    bool              `yaml:"FailTest"`
-	TestSource  string
 	Application *Cx1ClientGo.Application
 }
 
@@ -48,18 +50,16 @@ func (o ApplicationRule) String() string {
 }
 
 type CxQLCRUD struct {
+	CRUDTest `yaml:",inline"`
 	//QueryID       uint64 `yaml:"ID"`
 	QueryLanguage string    `yaml:"Language"`
 	QueryGroup    string    `yaml:"Group"`
 	QueryName     string    `yaml:"Name"`
-	Test          string    `yaml:"Test"`
 	Source        string    `yaml:"Source"`
 	Scope         CxQLScope `yaml:"Scope"`
 	Severity      string    `yaml:"Severity"`
 	IsExecutable  bool      `yaml:"IsExecutable"`
-	FailTest      bool      `yaml:"FailTest"`
 	Compile       bool      `yaml:"Compile"`
-	TestSource    string
 	ScopeID       string
 	Query         *Cx1ClientGo.AuditQuery
 	LastScan      *Cx1ClientGo.Scan
@@ -92,11 +92,9 @@ type CxQLScope struct {
 }
 
 type FlagCRUD struct {
-	Name       string `yaml:"Name"`
-	Test       string `yaml:"Test"`
-	Parent     string `yaml:"Parent"`
-	FailTest   bool   `yaml:"FailTest"`
-	TestSource string
+	CRUDTest `yaml:",inline"`
+	Name     string `yaml:"Name"`
+	Parent   string `yaml:"Parent"`
 }
 
 func (o FlagCRUD) String() string {
@@ -104,16 +102,14 @@ func (o FlagCRUD) String() string {
 }
 
 type GroupCRUD struct {
+	CRUDTest    `yaml:",inline"`
 	Name        string `yaml:"Name"`
-	Test        string `yaml:"Test"`
 	Parent      string `yaml:"Parent"`
 	ClientRoles []struct {
 		Client string   `yaml:"Client"`
 		Roles  []string `yaml:"Roles"`
 	} `yaml:"ClientRoles"`
-	FailTest   bool `yaml:"FailTest"`
-	TestSource string
-	Group      *Cx1ClientGo.Group
+	Group *Cx1ClientGo.Group
 }
 
 func (o GroupCRUD) String() string {
@@ -121,14 +117,12 @@ func (o GroupCRUD) String() string {
 }
 
 type ImportCRUD struct {
+	CRUDTest       `yaml:",inline"`
 	Name           string `yaml:"Name"`
 	ZipFile        string `yaml:"ZipFile"`
 	EncryptionKey  string `yaml:"EncryptionKey"`
 	ProjectMapFile string `yaml:"ProjectMapFile"`
-	Test           string `yaml:"Test"`
 	Parent         string `yaml:"Parent"`
-	FailTest       bool   `yaml:"FailTest"`
-	TestSource     string
 }
 
 func (o ImportCRUD) String() string {
@@ -136,18 +130,16 @@ func (o ImportCRUD) String() string {
 }
 
 type PresetCRUD struct {
+	CRUDTest    `yaml:",inline"`
 	Name        string `yaml:"Name"`
 	Description string `yaml:"Description"`
-	Test        string `yaml:"Test"`
 	Queries     []struct {
 		QueryID       uint64 `yaml:"ID"`
 		QueryLanguage string `yaml:"Language"`
 		QueryGroup    string `yaml:"Group"`
 		QueryName     string `yaml:"Name"`
 	} `yaml:"Queries"`
-	FailTest   bool `yaml:"FailTest"`
-	TestSource string
-	Preset     *Cx1ClientGo.Preset
+	Preset *Cx1ClientGo.Preset
 }
 
 func (o PresetCRUD) String() string {
@@ -155,13 +147,11 @@ func (o PresetCRUD) String() string {
 }
 
 type ProjectCRUD struct {
+	CRUDTest    `yaml:",inline"`
 	Name        string   `yaml:"Name"`
-	Test        string   `yaml:"Test"`
 	Groups      []string `yaml:"Groups"`
 	Application string   `yaml:"Application"`
 	Tags        []Tag    `yaml:"Tags"`
-	FailTest    bool     `yaml:"FailTest"`
-	TestSource  string
 	Project     *Cx1ClientGo.Project
 }
 
@@ -170,13 +160,11 @@ func (o ProjectCRUD) String() string {
 }
 
 type QueryCRUD struct {
+	CRUDTest      `yaml:",inline"`
 	QueryID       uint64 `yaml:"ID"`
 	QueryLanguage string `yaml:"Language"`
 	QueryGroup    string `yaml:"Group"`
 	QueryName     string `yaml:"Name"`
-	Test          string `yaml:"Test"`
-	FailTest      bool   `yaml:"FailTest"`
-	TestSource    string
 	Query         *Cx1ClientGo.Query
 }
 
@@ -189,14 +177,12 @@ func (o QueryCRUD) String() string {
 }
 
 type ReportCRUD struct {
+	CRUDTest    `yaml:",inline"`
 	ProjectName string `yaml:"Project"`
 	Number      uint   `yaml:"Number"`
 	Status      string `yaml:"ScanStatus"`
 	Branch      string `yaml:"Branch"`
 	Format      string `yaml:"Format"`
-	Test        string `yaml:"Test"`
-	FailTest    bool   `yaml:"FailTest"`
-	TestSource  string
 	Scan        *Cx1ClientGo.Scan
 }
 
@@ -218,14 +204,12 @@ func (o ReportCRUD) String() string {
 }
 
 type ResultCRUD struct {
-	ProjectName string `yaml:"Project"`
-	Number      uint64 `yaml:"FindingNumber"`
-	State       string `yaml:"State"`
-	Severity    string `yaml:"Severity"`
-	Comment     string `yaml:"Comment"`
-	Test        string `yaml:"Test"`
-	FailTest    bool   `yaml:"FailTest"`
-	TestSource  string
+	CRUDTest    `yaml:",inline"`
+	ProjectName string       `yaml:"Project"`
+	Number      uint64       `yaml:"FindingNumber"`
+	State       string       `yaml:"State"`
+	Severity    string       `yaml:"Severity"`
+	Comment     string       `yaml:"Comment"`
 	Filter      ResultFilter `yaml:"Filter"`
 	Result      *Cx1ClientGo.ScanResult
 	Project     *Cx1ClientGo.Project
@@ -281,11 +265,9 @@ func (o *ResultFilter) String() string {
 }
 
 type RoleCRUD struct {
+	CRUDTest    `yaml:",inline"`
 	Name        string   `yaml:"Name"`
-	Test        string   `yaml:"Test"`
 	Permissions []string `yaml:"Permissions"`
-	FailTest    bool     `yaml:"FailTest"`
-	TestSource  string
 	Role        *Cx1ClientGo.Role
 }
 
@@ -294,7 +276,7 @@ func (o RoleCRUD) String() string {
 }
 
 type ScanCRUD struct {
-	Test          string      `yaml:"Test"`
+	CRUDTest      `yaml:",inline"`
 	Project       string      `yaml:"Project"`
 	Branch        string      `yaml:"Branch"`
 	Repository    string      `yaml:"Repository"`
@@ -305,10 +287,8 @@ type ScanCRUD struct {
 	Preset        string      `yaml:"Preset"`
 	Status        string      `yaml:"Status"`
 	Timeout       int         `yaml:"Timeout"`
-	FailTest      bool        `yaml:"FailTest"`
 	Filter        *ScanFilter `yaml:"Filter"`
 	Cx1ScanFilter *Cx1ClientGo.ScanFilter
-	TestSource    string
 	Scan          *Cx1ClientGo.Scan
 }
 
@@ -342,16 +322,15 @@ func (f ScanFilter) String() string {
 }
 
 type UserCRUD struct {
-	Name       string   `yaml:"Name"`
-	Email      string   `yaml:"Email"`
-	Test       string   `yaml:"Test"`
-	FirstName  string   `yaml:"FirstName"`
-	LastName   string   `yaml:"LastName"`
-	Groups     []string `yaml:"Groups"`
-	Roles      []string `yaml:"Roles"`
-	FailTest   bool     `yaml:"FailTest"`
-	TestSource string
-	User       *Cx1ClientGo.User
+	CRUDTest  `yaml:",inline"`
+	Name      string   `yaml:"Name"`
+	Email     string   `yaml:"Email"`
+	FirstName string   `yaml:"FirstName"`
+	LastName  string   `yaml:"LastName"`
+	Groups    []string `yaml:"Groups"`
+	Roles     []string `yaml:"Roles"`
+
+	User *Cx1ClientGo.User
 }
 
 func (o UserCRUD) String() string {
@@ -361,60 +340,4 @@ func (o UserCRUD) String() string {
 type Tag struct {
 	Key   string `yaml:"Key"`
 	Value string `yaml:"Value"`
-}
-
-type TestSet struct {
-	Name              string                 `yaml:"Name"`
-	File              string                 `yaml:"File"`
-	AccessAssignments []AccessAssignmentCRUD `yaml:"AccessAssignments"`
-	Applications      []ApplicationCRUD      `yaml:"Applications"`
-	Flags             []FlagCRUD             `yaml:"Flags"`
-	Groups            []GroupCRUD            `yaml:"Groups"`
-	Imports           []ImportCRUD           `yaml:"Imports"`
-	Presets           []PresetCRUD           `yaml:"Presets"`
-	Projects          []ProjectCRUD          `yaml:"Projects"`
-	Queries           []CxQLCRUD             `yaml:"Queries"`
-	Reports           []ReportCRUD           `yaml:"Reports"`
-	Results           []ResultCRUD           `yaml:"Results"`
-	Roles             []RoleCRUD             `yaml:"Roles"`
-	Scans             []ScanCRUD             `yaml:"Scans"`
-	Users             []UserCRUD             `yaml:"Users"`
-
-	Wait uint `yaml:"Wait"`
-}
-
-type TestConfig struct {
-	Cx1URL     string    `yaml:"Cx1URL"`
-	IAMURL     string    `yaml:"IAMURL"`
-	Tenant     string    `yaml:"Tenant"`
-	ProxyURL   string    `yaml:"ProxyURL"`
-	Tests      []TestSet `yaml:"Tests"`
-	LogLevel   string    `yaml:"LogLevel"`
-	ConfigPath string    `yaml:"-"`
-}
-
-type TestResult struct {
-	FailTest   bool
-	Result     int
-	CRUD       string
-	Module     string
-	Duration   float64
-	Name       string
-	Id         int
-	TestObject string
-	Reason     string
-	TestSource string
-}
-
-// test result output
-type Counter struct {
-	Pass uint
-	Fail uint
-	Skip uint
-}
-type CounterSet struct {
-	Create Counter
-	Read   Counter
-	Update Counter
-	Delete Counter
 }

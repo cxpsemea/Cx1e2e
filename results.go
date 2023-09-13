@@ -4,41 +4,23 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
-func ResultTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) {
-
-	for id := range *results {
-		t := &(*results)[id]
-		if IsCreate(t.Test) {
-			start := time.Now().UnixNano()
-			LogSkip(t.FailTest, logger, OP_CREATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "action not supported")
-		}
+func (t *ResultCRUD) Validate(CRUD string) error {
+	if t.ProjectName == "" {
+		return fmt.Errorf("project name is missing")
 	}
+	if t.Number == 0 {
+		return fmt.Errorf("result number is missing (starting from 1)")
+	}
+
+	return nil
 }
-
-func ResultTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) {
-	for id := range *results {
-		t := &(*results)[id]
-		if IsRead(t.Test) {
-			start := time.Now().UnixNano()
-			if t.ProjectName == "" || t.Number == 0 {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing project and finding number with optional filter)")
-			} else {
-				LogStart(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
-				err := ResultTestRead(cx1client, logger, testname, &(*results)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_READ, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
+func (t *ResultCRUD) GetModule() string {
+	return MOD_RESULT
 }
 
 func (o ResultFilter) Matches(result Cx1ClientGo.ScanResult) bool {
@@ -69,7 +51,11 @@ func (o ResultFilter) Matches(result Cx1ClientGo.ScanResult) bool {
 	return true
 }
 
-func ResultTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ResultCRUD) error {
+func (t *ResultCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+	return fmt.Errorf("not implemented")
+}
+
+func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	project, err := cx1client.GetProjectByName(t.ProjectName)
 	if err != nil {
 		return err
@@ -106,57 +92,6 @@ func ResultTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 		return filtered_results[i].Data.ResultHash < filtered_results[j].Data.ResultHash
 	})
 
-	/*
-		if t.QueryName != "" {
-			var counter uint64
-			for _, r := range results {
-				if r.Data.QueryName == t.QueryName && r.Data.LanguageName == t.QueryLanguage {
-					counter++
-					if counter == t.Number {
-						t.Result = &r
-						return nil
-					}
-				}
-			}
-
-			return fmt.Errorf("specified result not found")
-		}
-
-		if t.QueryID != 0 {
-			var counter uint64
-			for _, r := range results {
-				logger.Infof("  %d vs %d = %v", t.QueryID, r.Data.QueryID, t.QueryID == r.Data.QueryID)
-				if r.Data.QueryID == t.QueryID {
-					counter++
-					if counter == t.Number {
-						t.Result = &r
-						return nil
-					}
-				}
-			}
-			return fmt.Errorf("specified result not found")
-		}
-
-		if t.SimilarityID != 0 {
-			for _, r := range results {
-				if r.SimilarityID == t.SimilarityID {
-					t.Result = &r
-					return nil
-				}
-			}
-			return fmt.Errorf("specified result not found")
-		}
-
-		if t.ResultHash != "" {
-			for _, r := range results {
-				if r.Data.ResultHash == t.ResultHash {
-					t.Result = &r
-					return nil
-				}
-			}
-			return fmt.Errorf("specified result not found")
-		}*/
-
 	var id uint64
 	for id = 0; id < uint64(len(filtered_results)); id++ {
 		if id+1 == t.Number {
@@ -169,27 +104,7 @@ func ResultTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return fmt.Errorf("specified result not found")
 }
 
-func ResultTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) {
-	for id := range *results {
-		t := &(*results)[id]
-		if IsUpdate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Result == nil {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
-			} else {
-				LogStart(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
-				err := ResultTestUpdate(cx1client, logger, testname, t)
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_UPDATE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func ResultTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ResultCRUD) error {
+func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	change := t.Result.CreateResultsPredicate(t.Project.ProjectID)
 	if t.State != "" {
 		change.State = t.State
@@ -205,12 +120,6 @@ func ResultTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return err
 }
 
-func ResultTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, results *[]ResultCRUD) {
-	for id := range *results {
-		t := &(*results)[id]
-		if IsDelete(t.Test) {
-			start := time.Now().UnixNano()
-			LogSkip(t.FailTest, logger, OP_DELETE, MOD_RESULT, start, testname, id+1, t.String(), t.TestSource, "invalid test (action not supported)")
-		}
-	}
+func (t *ResultCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+	return fmt.Errorf("not implemented")
 }

@@ -2,14 +2,24 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
-func (q *CxQLCRUD) IsValid() bool {
-	return q.QueryLanguage != "" && q.QueryGroup != "" && q.QueryName != "" && (q.Scope.Project != "" || q.Scope.Application != "")
+func (t *CxQLCRUD) Validate(CRUD string) error {
+	if t.QueryLanguage != "" && t.QueryGroup != "" && t.QueryName != "" {
+		return fmt.Errorf("query language, group, or name is missing")
+	}
+
+	if t.Scope.Project == "" {
+		return fmt.Errorf("project name is missing")
+	}
+
+	return nil
+}
+func (t *CxQLCRUD) GetModule() string {
+	return MOD_QUERY
 }
 
 func CheckALQFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
@@ -18,28 +28,6 @@ func CheckALQFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
 		return false
 	}
 	return appLevelQueries
-}
-
-func QueryTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
-	for id := range *queries {
-		t := &(*queries)[id]
-		if IsCreate(t.Test) {
-			start := time.Now().UnixNano()
-			if !t.IsValid() {
-				LogSkip(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing query identifier)")
-			} else if !CheckALQFlag(cx1client) && t.Scope.Application != "" {
-				LogSkip(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (application-level queries are not enabled)")
-			} else {
-				LogStart(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
-				err := QueryTestCreate(cx1client, logger, testname, &(*queries)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_CREATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
 }
 
 func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error) {
@@ -144,7 +132,7 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 	return nil
 }
 
-func QueryTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
+func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	t.Query = getQuery(cx1client, logger, t)
 
 	if t.Query != nil {
@@ -206,29 +194,7 @@ func QueryTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	}
 }
 
-func QueryTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
-	for id := range *queries {
-		t := &(*queries)[id]
-		if IsRead(t.Test) {
-			start := time.Now().UnixNano()
-			if !t.IsValid() {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name)")
-			} else if !CheckALQFlag(cx1client) && t.Scope.Application != "" {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (application-level queries are not enabled)")
-			} else {
-				LogStart(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
-				err := QueryTestRead(cx1client, logger, testname, &(*queries)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_READ, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func QueryTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
+func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	t.Query = getQuery(cx1client, logger, t)
 
 	if t.Query == nil {
@@ -238,54 +204,10 @@ func QueryTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 	return nil
 }
 
-func QueryTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
-	for id := range *queries {
-		t := &(*queries)[id]
-		if IsUpdate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Query == nil {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
-			} else if !CheckALQFlag(cx1client) && t.Scope.Application != "" {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (application-level queries are not enabled)")
-			} else {
-				LogStart(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
-				err := QueryTestUpdate(cx1client, logger, testname, &(*queries)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_UPDATE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func QueryTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
+func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	return updateQuery(cx1client, t)
 }
 
-func QueryTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, queries *[]CxQLCRUD) {
-	for id := range *queries {
-		t := &(*queries)[id]
-		if IsDelete(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Query == nil {
-				LogSkip(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before deleting)")
-			} else if !CheckALQFlag(cx1client) && t.Scope.Application != "" {
-				LogSkip(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, "invalid test (application-level queries are not enabled)")
-			} else {
-				LogStart(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
-				err := QueryTestDelete(cx1client, logger, testname, &(*queries)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_DELETE, MOD_QUERY, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func QueryTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *CxQLCRUD) error {
+func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	return cx1client.DeleteQuery(*t.Query)
 }

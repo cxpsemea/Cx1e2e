@@ -11,15 +11,12 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
 	"gopkg.in/yaml.v2"
 )
-
-var TestResults []TestResult
 
 const (
 	OP_CREATE = "Create"
@@ -66,7 +63,7 @@ func main() {
 
 func run() float32 {
 	logger := logrus.New()
-	logger.SetLevel(logrus.InfoLevel)
+	logger.SetLevel(logrus.TraceLevel)
 	myformatter := &easy.Formatter{}
 	myformatter.TimestampFormat = "2006-01-02 15:04:05.000"
 	myformatter.LogFormat = "[%lvl%][%time%] %msg%\n"
@@ -95,7 +92,7 @@ func run() float32 {
 		return 0
 	}
 
-	switch strings.ToUpper(Config.LogLevel) {
+	/*switch strings.ToUpper(Config.LogLevel) {
 	case "":
 		logger.SetLevel(logrus.InfoLevel)
 	case "TRACE":
@@ -110,7 +107,7 @@ func run() float32 {
 		logger.SetLevel(logrus.ErrorLevel)
 	case "FATAL":
 		logger.SetLevel(logrus.FatalLevel)
-	}
+	}*/
 
 	var cx1client *Cx1ClientGo.Cx1Client
 	httpClient := &http.Client{}
@@ -152,7 +149,7 @@ func run() float32 {
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
 
-	RunTests(cx1client, logger, &Config)
+	TestResults := RunTests(cx1client, logger, &Config)
 
 	logger.Infof("Test result summary:\n")
 	count_failed := 0
@@ -336,292 +333,5 @@ func getFilePath(currentRoot, file string) (string, error) {
 		} else {
 			return "", fmt.Errorf("unable to find configuration file %v", testPath)
 		}
-	}
-}
-
-func GenerateReport(tests *[]TestResult, Config *TestConfig) error {
-	report, err := os.Create("cx1e2e_result.html")
-	if err != nil {
-		return err
-	}
-
-	defer report.Close()
-
-	var Access, Application, Flag, Group, Import, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
-	for _, r := range *tests {
-		var set *CounterSet
-		switch r.Module {
-		case MOD_ACCESS:
-			set = &Access
-		case MOD_APPLICATION:
-			set = &Application
-		case MOD_FLAG:
-			set = &Flag
-		case MOD_GROUP:
-			set = &Group
-		case MOD_IMPORT:
-			set = &Import
-		case MOD_PRESET:
-			set = &Preset
-		case MOD_PROJECT:
-			set = &Project
-		case MOD_QUERY:
-			set = &Query
-		case MOD_RESULT:
-			set = &Result
-		case MOD_REPORT:
-			set = &Report
-		case MOD_ROLE:
-			set = &Role
-		case MOD_SCAN:
-			set = &Scan
-		case MOD_USER:
-			set = &User
-		}
-
-		var count *Counter
-
-		switch r.CRUD {
-		case OP_CREATE:
-			count = &(set.Create)
-		case OP_READ:
-			count = &(set.Read)
-		case OP_UPDATE:
-			count = &(set.Update)
-		case OP_DELETE:
-			count = &(set.Delete)
-		}
-
-		switch r.Result {
-		case TST_PASS:
-			count.Pass++
-		case TST_FAIL:
-			count.Fail++
-		case TST_SKIP:
-			count.Skip++
-		}
-	}
-
-	_, err = report.WriteString(fmt.Sprintf("<html><head><title>%v tenant %v test - %v</title></head><body>", Config.Cx1URL, Config.Tenant, time.Now().String()))
-	if err != nil {
-		return err
-	}
-	report.WriteString("<h2>Summary</h2>")
-	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th rowspan=2>Area</th><th colspan=3>Create</th><th colspan=3>Read</th><th colspan=3>Update</th><th colspan=3>Delete</th></tr>\n")
-	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
-	writeCounterSet(report, "Access Assignment", &Access)
-	writeCounterSet(report, "Application", &Application)
-	writeCounterSet(report, "Flag", &Flag)
-	writeCounterSet(report, "Group", &Group)
-	writeCounterSet(report, "Import", &Import)
-	writeCounterSet(report, "Preset", &Preset)
-	writeCounterSet(report, "Project", &Project)
-	writeCounterSet(report, "Query", &Query)
-	writeCounterSet(report, "Result", &Result)
-	writeCounterSet(report, "Report", &Report)
-	writeCounterSet(report, "Role", &Role)
-	writeCounterSet(report, "Scan", &Scan)
-	writeCounterSet(report, "User", &User)
-	report.WriteString("</table><br>")
-
-	report.WriteString("<h2>Details</h2>")
-	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th>Test Set</th><th>Test</th><th>Duration (sec)</th><th>Result</th></tr>\n")
-
-	for _, t := range *tests {
-		result := "<span style='color:green'>PASS</span>"
-		if t.Result == TST_FAIL {
-			result = fmt.Sprintf("<span style='color:red'>FAIL: %v</span>", t.Reason)
-		} else if t.Result == TST_SKIP {
-			result = fmt.Sprintf("<span style='color:red'>SKIP: %v</span>", t.Reason)
-		}
-		testtype := "Test"
-		if t.FailTest {
-			testtype = "Negative-Test"
-		}
-		report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v %v %v: %v</td><td>%.2f</td><td>%v</td></tr>\n", t.Name, t.TestSource, t.CRUD, t.Module, testtype, t.TestObject, t.Duration, result))
-	}
-
-	report.WriteString("</table>\n")
-
-	_, err = report.WriteString("</body></html>")
-	if err != nil {
-		return err
-	}
-
-	return report.Sync()
-}
-
-func writeCell(report *os.File, count uint, good bool) {
-	if count == 0 {
-		report.WriteString("<td>&nbsp;</td>")
-	} else if good {
-		report.WriteString(fmt.Sprintf("<td style='color:green;text-align:center;'>%d</td>", count))
-	} else {
-		report.WriteString(fmt.Sprintf("<td style='color:red;text-align:center;'>%d</td>", count))
-	}
-}
-
-func writeCounterSet(report *os.File, module string, count *CounterSet) {
-	report.WriteString(fmt.Sprintf("<tr><td>%v</td>", module))
-
-	writeCell(report, count.Create.Pass, true)
-	writeCell(report, count.Create.Fail, false)
-	writeCell(report, count.Create.Skip, false)
-	writeCell(report, count.Read.Pass, true)
-	writeCell(report, count.Read.Fail, false)
-	writeCell(report, count.Read.Skip, false)
-	writeCell(report, count.Update.Pass, true)
-	writeCell(report, count.Update.Fail, false)
-	writeCell(report, count.Update.Skip, false)
-	writeCell(report, count.Delete.Pass, true)
-	writeCell(report, count.Delete.Fail, false)
-	writeCell(report, count.Delete.Skip, false)
-
-	report.WriteString("</tr>\n")
-}
-
-func IsCreate(test string) bool {
-	return strings.Contains(test, "C")
-}
-func IsRead(test string) bool {
-	return strings.Contains(test, "R")
-}
-func IsUpdate(test string) bool {
-	return strings.Contains(test, "U")
-}
-func IsDelete(test string) bool {
-	return strings.Contains(test, "D")
-}
-
-func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) {
-	for _, t := range Config.Tests {
-		logger.Tracef("Running test set: %v", t.Name)
-
-		if t.Wait > 0 {
-			logger.Infof("Waiting for %d seconds", t.Wait)
-			time.Sleep(time.Duration(t.Wait) * time.Second)
-		}
-		TestCreate(cx1client, logger, t.Name, &t)
-		TestRead(cx1client, logger, t.Name, &t)
-		TestUpdate(cx1client, logger, t.Name, &t)
-		TestDelete(cx1client, logger, t.Name, &t)
-	}
-}
-
-func TestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	logger.Tracef("Create tests: %v", testname)
-
-	FlagTestsCreate(cx1client, logger, testname, &tests.Flags)
-	ImportTestsCreate(cx1client, logger, testname, &tests.Imports)
-	GroupTestsCreate(cx1client, logger, testname, &tests.Groups)
-	ApplicationTestsCreate(cx1client, logger, testname, &tests.Applications)
-	ProjectTestsCreate(cx1client, logger, testname, &tests.Projects)
-	RoleTestsCreate(cx1client, logger, testname, &tests.Roles)
-	UserTestsCreate(cx1client, logger, testname, &tests.Users)
-	AccessTestsCreate(cx1client, logger, testname, &tests.AccessAssignments)
-	QueryTestsCreate(cx1client, logger, testname, &tests.Queries)
-	PresetTestsCreate(cx1client, logger, testname, &tests.Presets)
-	ScanTestsCreate(cx1client, logger, testname, &tests.Scans)
-	ResultTestsCreate(cx1client, logger, testname, &tests.Results)
-	ReportTestsCreate(cx1client, logger, testname, &tests.Reports)
-}
-func TestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	logger.Tracef("Read tests: %v", testname)
-
-	FlagTestsRead(cx1client, logger, testname, &tests.Flags)
-	ImportTestsRead(cx1client, logger, testname, &tests.Imports)
-	GroupTestsRead(cx1client, logger, testname, &tests.Groups)
-	ApplicationTestsRead(cx1client, logger, testname, &tests.Applications)
-	ProjectTestsRead(cx1client, logger, testname, &tests.Projects)
-	RoleTestsRead(cx1client, logger, testname, &tests.Roles)
-	AccessTestsRead(cx1client, logger, testname, &tests.AccessAssignments)
-	UserTestsRead(cx1client, logger, testname, &tests.Users)
-	QueryTestsRead(cx1client, logger, testname, &tests.Queries)
-	PresetTestsRead(cx1client, logger, testname, &tests.Presets)
-	ScanTestsRead(cx1client, logger, testname, &tests.Scans)
-	ResultTestsRead(cx1client, logger, testname, &tests.Results)
-	ReportTestsRead(cx1client, logger, testname, &tests.Reports)
-}
-func TestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	logger.Tracef("Update tests: %v", testname)
-
-	FlagTestsUpdate(cx1client, logger, testname, &tests.Flags)
-	ImportTestsUpdate(cx1client, logger, testname, &tests.Imports)
-	GroupTestsUpdate(cx1client, logger, testname, &tests.Groups)
-	ApplicationTestsUpdate(cx1client, logger, testname, &tests.Applications)
-	ProjectTestsUpdate(cx1client, logger, testname, &tests.Projects)
-	RoleTestsUpdate(cx1client, logger, testname, &tests.Roles)
-	AccessTestsUpdate(cx1client, logger, testname, &tests.AccessAssignments)
-	UserTestsUpdate(cx1client, logger, testname, &tests.Users)
-	QueryTestsUpdate(cx1client, logger, testname, &tests.Queries)
-	PresetTestsUpdate(cx1client, logger, testname, &tests.Presets)
-	ScanTestsUpdate(cx1client, logger, testname, &tests.Scans)
-	ResultTestsUpdate(cx1client, logger, testname, &tests.Results)
-	ReportTestsUpdate(cx1client, logger, testname, &tests.Reports)
-}
-func TestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, tests *TestSet) {
-	logger.Tracef("Delete tests: %v", testname)
-
-	FlagTestsDelete(cx1client, logger, testname, &tests.Flags)
-	ImportTestsDelete(cx1client, logger, testname, &tests.Imports)
-	GroupTestsDelete(cx1client, logger, testname, &tests.Groups)
-	ApplicationTestsDelete(cx1client, logger, testname, &tests.Applications)
-	ProjectTestsDelete(cx1client, logger, testname, &tests.Projects)
-	RoleTestsDelete(cx1client, logger, testname, &tests.Roles)
-	AccessTestsDelete(cx1client, logger, testname, &tests.AccessAssignments)
-	UserTestsDelete(cx1client, logger, testname, &tests.Users)
-	QueryTestsDelete(cx1client, logger, testname, &tests.Queries)
-	PresetTestsDelete(cx1client, logger, testname, &tests.Presets)
-	ScanTestsDelete(cx1client, logger, testname, &tests.Scans)
-	ResultTestsDelete(cx1client, logger, testname, &tests.Results)
-	ReportTestsDelete(cx1client, logger, testname, &tests.Reports)
-}
-
-func LogStart(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
-	logger.Infof("")
-	if failTest {
-		logger.Infof("Starting %v %v Negative-Test '%v' #%d - %v", CRUD, Module, testName, testId, testObject)
-	} else {
-		logger.Infof("Starting %v %v Test '%v' #%d - %v", CRUD, Module, testName, testId, testObject)
-	}
-}
-
-func LogPass(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string) {
-	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
-	if failTest {
-		logger.Errorf("FAIL [%.3fs]: %v %v Negative-Test '%v' #%d (%v) - %v", duration, CRUD, Module, testName, testId, testObject, "test passed unexpectedly")
-		TestResults = append(TestResults, TestResult{
-			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, "test passed unexpectedly", testSource,
-		})
-	} else {
-		logger.Infof("PASS [%.3fs]: %v %v Test '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
-		TestResults = append(TestResults, TestResult{
-			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
-		})
-	}
-}
-func LogSkip(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason string) {
-	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
-	if failTest {
-		logger.Warnf("SKIP [%.3fs]: %v %v Negative-Test '%v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
-	} else {
-		logger.Warnf("SKIP [%.3fs]: %v %v Test '%v' #%d - %v", duration, CRUD, Module, testName, testId, reason)
-	}
-	TestResults = append(TestResults, TestResult{
-		failTest, TST_SKIP, CRUD, Module, duration, testName, testId, testObject, reason, testSource,
-	})
-}
-func LogFail(failTest bool, logger *logrus.Logger, CRUD string, Module string, start int64, testName string, testId int, testObject string, testSource string, reason error) {
-	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
-	if failTest {
-		logger.Infof("PASS [%.3fs]: %v %v Negative-Test '%v' #%d (%v)", duration, CRUD, Module, testName, testId, testObject)
-		TestResults = append(TestResults, TestResult{
-			failTest, TST_PASS, CRUD, Module, duration, testName, testId, testObject, "", testSource,
-		})
-	} else {
-		logger.Errorf("FAIL [%.3fs]: %v %v Test '%v' #%d (%v) - %s", duration, CRUD, Module, testName, testId, testObject, reason)
-		TestResults = append(TestResults, TestResult{
-			failTest, TST_FAIL, CRUD, Module, duration, testName, testId, testObject, reason.Error(), testSource,
-		})
 	}
 }

@@ -2,31 +2,20 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
-func PresetTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) {
-	for id := range *presets {
-		t := &(*presets)[id]
-		if IsCreate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Name == "" {
-				LogSkip(t.FailTest, logger, OP_CREATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name)")
-			} else {
-				LogStart(t.FailTest, logger, OP_CREATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
-				err := PresetTestCreate(cx1client, logger, testname, &(*presets)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_CREATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_CREATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-
-		}
+func (t *PresetCRUD) Validate(CRUD string) error {
+	if t.Name == "" {
+		return fmt.Errorf("preset name is missing")
 	}
+
+	return nil
+}
+func (t *PresetCRUD) GetModule() string {
+	return MOD_PRESET
 }
 
 func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *PresetCRUD) ([]uint64, error) {
@@ -47,7 +36,7 @@ func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Pre
 	return query_ids, nil
 }
 
-func PresetTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *PresetCRUD) error {
+func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	query_ids, err := getQueryIDs(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -61,27 +50,7 @@ func PresetTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return nil
 }
 
-func PresetTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) {
-	for id := range *presets {
-		t := &(*presets)[id]
-		if IsRead(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Name == "" {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name)")
-			} else {
-				LogStart(t.FailTest, logger, OP_READ, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
-				err := PresetTestRead(cx1client, logger, testname, &(*presets)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_READ, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_READ, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func PresetTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *PresetCRUD) error {
+func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	test_Preset, err := cx1client.GetPresetByName(t.Name)
 	if err != nil {
 		return err
@@ -90,28 +59,7 @@ func PresetTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return nil
 }
 
-func PresetTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) {
-	for id := range *presets {
-		t := &(*presets)[id]
-		if IsUpdate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Preset == nil {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
-			} else {
-				LogStart(t.FailTest, logger, OP_UPDATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
-				err := PresetTestUpdate(cx1client, logger, testname, &(*presets)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_UPDATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_UPDATE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-
-		}
-	}
-}
-
-func PresetTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *PresetCRUD) error {
+func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	query_ids, err := getQueryIDs(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -122,27 +70,7 @@ func PresetTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t
 	return err
 }
 
-func PresetTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, presets *[]PresetCRUD) {
-	for id := range *presets {
-		t := &(*presets)[id]
-		if IsDelete(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Preset == nil {
-				LogSkip(t.FailTest, logger, OP_DELETE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before deleting)")
-			} else {
-				LogStart(t.FailTest, logger, OP_DELETE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
-				err := PresetTestDelete(cx1client, logger, testname, &(*presets)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_DELETE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_DELETE, MOD_PRESET, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func PresetTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *PresetCRUD) error {
+func (t *PresetCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	err := cx1client.DeletePreset(t.Preset)
 	if err != nil {
 		return err

@@ -2,30 +2,20 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
-func GroupTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) {
-	for id := range *groups {
-		t := &(*groups)[id]
-		if IsCreate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Name == "" {
-				LogSkip(t.FailTest, logger, OP_CREATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name)")
-			} else {
-				LogStart(t.FailTest, logger, OP_CREATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
-				err := GroupTestCreate(cx1client, logger, testname, &(*groups)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_CREATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_CREATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
+func (t *GroupCRUD) Validate(CRUD string) error {
+	if t.Name == "" {
+		return fmt.Errorf("group name is missing")
 	}
+
+	return nil
+}
+func (t *GroupCRUD) GetModule() string {
+	return MOD_GROUP
 }
 
 func updateGroup(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *GroupCRUD) error {
@@ -58,7 +48,7 @@ func updateGroup(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Gro
 	return nil
 }
 
-func GroupTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *GroupCRUD) error {
+func (t *GroupCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	test_Group, err := cx1client.CreateGroup(t.Name)
 	if err != nil {
 		return err
@@ -77,27 +67,7 @@ func GroupTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	return nil
 }
 
-func GroupTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) {
-	for id := range *groups {
-		t := &(*groups)[id]
-		if IsRead(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Name == "" {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name)")
-			} else {
-				LogStart(t.FailTest, logger, OP_READ, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
-				err := GroupTestRead(cx1client, logger, testname, &(*groups)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_READ, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_READ, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func GroupTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *GroupCRUD) error {
+func (t *GroupCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	test_Group, err := cx1client.GetGroupByName(t.Name)
 	if err != nil {
 		return err
@@ -112,27 +82,7 @@ func GroupTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test
 	return nil
 }
 
-func GroupTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) {
-	for id := range *groups {
-		t := &(*groups)[id]
-		if IsUpdate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Group == nil {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
-			} else {
-				LogStart(t.FailTest, logger, OP_UPDATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
-				err := GroupTestUpdate(cx1client, logger, testname, &(*groups)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_UPDATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_UPDATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func GroupTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *GroupCRUD) error {
+func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	err := updateGroup(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -141,27 +91,7 @@ func GroupTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, te
 	return nil
 }
 
-func GroupTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, groups *[]GroupCRUD) {
-	for id := range *groups {
-		t := &(*groups)[id]
-		if IsDelete(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Group == nil {
-				LogSkip(t.FailTest, logger, OP_DELETE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before deleting)")
-			} else {
-				LogStart(t.FailTest, logger, OP_DELETE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
-				err := GroupTestDelete(cx1client, logger, testname, &(*groups)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_DELETE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_DELETE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func GroupTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *GroupCRUD) error {
+func (t *GroupCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	err := cx1client.DeleteGroup(t.Group)
 	if err != nil {
 		return err

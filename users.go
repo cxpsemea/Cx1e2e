@@ -2,30 +2,23 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
-func UserTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) {
-	for id := range *users {
-		t := &(*users)[id]
-		if IsCreate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Name == "" || t.Email == "" {
-				LogSkip(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name or email)")
-			} else {
-				LogStart(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
-				err := UserTestCreate(cx1client, logger, testname, &(*users)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_CREATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
+func (t *UserCRUD) Validate(CRUD string) error {
+	if t.Name == "" {
+		return fmt.Errorf("user name is missing")
 	}
+	if t.Email == "" {
+		return fmt.Errorf("user email is missing")
+	}
+
+	return nil
+}
+func (t *UserCRUD) GetModule() string {
+	return MOD_USER
 }
 
 func updateUserFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *UserCRUD) error {
@@ -114,7 +107,7 @@ func updateUserFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *UserCRUD) error {
 	return nil
 }
 
-func UserTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *UserCRUD) error {
+func (t *UserCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	var test_User Cx1ClientGo.User
 	test_User.UserName = t.Name
 	test_User.Email = t.Email
@@ -133,27 +126,7 @@ func UserTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return nil
 }
 
-func UserTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) {
-	for id := range *users {
-		t := &(*users)[id]
-		if IsRead(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Name == "" && t.Email == "" {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name or email)")
-			} else {
-				LogStart(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
-				err := UserTestRead(cx1client, logger, testname, &(*users)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_READ, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func UserTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *UserCRUD) error {
+func (t *UserCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	test_User, err := cx1client.GetUserByUserName(t.Name)
 	if err != nil {
 		return err
@@ -162,27 +135,7 @@ func UserTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testn
 	return nil
 }
 
-func UserTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) {
-	for id := range *users {
-		t := &(*users)[id]
-		if IsUpdate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.User == nil {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
-			} else {
-				LogStart(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
-				err := UserTestUpdate(cx1client, logger, testname, &(*users)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_UPDATE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func UserTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *UserCRUD) error {
+func (t *UserCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	err := updateUserFromConfig(cx1client, t)
 	if err != nil {
 		return err
@@ -191,27 +144,7 @@ func UserTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return cx1client.UpdateUser(t.User)
 }
 
-func UserTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, users *[]UserCRUD) {
-	for id := range *users {
-		t := &(*users)[id]
-		if IsDelete(t.Test) {
-			start := time.Now().UnixNano()
-			if t.User == nil {
-				LogSkip(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before deleting)")
-			} else {
-				LogStart(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
-				err := UserTestDelete(cx1client, logger, testname, &(*users)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_DELETE, MOD_USER, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func UserTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *UserCRUD) error {
+func (t *UserCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	err := cx1client.DeleteUser(t.User)
 	if err != nil {
 		return err

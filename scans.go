@@ -4,45 +4,26 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
-func (t *ScanCRUD) IsValid() bool {
+func (t *ScanCRUD) Validate(CRUD string) error {
 	if t.Project == "" {
-		return false
+		return fmt.Errorf("project name is missing")
 	}
-
 	if (t.Repository == "" || t.Branch == "") && t.ZipFile == "" {
-		return false
+		return fmt.Errorf("project repository and branch or zip file is missing")
 	}
 
-	return true
+	return nil
+}
+func (t *ScanCRUD) GetModule() string {
+	return MOD_SCAN
 }
 
-func ScanTestsCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) {
-	for id := range *scans {
-		t := &(*scans)[id]
-		if IsCreate(t.Test) {
-			start := time.Now().UnixNano()
-			if !t.IsValid() {
-				LogSkip(t.FailTest, logger, OP_CREATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing project name, repository, branch, or zipfile)")
-			} else {
-				LogStart(t.FailTest, logger, OP_CREATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
-				err := ScanTestCreate(cx1client, logger, testname, &(*scans)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_CREATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_CREATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
+func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	project, err := cx1client.GetProjectByName(t.Project)
 	if err != nil {
 		return err
@@ -157,27 +138,7 @@ func ScanTestCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, tes
 	return nil
 }
 
-func ScanTestsRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) {
-	for id := range *scans {
-		t := &(*scans)[id]
-		if IsRead(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Project == "" {
-				LogSkip(t.FailTest, logger, OP_READ, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing project)")
-			} else {
-				LogStart(t.FailTest, logger, OP_READ, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
-				err := ScanTestRead(cx1client, logger, testname, &(*scans)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_READ, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_READ, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func ScanTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
+func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	project, err := cx1client.GetProjectByName(t.Project)
 	if err != nil {
 		return err
@@ -221,50 +182,10 @@ func ScanTestRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testn
 	return nil
 }
 
-func ScanTestsUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) {
-	for id := range *scans {
-		t := &(*scans)[id]
-		if IsUpdate(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Scan == nil {
-				LogSkip(t.FailTest, logger, OP_UPDATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before updating)")
-			} else {
-				LogStart(t.FailTest, logger, OP_UPDATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
-				err := ScanTestUpdate(cx1client, logger, testname, &(*scans)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_UPDATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_UPDATE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func ScanTestUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
+func (t *ScanCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	return fmt.Errorf("not implemented")
 }
 
-func ScanTestsDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, scans *[]ScanCRUD) {
-	for id := range *scans {
-		t := &(*scans)[id]
-		if IsDelete(t.Test) {
-			start := time.Now().UnixNano()
-			if t.Scan == nil {
-				LogSkip(t.FailTest, logger, OP_DELETE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, "invalid test (must read before deleting)")
-			} else {
-				LogStart(t.FailTest, logger, OP_DELETE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
-				err := ScanTestDelete(cx1client, logger, testname, &(*scans)[id])
-				if err != nil {
-					LogFail(t.FailTest, logger, OP_DELETE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource, err)
-				} else {
-					LogPass(t.FailTest, logger, OP_DELETE, MOD_SCAN, start, testname, id+1, t.String(), t.TestSource)
-				}
-			}
-		}
-	}
-}
-
-func ScanTestDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testname string, t *ScanCRUD) error {
+func (t *ScanCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	return cx1client.DeleteScanByID(t.Scan.ScanID)
 }
