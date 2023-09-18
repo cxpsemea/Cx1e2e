@@ -10,9 +10,6 @@ import (
 )
 
 func (t *ScanCRUD) Validate(CRUD string) error {
-	if CRUD == OP_UPDATE {
-		return fmt.Errorf("test type is not supported")
-	}
 	if CRUD == OP_DELETE && t.Scan == nil {
 		return fmt.Errorf("must read before deleting")
 	}
