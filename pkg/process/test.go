@@ -32,6 +32,7 @@ type TestConfig struct {
 	Tests      []TestSet `yaml:"Tests"`
 	LogLevel   string    `yaml:"LogLevel"`
 	ConfigPath string    `yaml:"-"`
+	AuthType   string    `yaml:"-"`
 }
 
 type TestResult struct {

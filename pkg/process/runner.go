@@ -30,14 +30,19 @@ type TestRunner interface {
 	RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error
 }
 
-func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) []TestResult {
+func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) float32 {
 	all_results := []TestResult{}
 
 	for id := range Config.Tests {
 		all_results = append(all_results, Config.Tests[id].RunTests(cx1client, logger)...)
 	}
 
-	return all_results
+	status, err := GenerateReport(&all_results, logger, Config)
+	if err != nil {
+		logger.Errorf("Failed to generate the report: %s", err)
+	}
+
+	return status
 }
 
 func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) []TestResult {
