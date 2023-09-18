@@ -10,8 +10,8 @@ import (
 )
 
 func (t *ResultCRUD) Validate(CRUD string) error {
-	if CRUD != OP_READ && CRUD != OP_UPDATE {
-		return fmt.Errorf("test type is not supported")
+	if CRUD == OP_UPDATE && t.Result == nil {
+		return fmt.Errorf("must read before updating")
 	}
 
 	if t.ProjectName == "" {

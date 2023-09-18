@@ -106,8 +106,10 @@ func run() float32 {
 
 	if *APIKey != "" {
 		cx1client, err = Cx1ClientGo.NewAPIKeyClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, *APIKey, logger)
+		Config.AuthType = fmt.Sprintf("APIKey %v", Cx1ClientGo.ShortenGUID(*APIKey))
 	} else {
 		cx1client, err = Cx1ClientGo.NewOAuthClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, *ClientID, *ClientSecret, logger)
+		Config.AuthType = fmt.Sprintf("OAuth client %v", *ClientID)
 	}
 
 	if err != nil {
@@ -117,46 +119,5 @@ func run() float32 {
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
 
-	TestResults := process.RunTests(cx1client, logger, &Config)
-
-	logger.Infof("Test result summary:\n")
-	count_failed := 0
-	count_passed := 0
-	count_skipped := 0
-
-	for _, result := range TestResults {
-		var testtype = "Test"
-		if result.FailTest {
-			testtype = "Negative-Test"
-		}
-		switch result.Result {
-		case 1:
-			fmt.Printf("PASS %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
-			count_passed++
-		case 0:
-			fmt.Printf("FAIL %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
-			count_failed++
-		case 2:
-			fmt.Printf("SKIP %v - %v %v %v: %v\n", result.Name, result.CRUD, result.Module, testtype, result.TestObject)
-			count_skipped++
-		}
-	}
-	fmt.Println("")
-	fmt.Printf("Ran %d tests\n", (count_failed + count_passed + count_skipped))
-	if count_failed > 0 {
-		fmt.Printf("FAILED %d tests\n", count_failed)
-	}
-	if count_skipped > 0 {
-		fmt.Printf("SKIPPED %d tests\n", count_skipped)
-	}
-	if count_passed > 0 {
-		fmt.Printf("PASSED %d tests\n", count_passed)
-	}
-
-	err = process.GenerateReport(&TestResults, &Config)
-	if err != nil {
-		logger.Errorf("Failed to generate HTML report: %s", err)
-	}
-
-	return float32(count_passed) / float32(count_failed+count_passed+count_skipped)
+	return process.RunTests(cx1client, logger, &Config)
 }
