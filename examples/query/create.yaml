@@ -33,7 +33,8 @@ Tests:
     Results:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there will be one dom_xss finding
-        Filter:
+        Type: SAST
+        SASTFilter:
           Query: Client_DOM_XSS
           Severity: HIGH
         Test: R

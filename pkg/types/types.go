@@ -140,6 +140,7 @@ type ImportCRUD struct {
 	EncryptionKey  string `yaml:"EncryptionKey"`
 	ProjectMapFile string `yaml:"ProjectMapFile"`
 	Parent         string `yaml:"Parent"`
+	TimeoutSeconds int    `yaml:"Timeout"`
 }
 
 func (o ImportCRUD) String() string {
@@ -222,39 +223,61 @@ func (o ReportCRUD) String() string {
 
 type ResultCRUD struct {
 	CRUDTest    `yaml:",inline"`
-	ProjectName string       `yaml:"Project"`
-	Number      uint64       `yaml:"FindingNumber"`
-	State       string       `yaml:"State"`
-	Severity    string       `yaml:"Severity"`
-	Comment     string       `yaml:"Comment"`
-	Filter      ResultFilter `yaml:"Filter"`
-	Result      *Cx1ClientGo.ScanResult
+	ProjectName string           `yaml:"Project"`
+	Number      uint64           `yaml:"FindingNumber"`
+	State       string           `yaml:"State"`
+	Severity    string           `yaml:"Severity"`
+	Comment     string           `yaml:"Comment"`
+	Type        string           `yaml:"Type"`
+	SASTFilter  SASTResultFilter `yaml:"SASTFilter"`
+	KICSFilter  KICSResultFilter `yaml:"KICSFilter"`
+	SCAFilter   SCAResultFilter  `yaml:"SCAFilter"`
+	Results     Cx1ClientGo.ScanResultSet
 	Project     *Cx1ClientGo.Project
 }
 
 func (o *ResultCRUD) String() string {
-	filter := o.Filter.String()
-	if filter != "" {
-		return fmt.Sprintf("%v: finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
+	switch o.Type {
+	case "SAST":
+		filter := o.SASTFilter.String()
+		if filter != "" {
+			return fmt.Sprintf("%v: SAST finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
+		}
+	case "SCA":
+		filter := o.SCAFilter.String()
+		if filter != "" {
+			return fmt.Sprintf("%v: SCA finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
+		}
+	case "KICS":
+		filter := o.KICSFilter.String()
+		if filter != "" {
+			return fmt.Sprintf("%v: KICS finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
+		}
 	}
 	return fmt.Sprintf("%v: finding #%d", o.ProjectName, o.Number)
 }
 
 type ResultFilter struct {
-	QueryID       uint64 `yaml:"QueryID"`
+	State        string `yaml:"State"`
+	Severity     string `yaml:"Severity"`
+	SimilarityID string `yaml:"SimilarityID"`
+}
+
+type SASTResultFilter struct {
+	ResultFilter
+	QueryID       string `yaml:"QueryID"`
 	QueryLanguage string `yaml:"Language"`
 	QueryGroup    string `yaml:"Group"`
 	QueryName     string `yaml:"Query"`
-	SimilarityID  int64  `yaml:"SimilarityID"`
 	ResultHash    string `yaml:"ResultHash"`
-	State         string `yaml:"State"`
-	Severity      string `yaml:"Severity"`
+	CweID         int    `yaml:"CweID"`
 }
 
-func (o *ResultFilter) String() string {
+func (o *SASTResultFilter) String() string {
 	var filters []string
-	if o.QueryID != 0 {
-		filters = append(filters, fmt.Sprintf("QueryID = %d", o.QueryID))
+
+	if o.QueryID != "" {
+		filters = append(filters, fmt.Sprintf("QueryID = %v", o.QueryID))
 	}
 	if o.QueryLanguage != "" {
 		filters = append(filters, fmt.Sprintf("Language = %v", o.QueryLanguage))
@@ -274,10 +297,72 @@ func (o *ResultFilter) String() string {
 	if o.State != "" {
 		filters = append(filters, fmt.Sprintf("State = %v", o.State))
 	}
-	if o.SimilarityID != 0 {
-		filters = append(filters, fmt.Sprintf("SimilarityID = %d", o.SimilarityID))
+	if o.SimilarityID != "" {
+		filters = append(filters, fmt.Sprintf("SimilarityID = %v", o.SimilarityID))
+	}
+	if o.CweID != 0 {
+		filters = append(filters, fmt.Sprintf("CweID = %d", o.CweID))
 	}
 
+	return strings.Join(filters, ", ")
+}
+
+type KICSResultFilter struct {
+	ResultFilter
+	QueryID    string `yaml:"QueryID"`
+	QueryName  string `yaml:"Name"`
+	QueryGroup string `yaml:"Group"`
+}
+
+func (o *KICSResultFilter) String() string {
+	var filters []string
+
+	if o.QueryID != "" {
+		filters = append(filters, fmt.Sprintf("QueryID = %v", o.QueryID))
+	}
+	if o.QueryGroup != "" {
+		filters = append(filters, fmt.Sprintf("Group = %v", o.QueryGroup))
+	}
+	if o.QueryName != "" {
+		filters = append(filters, fmt.Sprintf("Query = %v", o.QueryName))
+	}
+	if o.Severity != "" {
+		filters = append(filters, fmt.Sprintf("Severity = %v", o.Severity))
+	}
+	if o.State != "" {
+		filters = append(filters, fmt.Sprintf("State = %v", o.State))
+	}
+	if o.SimilarityID != "" {
+		filters = append(filters, fmt.Sprintf("SimilarityID = %v", o.SimilarityID))
+	}
+
+	return strings.Join(filters, ", ")
+}
+
+type SCAResultFilter struct {
+	ResultFilter
+	CveName      string `yaml:"CveName"`
+	PackageMatch string `yaml:"PackageMatch"`
+}
+
+func (o *SCAResultFilter) String() string {
+	var filters []string
+
+	if o.Severity != "" {
+		filters = append(filters, fmt.Sprintf("Severity = %v", o.Severity))
+	}
+	if o.State != "" {
+		filters = append(filters, fmt.Sprintf("State = %v", o.State))
+	}
+	if o.SimilarityID != "" {
+		filters = append(filters, fmt.Sprintf("SimilarityID = %v", o.SimilarityID))
+	}
+	if o.CveName != "" {
+		filters = append(filters, fmt.Sprintf("CveName = %v", o.CveName))
+	}
+	if o.PackageMatch != "" {
+		filters = append(filters, fmt.Sprintf("PackageMatch = %v", o.PackageMatch))
+	}
 	return strings.Join(filters, ", ")
 }
 

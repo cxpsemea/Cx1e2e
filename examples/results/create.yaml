@@ -19,23 +19,27 @@ Tests:
     Results:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there will be one stored_xss finding
-        Filter:
+        Type: SAST
+        SASTFilter:
           Query: Stored_XSS
           Severity: HIGH
         Test: R
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 # there will be three reflected_xss_all_clients finding
-        Filter:
+        Type: SAST
+        SASTFilter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
         Test: R
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there will be a Parameter_Tampering finding with this result hash
-        Filter:
+        Type: SAST
+        SASTFilter:
           ResultHash: "VMhOE8yTKUkdReXTf3ZkSjtBKoA="
         Test: R
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
-        Filter:
+        Type: SAST
+        SASTFilter:
           SimilarityID: 2014150247
         Test: R

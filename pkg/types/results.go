@@ -10,10 +10,13 @@ import (
 )
 
 func (t *ResultCRUD) Validate(CRUD string) error {
-	if CRUD == OP_UPDATE && t.Result == nil {
+	if CRUD == OP_UPDATE && (len(t.Results.SAST)+len(t.Results.SCA)+len(t.Results.KICS) == 0) {
 		return fmt.Errorf("must read before updating")
 	}
 
+	if t.Type == "" {
+		return fmt.Errorf("result type not specified, should be one of: SAST, SCA, KICS")
+	}
 	if t.ProjectName == "" {
 		return fmt.Errorf("project name is missing")
 	}
@@ -32,8 +35,8 @@ func (t *ResultCRUD) GetModule() string {
 	return MOD_RESULT
 }
 
-func (o ResultFilter) Matches(result Cx1ClientGo.ScanResult) bool {
-	if o.QueryID != 0 && o.QueryID != result.Data.QueryID {
+func (o SASTResultFilter) Matches(result *Cx1ClientGo.ScanSASTResult) bool {
+	if o.QueryID != "" && o.QueryID != fmt.Sprintf("%d", result.Data.QueryID) {
 		return false
 	}
 	if o.QueryLanguage != "" && !strings.EqualFold(o.QueryLanguage, result.Data.LanguageName) {
@@ -54,10 +57,97 @@ func (o ResultFilter) Matches(result Cx1ClientGo.ScanResult) bool {
 	if o.State != "" && strings.ToUpper(o.State) != result.State {
 		return false
 	}
-	if o.SimilarityID != 0 && o.SimilarityID != result.SimilarityID {
+	if o.SimilarityID != "" && o.SimilarityID != result.SimilarityID {
 		return false
 	}
 	return true
+}
+func (o KICSResultFilter) Matches(result *Cx1ClientGo.ScanKICSResult) bool {
+	if o.QueryID != "" && o.QueryID != fmt.Sprintf("%v", result.Data.QueryID) {
+		return false
+	}
+	if o.QueryGroup != "" && !strings.EqualFold(o.QueryGroup, result.Data.Group) {
+		return false
+	}
+	if o.QueryName != "" && !strings.EqualFold(o.QueryName, result.Data.QueryName) {
+		return false
+	}
+	if o.Severity != "" && strings.ToUpper(o.Severity) != result.Severity {
+		return false
+	}
+	if o.State != "" && strings.ToUpper(o.State) != result.State {
+		return false
+	}
+	if o.SimilarityID != "" && o.SimilarityID != result.SimilarityID {
+		return false
+	}
+	return true
+}
+func (o SCAResultFilter) Matches(result *Cx1ClientGo.ScanSCAResult) bool {
+	if o.Severity != "" && strings.ToUpper(o.Severity) != result.Severity {
+		return false
+	}
+	if o.State != "" && strings.ToUpper(o.State) != result.State {
+		return false
+	}
+	if o.SimilarityID != "" && o.SimilarityID != result.SimilarityID {
+		return false
+	}
+	if o.CveName != "" && o.CveName != result.VulnerabilityDetails.CveName {
+		return false
+	}
+	if o.PackageMatch != "" && !strings.Contains(strings.ToUpper(result.Data.PackageIdentifier), strings.ToUpper(o.PackageMatch)) {
+		return false
+	}
+	return true
+}
+
+func (t *ResultCRUD) Filter(results *Cx1ClientGo.ScanResultSet) Cx1ClientGo.ScanResultSet {
+	var filtered_results Cx1ClientGo.ScanResultSet
+	var final_results Cx1ClientGo.ScanResultSet
+	switch t.Type {
+	case "SAST":
+		for id := range results.SAST {
+			if t.SASTFilter.Matches(&(results.SAST[id])) {
+				filtered_results.SAST = append(filtered_results.SAST, results.SAST[id])
+			}
+		}
+		sort.SliceStable(filtered_results.SAST, func(i, j int) bool {
+			return filtered_results.SAST[i].Data.ResultHash < filtered_results.SAST[j].Data.ResultHash
+		})
+
+		if t.Number <= uint64(len(filtered_results.SAST)) {
+			final_results.SAST = []Cx1ClientGo.ScanSASTResult{filtered_results.SAST[t.Number-1]}
+		}
+	case "SCA":
+		for id := range results.SCA {
+			if t.SCAFilter.Matches(&(results.SCA[id])) {
+				filtered_results.SCA = append(filtered_results.SCA, results.SCA[id])
+			}
+		}
+		sort.SliceStable(filtered_results.SCA, func(i, j int) bool {
+			return filtered_results.SCA[i].SimilarityID < filtered_results.SCA[j].SimilarityID // TODO: Reconsider this sort of sort
+		})
+
+		if t.Number <= uint64(len(filtered_results.SCA)) {
+			final_results.SCA = []Cx1ClientGo.ScanSCAResult{filtered_results.SCA[t.Number-1]}
+		}
+	case "KICS":
+		for id := range results.KICS {
+			if t.KICSFilter.Matches(&(results.KICS[id])) {
+				filtered_results.KICS = append(filtered_results.KICS, results.KICS[id])
+			}
+		}
+		sort.SliceStable(filtered_results.KICS, func(i, j int) bool {
+			return filtered_results.KICS[i].SimilarityID < filtered_results.KICS[j].SimilarityID // TODO: Check if this sort of sort is sufficient
+		})
+
+		if t.Number <= uint64(len(filtered_results.KICS)) {
+			final_results.KICS = []Cx1ClientGo.ScanKICSResult{filtered_results.KICS[t.Number-1]}
+		}
+	}
+
+	return final_results
 }
 
 func (t *ResultCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
@@ -90,31 +180,46 @@ func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		return err
 	}
 
-	filtered_results := make([]Cx1ClientGo.ScanResult, 0)
-	for _, r := range results {
-		if t.Filter.Matches(r) {
-			filtered_results = append(filtered_results, r)
+	t.Results = t.Filter(&results)
+
+	switch t.Type {
+	case "SAST":
+		if len(t.Results.SAST) == 0 {
+			return fmt.Errorf("failed to find SAST finding matching filter %v", t.SASTFilter)
+		}
+	case "SCA":
+		if len(t.Results.SCA) == 0 {
+			return fmt.Errorf("failed to find SCA finding matching filter %v", t.SCAFilter)
+		}
+	case "KICS":
+		if len(t.Results.KICS) == 0 {
+			return fmt.Errorf("failed to find KICS finding matching filter %v", t.KICSFilter)
 		}
 	}
 
-	sort.SliceStable(filtered_results, func(i, j int) bool {
-		return filtered_results[i].Data.ResultHash < filtered_results[j].Data.ResultHash
-	})
-
-	var id uint64
-	for id = 0; id < uint64(len(filtered_results)); id++ {
-		if id+1 == t.Number {
-			result := filtered_results[id]
-			t.Result = &result
-			return nil
-		}
-	}
-
-	return fmt.Errorf("specified result not found")
+	return nil
 }
 
 func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
-	change := t.Result.CreateResultsPredicate(t.Project.ProjectID)
+	var change Cx1ClientGo.ResultsPredicates
+	switch t.Type {
+	case "SAST":
+		if len(t.Results.SAST) == 0 {
+			return fmt.Errorf("specified SAST result not found")
+		}
+		change = t.Results.SAST[0].CreateResultsPredicate(t.Project.ProjectID)
+	case "SCA":
+		if len(t.Results.SCA) == 0 {
+			return fmt.Errorf("specified SCA result not found")
+		}
+		change = t.Results.SCA[0].CreateResultsPredicate(t.Project.ProjectID)
+	case "KICS":
+		if len(t.Results.KICS) == 0 {
+			return fmt.Errorf("specified KICS result not found")
+		}
+		change = t.Results.KICS[0].CreateResultsPredicate(t.Project.ProjectID)
+	}
+
 	if t.State != "" {
 		change.State = t.State
 	}

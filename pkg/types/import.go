@@ -51,7 +51,13 @@ func (t *ImportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 		return fmt.Errorf("failed to start import: %v", err)
 	}
 
-	result, err := cx1client.ImportPollingByID(importID)
+	var result string
+	if t.TimeoutSeconds == 0 {
+		cvars := cx1client.GetClientVars()
+		result, err = cx1client.ImportPollingByIDWithTimeout(importID, cvars.MigrationPollingDelaySeconds, t.TimeoutSeconds)
+	} else {
+		result, err = cx1client.ImportPollingByID(importID)
+	}
 	if err != nil {
 		return fmt.Errorf("failed during import: %s", err)
 	}
