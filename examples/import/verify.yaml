@@ -24,7 +24,8 @@ Tests:
     Results:
       - Project: e2e-test-import-project
         FindingNumber: 1
-        Filter:
+        Type: SAST
+        SASTFilter:
           ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="
           State: CONFIRMED
         Test: R

@@ -27,7 +27,8 @@ Tests:
     Results:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # this finding should no longer be reported
-        Filter:
+        Type: SAST
+        SASTFilter:
           Query: Client_DOM_XSS
           Severity: HIGH
         Test: R
