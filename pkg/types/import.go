@@ -52,7 +52,7 @@ func (t *ImportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	}
 
 	var result string
-	if t.TimeoutSeconds == 0 {
+	if t.TimeoutSeconds != 0 {
 		cvars := cx1client.GetClientVars()
 		result, err = cx1client.ImportPollingByIDWithTimeout(importID, cvars.MigrationPollingDelaySeconds, t.TimeoutSeconds)
 	} else {

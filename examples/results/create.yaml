@@ -10,10 +10,10 @@ Tests:
         Test: C
     Scans:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
-        ZipFile: ../files/SSBAv0.7.zip
+        ZipFile: ../files/SSBAv0.8.zip
         Branch: zip
         Preset: All
-        Engine: sast
+        Engine: sast sca kics apisec
         WaitForEnd: true
         Test: C
     Results:
@@ -35,11 +35,23 @@ Tests:
         FindingNumber: 1 # there will be a Parameter_Tampering finding with this result hash
         Type: SAST
         SASTFilter:
-          ResultHash: "VMhOE8yTKUkdReXTf3ZkSjtBKoA="
+          ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: R
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
         Type: SAST
         SASTFilter:
-          SimilarityID: 2014150247
+          SimilarityID: 715549665
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+        FindingNumber: 1 # there is also a Healthcheck Instruction Missing finding from KICS
+        Type: KICS
+        KICSFilter:
+          SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+        FindingNumber: 1 # there is also a SCA finding for Maven-org.apache.tomcat.embed:tomcat-embed-core CVE-2021-43980
+        Type: SCA
+        SCAFilter:
+          SimilarityID: "CVE-2021-43980"
         Test: R

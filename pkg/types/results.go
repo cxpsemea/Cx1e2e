@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
@@ -13,7 +14,6 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 	if CRUD == OP_UPDATE && (len(t.Results.SAST)+len(t.Results.SCA)+len(t.Results.KICS) == 0) {
 		return fmt.Errorf("must read before updating")
 	}
-
 	if t.Type == "" {
 		return fmt.Errorf("result type not specified, should be one of: SAST, SCA, KICS")
 	}
@@ -28,7 +28,7 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 }
 
 func (t *ResultCRUD) IsSupported(CRUD string) bool {
-	return CRUD == OP_UPDATE || CRUD == OP_READ
+	return (CRUD == OP_UPDATE && (t.Type == "SAST" || t.Type == "KICS")) || CRUD == OP_READ
 }
 
 func (t *ResultCRUD) GetModule() string {
@@ -36,8 +36,11 @@ func (t *ResultCRUD) GetModule() string {
 }
 
 func (o SASTResultFilter) Matches(result *Cx1ClientGo.ScanSASTResult) bool {
-	if o.QueryID != "" && o.QueryID != fmt.Sprintf("%d", result.Data.QueryID) {
-		return false
+	if o.QueryID != "" {
+		u, _ := strconv.ParseUint(o.QueryID, 10, 64)
+		if u != result.Data.QueryID {
+			return false
+		}
 	}
 	if o.QueryLanguage != "" && !strings.EqualFold(o.QueryLanguage, result.Data.LanguageName) {
 		return false
@@ -201,37 +204,28 @@ func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 }
 
 func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
-	var change Cx1ClientGo.ResultsPredicates
 	switch t.Type {
 	case "SAST":
 		if len(t.Results.SAST) == 0 {
 			return fmt.Errorf("specified SAST result not found")
 		}
-		change = t.Results.SAST[0].CreateResultsPredicate(t.Project.ProjectID)
+		change := t.Results.SAST[0].CreateResultsPredicate(t.Project.ProjectID)
+		change.Update(t.State, t.Severity, t.Comment)
+		err := cx1client.AddSASTResultsPredicates([]Cx1ClientGo.SASTResultsPredicates{change})
+		return err
 	case "SCA":
-		if len(t.Results.SCA) == 0 {
-			return fmt.Errorf("specified SCA result not found")
-		}
-		change = t.Results.SCA[0].CreateResultsPredicate(t.Project.ProjectID)
+		return fmt.Errorf("updating SCA results is not supported")
 	case "KICS":
 		if len(t.Results.KICS) == 0 {
 			return fmt.Errorf("specified KICS result not found")
 		}
-		change = t.Results.KICS[0].CreateResultsPredicate(t.Project.ProjectID)
+		change := t.Results.KICS[0].CreateResultsPredicate(t.Project.ProjectID)
+		change.Update(t.State, t.Severity, t.Comment)
+		err := cx1client.AddKICSResultsPredicates([]Cx1ClientGo.KICSResultsPredicates{change})
+		return err
 	}
 
-	if t.State != "" {
-		change.State = t.State
-	}
-	if t.Severity != "" {
-		change.Severity = t.Severity
-	}
-	if t.Comment != "" {
-		change.Comment = t.Comment
-	}
-
-	err := cx1client.AddResultsPredicates([]Cx1ClientGo.ResultsPredicates{change})
-	return err
+	return fmt.Errorf("unknown type: %v", t.Type)
 }
 
 func (t *ResultCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {

@@ -1,7 +1,7 @@
 IAMURL: https://eu.iam.checkmarx.net
 Cx1URL: https://eu.ast.checkmarx.net
 Tenant: your_tenant_here
-ProxyURL: http://127.0.0.1:8080
+#ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
   - Name: Read project scan results and update some findings
@@ -38,7 +38,7 @@ Tests:
         FindingNumber: 1 # there will be a Parameter_Tampering finding with this result hash
         Type: SAST
         SASTFilter:
-          ResultHash: "VMhOE8yTKUkdReXTf3ZkSjtBKoA="
+          ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: RU
         Comment: "This parameter tampering is actually high rish"
         Severity: HIGH
@@ -46,9 +46,17 @@ Tests:
         FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
         Type: SAST
         SASTFilter:
-          SimilarityID: 2014150247
+          SimilarityID: 715549665
         Test: RU
         Comment: "This hardcoded password is my secret backdoor, not exploitable"
+        State: NOT_EXPLOITABLE
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+        FindingNumber: 1 # there is also a Healthcheck Instruction Missing finding from KICS
+        Type: KICS
+        KICSFilter:
+          SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
+        Test: RU
+        Comment: "I don't care about the health of my container"
         State: NOT_EXPLOITABLE
   - Name: Read project scan results to verify the updates worked
     Results:
@@ -95,3 +103,11 @@ Tests:
           Query: Use_Of_Hardcoded_Password
           State: NOT_EXPLOITABLE
         Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+        FindingNumber: 1 # there is also a Healthcheck Instruction Missing finding from KICS
+        Type: KICS
+        KICSFilter:
+          SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
+          State: NOT_EXPLOITABLE
+        Test: R
+        

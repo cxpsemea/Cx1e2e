@@ -6,7 +6,7 @@ Tenant: your_tenant_here
 Tests:
   - Name: create new corp query, add to preset
     Queries:
-      - Name: e2e_test_cheeseburgers
+      - Name: EtoE_Test_Cheeseburgers
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 
@@ -26,7 +26,7 @@ Tests:
             Name: Client_DOM_XSS
           - Language: JavaScript
             Group: JavaScript_High_Risk
-            Name: e2e_test_cheeseburgers
+            Name: EtoE_Test_Cheeseburgers
         Test: RU
   - Name: run a scan with the new preset
     Scans:
@@ -49,12 +49,12 @@ Tests:
         FindingNumber: 1 # this new finding should be reported now
         Type: SAST
         SASTFilter:
-          Query: e2e_test_cheeseburgers
+          Query: EtoE_Test_Cheeseburgers
           Severity: HIGH
         Test: R
   - Name: Delete new corp query
     Queries:
-      - Name: e2e_test_cheeseburgers
+      - Name: EtoE_Test_Cheeseburgers
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 

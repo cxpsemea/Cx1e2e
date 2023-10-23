@@ -264,7 +264,7 @@ type ResultFilter struct {
 }
 
 type SASTResultFilter struct {
-	ResultFilter
+	ResultFilter  `yaml:",inline"`
 	QueryID       string `yaml:"QueryID"`
 	QueryLanguage string `yaml:"Language"`
 	QueryGroup    string `yaml:"Group"`
@@ -308,10 +308,10 @@ func (o *SASTResultFilter) String() string {
 }
 
 type KICSResultFilter struct {
-	ResultFilter
-	QueryID    string `yaml:"QueryID"`
-	QueryName  string `yaml:"Name"`
-	QueryGroup string `yaml:"Group"`
+	ResultFilter `yaml:",inline"`
+	QueryID      string `yaml:"QueryID"`
+	QueryName    string `yaml:"Name"`
+	QueryGroup   string `yaml:"Group"`
 }
 
 func (o *KICSResultFilter) String() string {
@@ -340,7 +340,7 @@ func (o *KICSResultFilter) String() string {
 }
 
 type SCAResultFilter struct {
-	ResultFilter
+	ResultFilter `yaml:",inline"`
 	CveName      string `yaml:"CveName"`
 	PackageMatch string `yaml:"PackageMatch"`
 }
