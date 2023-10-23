@@ -178,7 +178,7 @@ func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test Te
 			return false
 		}
 		if !val {
-			logger.Warnf("Test requires feature flag %v but it is disabled", flag)
+			logger.Debugf("Test requires feature flag %v but it is disabled", flag)
 			return false
 		}
 	}
