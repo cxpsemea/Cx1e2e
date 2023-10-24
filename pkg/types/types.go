@@ -396,9 +396,9 @@ type ScanCRUD struct {
 
 func (o ScanCRUD) String() string {
 	if o.Repository != "" {
-		return fmt.Sprintf("%v: repo %v, branch %v", o.Project, o.Repository, o.Branch)
+		return fmt.Sprintf("%v scan of %v: repo %v, branch %v", o.Engine, o.Project, o.Repository, o.Branch)
 	} else {
-		return fmt.Sprintf("%v: zip %v, branch %v", o.Project, o.ZipFile, o.Branch)
+		return fmt.Sprintf("%v scan of %v: zip %v, branch %v", o.Engine, o.Project, o.ZipFile, o.Branch)
 	}
 }
 
