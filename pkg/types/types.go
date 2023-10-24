@@ -144,7 +144,11 @@ type ImportCRUD struct {
 }
 
 func (o ImportCRUD) String() string {
-	return o.Name
+	if o.TimeoutSeconds == 0 {
+		return o.Name
+	} else {
+		return fmt.Sprintf("%v (%d sec timeout)", o.Name, o.TimeoutSeconds)
+	}
 }
 
 type PresetCRUD struct {
