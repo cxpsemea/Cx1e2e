@@ -45,6 +45,7 @@ func run() float32 {
 	Cx1URL := flag.String("cx1", "", "Optional: CheckmarxOne platform URL, if not defined in the test config.yaml")
 	IAMURL := flag.String("iam", "", "Optional: CheckmarxOne IAM URL, if not defined in the test config.yaml")
 	Tenant := flag.String("tenant", "", "Optional: CheckmarxOne tenant, if not defined in the test config.yaml")
+	LogLevel := flag.String("log", "", "Log level: TRACE, DEBUG, INFO, WARN, ERROR, FATAL. Default INFO")
 
 	flag.Parse()
 
@@ -60,7 +61,11 @@ func run() float32 {
 		return 0
 	}
 
-	switch strings.ToUpper(Config.LogLevel) {
+	if *LogLevel == "" {
+		*LogLevel = Config.LogLevel
+	}
+
+	switch strings.ToUpper(*LogLevel) {
 	case "":
 		logger.SetLevel(logrus.InfoLevel)
 	case "TRACE":
