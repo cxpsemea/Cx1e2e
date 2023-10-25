@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
@@ -22,6 +23,8 @@ const (
 	MOD_SCAN        = "Scan"
 	MOD_USER        = "User"
 )
+
+var RepoCreds *regexp.Regexp = regexp.MustCompile(`//(.*)@`)
 
 type CRUDTest struct {
 	Test       string   `yaml:"Test"`         // CRUD [create, read, update, delete]
@@ -400,7 +403,8 @@ type ScanCRUD struct {
 
 func (o ScanCRUD) String() string {
 	if o.Repository != "" {
-		return fmt.Sprintf("%v scan of %v: repo %v, branch %v", o.Engine, o.Project, o.Repository, o.Branch)
+		safeRepo := RepoCreds.ReplaceAllString(o.Repository, "//****@")
+		return fmt.Sprintf("%v scan of %v: repo %v, branch %v", o.Engine, o.Project, safeRepo, o.Branch)
 	} else {
 		return fmt.Sprintf("%v scan of %v: zip %v, branch %v", o.Engine, o.Project, o.ZipFile, o.Branch)
 	}
