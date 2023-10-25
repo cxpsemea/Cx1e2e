@@ -10,5 +10,5 @@ Tests:
         ZipFile: ../files/e2e_import_test.zip
         ProjectMapFile: ../files/e2e_project_name_mapping.json
         EncryptionKey: "RvO2UJmPBEbpCFAxzYE8q5o23BZwfOwnSc+7xHc3d28="
-        Timeout: 600 #seconds = 10 min
+        Timeout: 1800 #seconds = 30 min
         Test: C
