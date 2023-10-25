@@ -45,7 +45,7 @@ func run() float32 {
 	Cx1URL := flag.String("cx1", "", "Optional: CheckmarxOne platform URL, if not defined in the test config.yaml")
 	IAMURL := flag.String("iam", "", "Optional: CheckmarxOne IAM URL, if not defined in the test config.yaml")
 	Tenant := flag.String("tenant", "", "Optional: CheckmarxOne tenant, if not defined in the test config.yaml")
-	LogLevel := flag.String("log", "", "Log level: TRACE, DEBUG, INFO, WARN, ERROR, FATAL. Default INFO")
+	LogLevel := flag.String("log", "", "Log level: TRACE, DEBUG, INFO, WARNING, ERROR, FATAL. Default INFO")
 
 	flag.Parse()
 
@@ -66,20 +66,26 @@ func run() float32 {
 	}
 
 	switch strings.ToUpper(*LogLevel) {
-	case "":
-		logger.SetLevel(logrus.InfoLevel)
 	case "TRACE":
+		logger.Info("Setting log level to TRACE")
 		logger.SetLevel(logrus.TraceLevel)
 	case "DEBUG":
+		logger.Info("Setting log level to DEBUG")
 		logger.SetLevel(logrus.DebugLevel)
 	case "INFO":
+		logger.Info("Setting log level to INFO")
 		logger.SetLevel(logrus.InfoLevel)
 	case "WARNING":
+		logger.Info("Setting log level to WARNING")
 		logger.SetLevel(logrus.WarnLevel)
 	case "ERROR":
+		logger.Info("Setting log level to ERROR")
 		logger.SetLevel(logrus.ErrorLevel)
 	case "FATAL":
+		logger.Info("Setting log level to FATAL")
 		logger.SetLevel(logrus.FatalLevel)
+	default:
+		logger.Info("Log level set to default: INFO")
 	}
 
 	var cx1client *Cx1ClientGo.Cx1Client
