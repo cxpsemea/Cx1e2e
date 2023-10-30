@@ -33,6 +33,9 @@ type TestConfig struct {
 	LogLevel   string    `yaml:"LogLevel"`
 	ConfigPath string    `yaml:"-"`
 	AuthType   string    `yaml:"-"`
+	AuthUser   string    `yaml:"-"`
+	ReportType string    `yaml:"ReportType"`
+	ReportName string    `yaml:"ReportName"`
 }
 
 type TestResult struct {
@@ -59,4 +62,46 @@ type CounterSet struct {
 	Read   Counter
 	Update Counter
 	Delete Counter
+}
+
+type ReportSettings struct {
+	Target    string `json:"TestTarget"`
+	Auth      string `json:"Authentication"`
+	Config    string `json:"TestConfig"`
+	Timestamp string `json:"ExecutionTime"`
+	E2ESuffix string `json:"E2ESuffix"`
+}
+
+type ReportSummary struct {
+	Total Counter `json:"Total"`
+	Area  struct {
+		Access      CounterSet
+		Application CounterSet
+		Flag        CounterSet
+		Group       CounterSet
+		Import      CounterSet
+		Preset      CounterSet
+		Project     CounterSet
+		Query       CounterSet
+		Result      CounterSet
+		Report      CounterSet
+		Role        CounterSet
+		Scan        CounterSet
+		User        CounterSet
+	} `json:"Area"`
+}
+
+type ReportTestDetails struct {
+	Name       string
+	Source     string
+	Test       string
+	Duration   float64
+	ResultType int `json:"-"`
+	Result     string
+}
+
+type Report struct {
+	Settings ReportSettings      `json:"Settings"`
+	Summary  ReportSummary       `json:"Summary"`
+	Details  []ReportTestDetails `json:"Details"`
 }

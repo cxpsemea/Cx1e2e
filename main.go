@@ -46,6 +46,8 @@ func run() float32 {
 	IAMURL := flag.String("iam", "", "Optional: CheckmarxOne IAM URL, if not defined in the test config.yaml")
 	Tenant := flag.String("tenant", "", "Optional: CheckmarxOne tenant, if not defined in the test config.yaml")
 	LogLevel := flag.String("log", "", "Log level: TRACE, DEBUG, INFO, WARNING, ERROR, FATAL. Default INFO")
+	ReportType := flag.String("report-type", "", "Report output format: html or json. Default both: html,json")
+	ReportName := flag.String("report-name", "", "Report output base name: cx1e2e_result. Default creates both cx1e2e_result.html and cx1e2e_result.json")
 
 	flag.Parse()
 
@@ -86,6 +88,25 @@ func run() float32 {
 		logger.SetLevel(logrus.FatalLevel)
 	default:
 		logger.Info("Log level set to default: INFO")
+	}
+
+	if *ReportName != "" {
+		Config.ReportName = *ReportName
+	}
+	if Config.ReportName == "" {
+		Config.ReportName = "cx1e2e_result"
+	}
+
+	if *ReportType != "" {
+		Config.ReportType = strings.ToLower(*ReportType)
+	}
+	if Config.ReportType == "" {
+		Config.ReportType = "html,json"
+	} else {
+		if Config.ReportType != "html" && Config.ReportType != "json" && Config.ReportType != "html,json" {
+			logger.Errorf("Supplied report type (%v) is invalid, using default", Config.ReportType)
+			Config.ReportType = "html,json"
+		}
 	}
 
 	var cx1client *Cx1ClientGo.Cx1Client
@@ -129,6 +150,11 @@ func run() float32 {
 	}
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
+	currentUser, err := cx1client.GetCurrentUser()
+	if err != nil {
+		logger.Fatalf("Failed to get cx1 client current user: %s", err)
+	}
+	Config.AuthUser = currentUser.String()
 
 	return process.RunTests(cx1client, logger, &Config)
 }
