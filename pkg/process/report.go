@@ -1,121 +1,172 @@
 package process
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/cxpsemea/cx1e2e/pkg/types"
 	"github.com/sirupsen/logrus"
 )
 
-func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConfig) (float32, error) {
-	count_failed := 0
-	count_passed := 0
-	count_skipped := 0
+func prepareReportData(tests *[]TestResult, Config *TestConfig) Report {
+	var report Report
+	report.Settings.Target = fmt.Sprintf("%v tenant %v", Config.Cx1URL, Config.Tenant)
+	report.Settings.Auth = fmt.Sprintf("%v user %v", Config.AuthType, Config.AuthUser)
+	report.Settings.Config = Config.ConfigPath
+	report.Settings.Timestamp = time.Now().String()
+	report.Settings.E2ESuffix = os.Getenv("E2E_RUN_SUFFIX")
 
-	logger.Infof("Test result summary:\n")
-
-	var Access, Application, Flag, Group, Import, Preset, Project, Query, Result, Report, Role, Scan, User CounterSet
 	for _, r := range *tests {
-		var set *CounterSet
-		switch r.Module {
-		case types.MOD_ACCESS:
-			set = &Access
-		case types.MOD_APPLICATION:
-			set = &Application
-		case types.MOD_FLAG:
-			set = &Flag
-		case types.MOD_GROUP:
-			set = &Group
-		case types.MOD_IMPORT:
-			set = &Import
-		case types.MOD_PRESET:
-			set = &Preset
-		case types.MOD_PROJECT:
-			set = &Project
-		case types.MOD_QUERY:
-			set = &Query
-		case types.MOD_RESULT:
-			set = &Result
-		case types.MOD_REPORT:
-			set = &Report
-		case types.MOD_ROLE:
-			set = &Role
-		case types.MOD_SCAN:
-			set = &Scan
-		case types.MOD_USER:
-			set = &User
-		}
+		report.AddTest(&r)
+	}
 
-		var count *Counter
+	return report
+}
 
-		switch r.CRUD {
-		case types.OP_CREATE:
-			count = &(set.Create)
-		case types.OP_READ:
-			count = &(set.Read)
-		case types.OP_UPDATE:
-			count = &(set.Update)
-		case types.OP_DELETE:
-			count = &(set.Delete)
-		}
+func (c *Counter) AddTest(t *TestResult) {
+	switch t.Result {
+	case TST_PASS:
+		c.Pass++
+	case TST_FAIL:
+		c.Fail++
+	case TST_SKIP:
+		c.Skip++
+	}
+}
 
-		switch r.Result {
-		case TST_PASS:
-			count.Pass++
-		case TST_FAIL:
-			count.Fail++
-		case TST_SKIP:
-			count.Skip++
-		}
+func (c *CounterSet) AddTest(t *TestResult) {
+	switch t.CRUD {
+	case types.OP_CREATE:
+		c.Create.AddTest(t)
+	case types.OP_READ:
+		c.Read.AddTest(t)
+	case types.OP_UPDATE:
+		c.Update.AddTest(t)
+	case types.OP_DELETE:
+		c.Delete.AddTest(t)
+	}
+}
 
-		var testtype = "Test"
-		if r.FailTest {
-			testtype = "Negative-Test"
-		}
-		switch r.Result {
-		case 1:
-			fmt.Printf("PASS %v - %v %v %v: %v\n", r.Name, r.CRUD, r.Module, testtype, r.TestObject)
-			count_passed++
-		case 0:
-			fmt.Printf("FAIL %v - %v %v %v: %v\n", r.Name, r.CRUD, r.Module, testtype, r.TestObject)
-			count_failed++
-		case 2:
-			fmt.Printf("SKIP %v - %v %v %v: %v\n", r.Name, r.CRUD, r.Module, testtype, r.TestObject)
-			count_skipped++
-		}
+func (s *ReportSummary) AddTest(t *TestResult) {
+	switch t.Module {
+	case types.MOD_ACCESS:
+		s.Area.Access.AddTest(t)
+	case types.MOD_APPLICATION:
+		s.Area.Application.AddTest(t)
+	case types.MOD_FLAG:
+		s.Area.Flag.AddTest(t)
+	case types.MOD_GROUP:
+		s.Area.Group.AddTest(t)
+	case types.MOD_IMPORT:
+		s.Area.Import.AddTest(t)
+	case types.MOD_PRESET:
+		s.Area.Preset.AddTest(t)
+	case types.MOD_PROJECT:
+		s.Area.Project.AddTest(t)
+	case types.MOD_QUERY:
+		s.Area.Query.AddTest(t)
+	case types.MOD_RESULT:
+		s.Area.Result.AddTest(t)
+	case types.MOD_REPORT:
+		s.Area.Report.AddTest(t)
+	case types.MOD_ROLE:
+		s.Area.Role.AddTest(t)
+	case types.MOD_SCAN:
+		s.Area.Scan.AddTest(t)
+	case types.MOD_USER:
+		s.Area.User.AddTest(t)
+	}
+
+	switch t.Result {
+	case TST_PASS:
+		s.Total.Pass++
+	case TST_SKIP:
+		s.Total.Skip++
+	case TST_FAIL:
+		s.Total.Fail++
+	}
+}
+
+func (r *Report) AddTest(t *TestResult) {
+	r.Summary.AddTest(t)
+
+	testtype := "Test"
+	if t.FailTest {
+		testtype = "Negative-Test"
+	}
+
+	details := ReportTestDetails{
+		Name:       t.Name,
+		Source:     t.TestSource,
+		Test:       fmt.Sprintf("%v %v %v: %v", t.CRUD, t.Module, testtype, t.TestObject),
+		Duration:   t.Duration,
+		ResultType: t.Result,
+	}
+
+	switch t.Result {
+	case TST_PASS:
+		details.Result = "PASS"
+	case TST_FAIL:
+		details.Result = fmt.Sprintf("FAIL: %v", t.Reason)
+	case TST_SKIP:
+		details.Result = fmt.Sprintf("SKIP: %v", t.Reason)
+	}
+
+	r.Details = append(r.Details, details)
+}
+
+func (d ReportTestDetails) String() string {
+	result := "PASS"
+	switch d.ResultType {
+	case TST_FAIL:
+		result = "FAIL"
+	case TST_SKIP:
+		result = "SKIP"
+	}
+
+	return fmt.Sprintf("%v %v - %v", result, d.Name, d.Test)
+}
+
+func OutputSummaryConsole(reportData *Report, logger *logrus.Logger) {
+	fmt.Println("Test result summary:")
+	for _, r := range reportData.Details {
+		fmt.Println(r.String())
 	}
 
 	fmt.Println("")
-	fmt.Printf("Ran %d tests\n", (count_failed + count_passed + count_skipped))
-	if count_failed > 0 {
-		fmt.Printf("FAILED %d tests\n", count_failed)
+	fmt.Printf("Ran %d tests\n", (reportData.Summary.Total.Fail + reportData.Summary.Total.Pass + reportData.Summary.Total.Skip))
+	if reportData.Summary.Total.Fail > 0 {
+		fmt.Printf("FAILED %d tests\n", reportData.Summary.Total.Fail)
 	}
-	if count_skipped > 0 {
-		fmt.Printf("SKIPPED %d tests\n", count_skipped)
+	if reportData.Summary.Total.Skip > 0 {
+		fmt.Printf("SKIPPED %d tests\n", reportData.Summary.Total.Skip)
 	}
-	if count_passed > 0 {
-		fmt.Printf("PASSED %d tests\n", count_passed)
+	if reportData.Summary.Total.Pass > 0 {
+		fmt.Printf("PASSED %d tests\n", reportData.Summary.Total.Pass)
 	}
-	status := float32(count_passed) / float32(count_failed+count_passed+count_skipped)
 
-	report, err := os.Create("cx1e2e_result.html")
+}
+
+func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig) error {
+	report, err := os.Create(reportName)
 	if err != nil {
-		return status, err
+		return err
 	}
 
 	defer report.Close()
 	_, err = report.WriteString(fmt.Sprintf("<html><head><title>%v tenant %v test - %v</title></head><body>", Config.Cx1URL, Config.Tenant, time.Now().String()))
 	if err != nil {
-		return status, err
+		return err
 	}
 
 	report.WriteString("<h2>Settings</h2>")
-	report.WriteString(fmt.Sprintf("Running end to end tests against %v tenant %v<br>", Config.Cx1URL, Config.Tenant))
-	report.WriteString(fmt.Sprintf("Authenticated using %v<br>", Config.AuthType))
-	report.WriteString(fmt.Sprintf("Test set defined in configuration %v<br>", Config.ConfigPath))
-	report.WriteString(fmt.Sprintf("Execution timestamp: %v.<br>", time.Now().String()))
+	report.WriteString(fmt.Sprintf("Running end to end tests against %v<br>", reportData.Settings.Target))
+	report.WriteString(fmt.Sprintf("Authenticated using %v<br>", reportData.Settings.Auth))
+	report.WriteString(fmt.Sprintf("Test set defined in configuration %v<br>", reportData.Settings.Config))
+	report.WriteString(fmt.Sprintf("Execution timestamp: %v.<br>", reportData.Settings.Timestamp))
 	if os.Getenv("E2E_RUN_SUFFIX") == "" {
 		report.WriteString(fmt.Sprintf("Default object name suffix %%E2E_RUN_SUFFIX%% environment variable is blank. Objects created by cx1e2e will use default names.<br>"))
 	} else {
@@ -124,53 +175,88 @@ func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConf
 
 	report.WriteString("<h2>Summary</h2>")
 
-	report.WriteString(fmt.Sprintf("<p>Test status:<br>FAIL: %d<br>SKIP: %d<br>PASS:%d<br></p>", count_failed, count_skipped, count_passed))
+	report.WriteString(fmt.Sprintf("<p>Test status:<br>FAIL: %d<br>SKIP: %d<br>PASS:%d<br></p>", reportData.Summary.Total.Fail, reportData.Summary.Total.Skip, reportData.Summary.Total.Pass))
 
 	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th rowspan=2>Area</th><th colspan=3>Create</th><th colspan=3>Read</th><th colspan=3>Update</th><th colspan=3>Delete</th></tr>\n")
 	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
-	writeCounterSet(report, "Access Assignment", &Access)
-	writeCounterSet(report, "Application", &Application)
-	writeCounterSet(report, "Flag", &Flag)
-	writeCounterSet(report, "Group", &Group)
-	writeCounterSet(report, "Import", &Import)
-	writeCounterSet(report, "Preset", &Preset)
-	writeCounterSet(report, "Project", &Project)
-	writeCounterSet(report, "Query", &Query)
-	writeCounterSet(report, "Result", &Result)
-	writeCounterSet(report, "Report", &Report)
-	writeCounterSet(report, "Role", &Role)
-	writeCounterSet(report, "Scan", &Scan)
-	writeCounterSet(report, "User", &User)
+	writeCounterSet(report, "Access Assignment", &reportData.Summary.Area.Access)
+	writeCounterSet(report, "Application", &reportData.Summary.Area.Application)
+	writeCounterSet(report, "Flag", &reportData.Summary.Area.Flag)
+	writeCounterSet(report, "Group", &reportData.Summary.Area.Group)
+	writeCounterSet(report, "Import", &reportData.Summary.Area.Import)
+	writeCounterSet(report, "Preset", &reportData.Summary.Area.Preset)
+	writeCounterSet(report, "Project", &reportData.Summary.Area.Project)
+	writeCounterSet(report, "Query", &reportData.Summary.Area.Query)
+	writeCounterSet(report, "Result", &reportData.Summary.Area.Result)
+	writeCounterSet(report, "Report", &reportData.Summary.Area.Report)
+	writeCounterSet(report, "Role", &reportData.Summary.Area.Role)
+	writeCounterSet(report, "Scan", &reportData.Summary.Area.Scan)
+	writeCounterSet(report, "User", &reportData.Summary.Area.User)
 	report.WriteString("</table><br>")
 
 	report.WriteString("<h2>Details</h2>")
 	report.WriteString("<table border=1 style='border:1px solid black' cellpadding=2 cellspacing=0><tr><th>Test Set</th><th>Test</th><th>Duration (sec)</th><th>Result</th></tr>\n")
 
-	for _, t := range *tests {
-		result := "<span style='color:green'>PASS</span>"
-		if t.Result == TST_FAIL {
-			result = fmt.Sprintf("<span style='color:red'>FAIL: %v</span>", t.Reason)
-		} else if t.Result == TST_SKIP {
-			result = fmt.Sprintf("<span style='color:red'>SKIP: %v</span>", t.Reason)
+	for _, t := range reportData.Details {
+		switch t.ResultType {
+		case TST_PASS:
+			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:green'>%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result))
+		case TST_SKIP:
+			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:orange'>%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result))
+		case TST_FAIL:
+			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:red'>%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result))
 		}
-		testtype := "Test"
-		if t.FailTest {
-			testtype = "Negative-Test"
-		}
-		report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v %v %v: %v</td><td>%.2f</td><td>%v</td></tr>\n", t.Name, t.TestSource, t.CRUD, t.Module, testtype, t.TestObject, t.Duration, result))
 	}
 
 	report.WriteString("</table>\n")
 
 	_, err = report.WriteString("</body></html>")
 	if err != nil {
-		return status, err
+		return err
 	}
 
-	err = report.Sync()
+	return report.Sync()
+}
+
+func OutputReportJSON(reportName string, reportData *Report) error {
+	report, err := os.Create(reportName)
 	if err != nil {
-		return status, err
+		return err
 	}
+
+	defer report.Close()
+
+	json, err := json.Marshal(*reportData)
+	if err != nil {
+		return err
+	}
+	_, err = report.Write(json)
+	if err != nil {
+		return err
+	}
+
+	return report.Sync()
+}
+
+func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConfig) (float32, error) {
+	reportData := prepareReportData(tests, Config)
+	OutputSummaryConsole(&reportData, logger)
+
+	if strings.Contains(Config.ReportType, "html") {
+		err := OutputReportHTML(fmt.Sprintf("%v.html", Config.ReportName), &reportData, Config)
+		if err != nil {
+			logger.Errorf("Failed to write HTML report to %v.html: %s", Config.ReportName, err)
+		}
+	}
+
+	if strings.Contains(Config.ReportType, "json") {
+		err := OutputReportJSON(fmt.Sprintf("%v.json", Config.ReportName), &reportData)
+		if err != nil {
+			logger.Errorf("Failed to write JSON report to %v.json: %s", Config.ReportName, err)
+		}
+	}
+
+	status := float32(reportData.Summary.Total.Pass) / float32(reportData.Summary.Total.Skip+reportData.Summary.Total.Fail+reportData.Summary.Total.Pass)
 
 	return status, nil
 }
