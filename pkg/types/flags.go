@@ -15,7 +15,7 @@ func (t *FlagCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *FlagCRUD) IsSupported(CRUD string) bool {
+func (t *FlagCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
 	return CRUD == OP_READ
 }
 
