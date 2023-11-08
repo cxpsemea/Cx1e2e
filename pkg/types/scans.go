@@ -24,7 +24,7 @@ func (t *ScanCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ScanCRUD) IsSupported(CRUD string) bool {
+func (t *ScanCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
 	return !(CRUD == OP_UPDATE)
 }
 
@@ -42,15 +42,21 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 
 	scanDelay := cx1client.GetClientVars().ScanPollingDelaySeconds
 
-	engines := strings.Split(t.Engine, " ")
+	requested_engines := strings.Split(t.Engine, " ")
+	engines := make([]string, 0)
 
-	for _, e := range engines {
-		scanConfig := Cx1ClientGo.ScanConfiguration{}
-		scanConfig.ScanType = e
-		if e == "sast" {
-			scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
+	for _, e := range requested_engines {
+		if cx1client.IsEngineAllowed(e) {
+			engines = append(engines, e)
+			scanConfig := Cx1ClientGo.ScanConfiguration{}
+			scanConfig.ScanType = e
+			if e == "sast" {
+				scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
+			}
+			scanConfigs = append(scanConfigs, scanConfig)
+		} else {
+			logger.Warnf("Requested to run a scan with engine %v but this is not supported in the license and will be skipped", e)
 		}
-		scanConfigs = append(scanConfigs, scanConfig)
 	}
 
 	var test_Scan Cx1ClientGo.Scan

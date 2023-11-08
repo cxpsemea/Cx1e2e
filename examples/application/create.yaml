@@ -16,5 +16,5 @@ Tests:
       - Name: e2e-test-app-app%E2E_RUN_SUFFIX%
         Rules: 
           - Type: "project.name.in"
-            Value: "e2e-test-app-projec%E2E_RUN_SUFFIX%1"
+            Value: "e2e-test-app-project%E2E_RUN_SUFFIX%"
         Test: C

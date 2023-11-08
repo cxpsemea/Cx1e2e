@@ -16,8 +16,8 @@ Tests:
         Repository: https://github.com/michaelkubiaczyk/ssba
         Branch: master
         Preset: All
-        Engine: sast #SAST only
-        #Engine: sast sca kics apisec #throw everything at it
+        #Engine: sast #SAST only
+        Engine: sast sca kics apisec #throw everything at it
         WaitForEnd: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Status: Completed #Failed, Partial

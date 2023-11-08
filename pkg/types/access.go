@@ -15,7 +15,7 @@ func CheckAMFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
 	return flag
 }
 
-func (t *AccessAssignmentCRUD) IsSupported(CRUD string) bool {
+func (t *AccessAssignmentCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
 	return true
 }
 

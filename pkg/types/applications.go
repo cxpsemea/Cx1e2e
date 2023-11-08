@@ -18,7 +18,7 @@ func (t *ApplicationCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ApplicationCRUD) IsSupported(CRUD string) bool {
+func (t *ApplicationCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
 	return true
 }
 
