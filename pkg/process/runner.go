@@ -18,7 +18,7 @@ type TestRunner interface {
 	Validate(testType string) error
 	String() string
 	IsType(testType string) bool
-	IsSupported(testType string) bool
+	IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testType string) bool
 	IsNegative() bool
 	GetSource() string
 	GetModule() string
@@ -111,7 +111,7 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, C
 
 func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName string, test TestRunner, results *[]TestResult) {
 	if test.IsType(CRUD) {
-		if !test.IsSupported(CRUD) {
+		if !test.IsSupported(cx1client, logger, CRUD) {
 			logger.Warnf("Test for %v %v is not supported and will be skipped.", CRUD, test.String())
 		} else if !CheckFlags(cx1client, logger, test) {
 			logger.Warnf("Test for %v %v requires features that are not enabled in this environment and will be skipped.", CRUD, test.String())

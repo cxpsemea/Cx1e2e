@@ -23,7 +23,7 @@ func (t *CxQLCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *CxQLCRUD) IsSupported(CRUD string) bool {
+func (t *CxQLCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
 	return true
 }
 

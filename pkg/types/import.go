@@ -24,7 +24,7 @@ func (t *ImportCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ImportCRUD) IsSupported(CRUD string) bool {
+func (t *ImportCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
 	return CRUD == OP_CREATE
 }
 

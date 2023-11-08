@@ -27,7 +27,12 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ResultCRUD) IsSupported(CRUD string) bool {
+func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
+	if !cx1client.IsEngineAllowed(t.Type) {
+		logger.Warnf("Test attempts to access results from engine %v but this is not supported in the license and will be skipped", t.Type)
+		return false
+	}
+
 	return (CRUD == OP_UPDATE && (t.Type == "SAST" || t.Type == "KICS")) || CRUD == OP_READ
 }
 
