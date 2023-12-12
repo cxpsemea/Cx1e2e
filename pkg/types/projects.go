@@ -43,22 +43,22 @@ func (t *ProjectCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus
 		tags[tag.Key] = tag.Value
 	}
 
-	test_Project, err := cx1client.CreateProject(t.Name, group_ids, tags)
-	if err != nil {
-		return err
-	}
-	t.Project = &test_Project
-
-	if t.Application != "" {
+	if t.Application == "" {
+		test_Project, err := cx1client.CreateProject(t.Name, group_ids, tags)
+		if err != nil {
+			return err
+		}
+		t.Project = &test_Project
+	} else {
 		app, err := cx1client.GetApplicationByName(t.Application)
 		if err != nil {
 			return err
 		}
-		app.AssignProject(t.Project)
-		err = cx1client.UpdateApplication(&app)
+		test_Project, err := cx1client.CreateProjectInApplication(t.Name, group_ids, tags, app.ApplicationID)
 		if err != nil {
 			return err
 		}
+		t.Project = &test_Project
 	}
 
 	return nil
