@@ -220,13 +220,13 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 		if query.Level != "Corp" {
 			return fmt.Errorf("no Corp-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
 		}
-	} else if t.Scope.Project != "" {
-		if query.Level != "Project" {
-			return fmt.Errorf("no Project-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
-		}
 	} else if t.Scope.Application != "" {
 		if query.Level != "Team" {
 			return fmt.Errorf("no Application-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		}
+	} else if t.Scope.Project != "" {
+		if query.Level != "Project" {
+			return fmt.Errorf("no Project-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
 		}
 	}
 

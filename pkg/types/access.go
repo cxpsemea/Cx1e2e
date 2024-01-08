@@ -81,7 +81,11 @@ func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		access.ResourceID = project.ProjectID
 	}
 
-	access.EntityRoles = t.Roles
+	access.EntityRoles = make([]Cx1ClientGo.AccessAssignedRole, len(t.Roles) )
+
+	for id, r := t.Roles {
+		access.EntityRoles[id].Name = r	
+	}
 
 	return access, nil
 }
@@ -114,7 +118,7 @@ func (t *AccessAssignmentCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger 
 	for _, rr := range t.Roles {
 		hasrole := false
 		for _, ar := range assignment.EntityRoles {
-			if rr == ar {
+			if rr == ar.Name {
 				hasrole = true
 				break
 			}
