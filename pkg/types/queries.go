@@ -99,13 +99,8 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCR
 	return &auditQuery
 }
 
-func compileQuery(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuery, t *CxQLCRUD) error {
-	session, err := getAuditSession(cx1client, t)
-	if err != nil {
-		return err
-	}
-
-	err = cx1client.AuditCompileQuery(session, *query)
+func compileQuery(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuery, session string, t *CxQLCRUD) error {
+	err := cx1client.AuditCompileQuery(session, *query)
 	if err != nil {
 		return fmt.Errorf("error triggering query compile: %s", err)
 	}
@@ -118,6 +113,11 @@ func compileQuery(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuer
 }
 
 func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
+	session, err := getAuditSession(cx1client, t)
+	if err != nil {
+		return err
+	}
+
 	t.Query.Severity = cx1client.GetSeverityID(t.Severity)
 
 	if t.Source != "" {
@@ -127,13 +127,13 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 	t.Query.IsExecutable = t.IsExecutable
 
 	if t.Compile {
-		err := compileQuery(cx1client, t.Query, t)
+		err := compileQuery(cx1client, t.Query, session, t)
 		if err != nil {
 			return err
 		}
 	}
 
-	err := cx1client.UpdateQuery(*t.Query)
+	err = cx1client.AuditUpdateQuery(session, *t.Query)
 	if err != nil {
 		return err
 	}
@@ -143,6 +143,11 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 
 func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
 	t.Query = getQuery(cx1client, logger, t)
+
+	session, err := getAuditSession(cx1client, t)
+	if err != nil {
+		return err
+	}
 
 	if t.Query != nil {
 		logger.Debugf("Found query: %v", t.Query.String())
@@ -182,7 +187,7 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		newQuery.IsExecutable = t.IsExecutable
 
 		if t.Compile {
-			err = compileQuery(cx1client, &newQuery, t)
+			err = compileQuery(cx1client, &newQuery, session, t)
 			if err != nil {
 				return err
 			}
@@ -204,11 +209,28 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 }
 
 func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
-	t.Query = getQuery(cx1client, logger, t)
-
-	if t.Query == nil {
+	query := getQuery(cx1client, logger, t)
+	if query == nil {
 		return fmt.Errorf("no such query %v: %v -> %v -> %v exists", t.Scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
+
+	fmt.Printf("Retrieved query at levelID %v: %v", query.LevelID, query.String())
+
+	if t.Scope.Corp {
+		if query.Level != "Corp" {
+			return fmt.Errorf("no Corp-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		}
+	} else if t.Scope.Application != "" {
+		if query.Level != "Team" {
+			return fmt.Errorf("no Application-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		}
+	} else if t.Scope.Project != "" {
+		if query.Level != "Project" {
+			return fmt.Errorf("no Project-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		}
+	}
+
+	t.Query = query
 
 	return nil
 }
