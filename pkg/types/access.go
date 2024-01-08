@@ -81,10 +81,10 @@ func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		access.ResourceID = project.ProjectID
 	}
 
-	access.EntityRoles = make([]Cx1ClientGo.AccessAssignedRole, len(t.Roles) )
+	access.EntityRoles = make([]Cx1ClientGo.AccessAssignedRole, len(t.Roles))
 
-	for id, r := t.Roles {
-		access.EntityRoles[id].Name = r	
+	for id, r := range t.Roles {
+		access.EntityRoles[id].Name = r
 	}
 
 	return access, nil
