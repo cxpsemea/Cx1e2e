@@ -27,13 +27,23 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
+func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
 	if !cx1client.IsEngineAllowed(t.Type) {
-		logger.Warnf("Test attempts to access results from engine %v but this is not supported in the license and will be skipped", t.Type)
-		return false
+		return fmt.Errorf("test attempts to access results from engine %v but this is not supported in the license and will be skipped", t.Type)
+	}
+	if !Engines.IsEnabled(t.Type) {
+		return fmt.Errorf("test attempts to access results from engine %v but this was disabled for this test execution", t.Type)
 	}
 
-	return (CRUD == OP_UPDATE && (t.Type == "SAST" || t.Type == "KICS")) || CRUD == OP_READ
+	if CRUD == OP_UPDATE && !(t.Type == "SAST" || t.Type == "KICS") {
+		return fmt.Errorf("can only update SAST and KICS results")
+	}
+
+	if CRUD != OP_READ {
+		return fmt.Errorf("can't delete or create results")
+	}
+
+	return nil
 }
 
 func (t *ResultCRUD) GetModule() string {
@@ -158,11 +168,11 @@ func (t *ResultCRUD) Filter(results *Cx1ClientGo.ScanResultSet) Cx1ClientGo.Scan
 	return final_results
 }
 
-func (t *ResultCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ResultCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not implemented")
 }
 
-func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	project, err := cx1client.GetProjectByName(t.ProjectName)
 	if err != nil {
 		return err
@@ -208,7 +218,7 @@ func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return nil
 }
 
-func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	switch t.Type {
 	case "SAST":
 		if len(t.Results.SAST) == 0 {
@@ -233,6 +243,6 @@ func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	return fmt.Errorf("unknown type: %v", t.Type)
 }
 
-func (t *ResultCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ResultCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not implemented")
 }

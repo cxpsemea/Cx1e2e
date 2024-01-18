@@ -19,8 +19,8 @@ func (t *GroupCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *GroupCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *GroupCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *GroupCRUD) GetModule() string {
@@ -57,7 +57,7 @@ func updateGroup(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Gro
 	return nil
 }
 
-func (t *GroupCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *GroupCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_Group, err := cx1client.CreateGroup(t.Name)
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (t *GroupCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.L
 	return nil
 }
 
-func (t *GroupCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *GroupCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_Group, err := cx1client.GetGroupByName(t.Name)
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (t *GroupCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 	return nil
 }
 
-func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	err := updateGroup(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.L
 	return nil
 }
 
-func (t *GroupCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *GroupCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	err := cx1client.DeleteGroup(t.Group)
 	if err != nil {
 		return err

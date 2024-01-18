@@ -23,8 +23,8 @@ func (t *CxQLCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *CxQLCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *CxQLCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *CxQLCRUD) GetModule() string {
@@ -141,7 +141,7 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 	return nil
 }
 
-func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	t.Query = getQuery(cx1client, logger, t)
 
 	session, err := getAuditSession(cx1client, t)
@@ -208,13 +208,11 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	}
 }
 
-func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	query := getQuery(cx1client, logger, t)
 	if query == nil {
 		return fmt.Errorf("no such query %v: %v -> %v -> %v exists", t.Scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
-
-	fmt.Printf("Retrieved query at levelID %v: %v", query.LevelID, query.String())
 
 	if t.Scope.Corp {
 		if query.Level != "Corp" {
@@ -235,10 +233,10 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return updateQuery(cx1client, t)
 }
 
-func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return cx1client.DeleteQuery(*t.Query)
 }

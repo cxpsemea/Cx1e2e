@@ -15,8 +15,8 @@ func CheckAMFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
 	return flag
 }
 
-func (t *AccessAssignmentCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *AccessAssignmentCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *AccessAssignmentCRUD) Validate(CRUD string) error {
@@ -90,7 +90,7 @@ func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return access, nil
 }
 
-func (t *AccessAssignmentCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *AccessAssignmentCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	access, err := prepareAccessAssignment(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func (t *AccessAssignmentCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logge
 	return nil
 }
 
-func (t *AccessAssignmentCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *AccessAssignmentCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	access, err := prepareAccessAssignment(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -131,7 +131,7 @@ func (t *AccessAssignmentCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger 
 	return nil
 }
 
-func (t *AccessAssignmentCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *AccessAssignmentCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	access, err := prepareAccessAssignment(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -151,7 +151,7 @@ func (t *AccessAssignmentCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logge
 	return nil
 }
 
-func (t *AccessAssignmentCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *AccessAssignmentCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	access, err := prepareAccessAssignment(cx1client, logger, t)
 	if err != nil {
 		return err

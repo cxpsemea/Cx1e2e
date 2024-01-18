@@ -2,13 +2,6 @@ package types
 
 import "strings"
 
-const (
-	OP_CREATE = "Create"
-	OP_READ   = "Read"
-	OP_UPDATE = "Update"
-	OP_DELETE = "Delete"
-)
-
 func (c CRUDTest) IsNegative() bool {
 	return c.FailTest
 }

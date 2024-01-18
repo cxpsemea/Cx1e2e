@@ -24,7 +24,35 @@ const (
 	MOD_USER        = "User"
 )
 
+const (
+	OP_CREATE = "Create"
+	OP_READ   = "Read"
+	OP_UPDATE = "Update"
+	OP_DELETE = "Delete"
+)
+
 var RepoCreds *regexp.Regexp = regexp.MustCompile(`//(.*)@`)
+
+type EnabledEngines struct {
+	SAST   bool
+	KICS   bool
+	SCA    bool
+	APISEC bool
+}
+
+func (e EnabledEngines) IsEnabled(engine string) bool {
+	switch engine {
+	case "sast":
+		return e.SAST
+	case "sca":
+		return e.SCA
+	case "kics":
+		return e.KICS
+	case "apisec":
+		return e.APISEC
+	}
+	return false
+}
 
 type CRUDTest struct {
 	Test       string   `yaml:"Test"`         // CRUD [create, read, update, delete]

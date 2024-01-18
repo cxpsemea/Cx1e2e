@@ -18,8 +18,8 @@ func (t *ApplicationCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ApplicationCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *ApplicationCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *ApplicationCRUD) GetModule() string {
@@ -43,7 +43,7 @@ func updateApplication(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, 
 	return nil
 }
 
-func (t *ApplicationCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ApplicationCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	/* TODO once apps can be in groups
 	group_ids := []string{}
 
@@ -68,7 +68,7 @@ func (t *ApplicationCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 	return nil
 }
 
-func (t *ApplicationCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ApplicationCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_Application, err := cx1client.GetApplicationByName(t.Name)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (t *ApplicationCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logr
 	return nil
 }
 
-func (t *ApplicationCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ApplicationCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	err := updateApplication(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (t *ApplicationCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 	return nil
 }
 
-func (t *ApplicationCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ApplicationCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	err := cx1client.DeleteApplicationByID(t.Application.ApplicationID)
 	if err != nil {
 		return err
