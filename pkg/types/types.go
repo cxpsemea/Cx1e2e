@@ -111,6 +111,7 @@ type CxQLCRUD struct {
 	IsExecutable  bool      `yaml:"IsExecutable"`
 	Compile       bool      `yaml:"Compile"`
 	DeleteSession bool      `yaml:"DeleteAuditSession"`
+	OldAPI        bool      `yaml:"OldAPI"`
 	ScopeID       string
 	Query         *Cx1ClientGo.AuditQuery
 	LastScan      *Cx1ClientGo.Scan

@@ -128,11 +128,15 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, sessionId string, t *CxQLCRUD
 		}
 	}
 
-	return cx1client.AuditUpdateQuery(sessionId, *t.Query)
+	if t.OldAPI {
+		return cx1client.UpdateQuery(*t.Query)
+	} else {
+		return cx1client.AuditUpdateQuery(sessionId, *t.Query)
+	}
 }
 
 func (t *CxQLCRUD) TerminateSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, sessionId string) {
-	if t.DeleteSession {
+	if t.DeleteSession && sessionId != "" {
 		err := cx1client.AuditDeleteSessionByID(sessionId)
 		if err != nil {
 			logger.Errorf("Failed to delete Audit session: %v: %s", sessionId, err)
@@ -143,9 +147,14 @@ func (t *CxQLCRUD) TerminateSession(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	t.Query = getQuery(cx1client, logger, t)
 
-	session, err := getAuditSession(cx1client, t)
-	if err != nil {
-		return err
+	var session string
+	var err error
+
+	if t.Compile || !t.OldAPI {
+		session, err = getAuditSession(cx1client, t)
+		if err != nil {
+			return err
+		}
 	}
 	defer t.TerminateSession(cx1client, logger, session)
 
