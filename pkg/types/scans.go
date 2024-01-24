@@ -50,9 +50,9 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	engines := make([]string, 0)
 
 	for _, e := range requested_engines {
-		if !cx1client.IsEngineAllowed(e) {
+		if !cx1client.IsEngineAllowed(e) && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this is not supported in the license and will be skipped", e)
-		} else if !Engines.IsEnabled(e) {
+		} else if !Engines.IsEnabled(e) && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this was disabled for this test execution", e)
 		} else {
 			engines = append(engines, e)
@@ -93,6 +93,14 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	if t.WaitForEnd {
 		test_Scan, err = cx1client.ScanPollingWithTimeout(&test_Scan, true, scanDelay, t.Timeout)
 		if err != nil {
+			if err.Error()[:12] == "scan polling" && t.Cancel {
+				logger.Infof("Scan %v took too long and will be canceled", test_Scan.String())
+				err = cx1client.CancelScanByID(test_Scan.ScanID)
+				if err != nil {
+					return err
+				}
+				test_Scan, err = cx1client.ScanPollingDetailed(&test_Scan)
+			}
 			return err
 		}
 

@@ -14,5 +14,6 @@ Tests:
         #Engine: sast sca kics apisec #throw everything at it
         WaitForEnd: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
+        CancelOnTimeout: true
         Status: Failed # the branch does not exist so this scan should fail
         Test: C

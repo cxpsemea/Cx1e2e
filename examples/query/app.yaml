@@ -17,6 +17,7 @@ Tests:
         Source: "result = All.NewCxList();"
         Severity: LOW
         Compile: true
+        DeleteAuditSession: true
         Test: C
     Scans:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
@@ -26,6 +27,7 @@ Tests:
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Engine: sast
         WaitForEnd: true
+        CancelOnTimeout: true
         Test: C
     Results:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%

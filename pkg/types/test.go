@@ -27,3 +27,7 @@ func (c CRUDTest) GetSource() string {
 func (c CRUDTest) GetFlags() []string {
 	return c.Flags
 }
+
+func (c CRUDTest) IsForced() bool {
+	return c.ForceRun
+}

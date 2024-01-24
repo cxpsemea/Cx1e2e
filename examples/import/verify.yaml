@@ -20,6 +20,7 @@ Tests:
         Preset: e2e-test-import-preset
         Engine: sast # sca kics apisec
         WaitForEnd: true
+        CancelOnTimeout: true
         Test: C
     Results:
       - Project: e2e-test-import-project

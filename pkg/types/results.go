@@ -35,11 +35,11 @@ func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logru
 		return fmt.Errorf("test attempts to access results from engine %v but this was disabled for this test execution", t.Type)
 	}
 
-	if CRUD == OP_UPDATE && !(t.Type == "SAST" || t.Type == "KICS") {
-		return fmt.Errorf("can only update SAST and KICS results")
-	}
-
-	if CRUD != OP_READ {
+	if CRUD == OP_UPDATE {
+		if !(t.Type == "SAST" || t.Type == "KICS") {
+			return fmt.Errorf("can't update %v results", t.Type)
+		}
+	} else if CRUD != OP_READ {
 		return fmt.Errorf("can't delete or create results")
 	}
 
