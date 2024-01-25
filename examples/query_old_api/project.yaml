@@ -4,7 +4,7 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create project query override and run a scan
+  - Name: create project query override and run a scan (old api)
     Queries:
       - Name: Client_DOM_XSS
         Group: JavaScript_High_Risk
