@@ -18,4 +18,5 @@ Tests:
         Preset: All
         Engine: sast # sca kics apisec
         WaitForEnd: true
+        CancelOnTimeout: true
         Test: C

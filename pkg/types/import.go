@@ -24,15 +24,18 @@ func (t *ImportCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ImportCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return CRUD == OP_CREATE
+func (t *ImportCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	if CRUD != OP_CREATE {
+		return fmt.Errorf("can only create an import")
+	}
+	return nil
 }
 
 func (t *ImportCRUD) GetModule() string {
 	return MOD_IMPORT
 }
 
-func (t *ImportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ImportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	fileContents, err := os.ReadFile(t.ZipFile)
 	if err != nil {
 		return fmt.Errorf("failed to read %v: %s", t.ZipFile, err)
@@ -69,14 +72,14 @@ func (t *ImportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	return nil
 }
 
-func (t *ImportCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ImportCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }
 
-func (t *ImportCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ImportCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }
 
-func (t *ImportCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ImportCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }

@@ -45,9 +45,10 @@ func run() float32 {
 	Cx1URL := flag.String("cx1", "", "Optional: CheckmarxOne platform URL, if not defined in the test config.yaml")
 	IAMURL := flag.String("iam", "", "Optional: CheckmarxOne IAM URL, if not defined in the test config.yaml")
 	Tenant := flag.String("tenant", "", "Optional: CheckmarxOne tenant, if not defined in the test config.yaml")
-	LogLevel := flag.String("log", "", "Log level: TRACE, DEBUG, INFO, WARNING, ERROR, FATAL. Default INFO")
-	ReportType := flag.String("report-type", "", "Report output format: html or json. Default both: html,json")
-	ReportName := flag.String("report-name", "", "Report output base name: cx1e2e_result. Default creates both cx1e2e_result.html and cx1e2e_result.json")
+	LogLevel := flag.String("log", "INFO", "Log level: TRACE, DEBUG, INFO, WARNING, ERROR, FATAL")
+	ReportType := flag.String("report-type", "html,json", "Report output format: html or json")
+	ReportName := flag.String("report-name", "cx1e2e_result", "Report output base name")
+	Engines := flag.String("engines", "sast,sca,kics,apisec", "Run tests only for these engines")
 
 	flag.Parse()
 
@@ -155,6 +156,20 @@ func run() float32 {
 		logger.Fatalf("Failed to get cx1 client current user: %s", err)
 	}
 	Config.AuthUser = currentUser.String()
+
+	EngineList := strings.Split(strings.ToLower(*Engines), ",")
+	for _, e := range EngineList {
+		switch e {
+		case "sast":
+			Config.Engines.SAST = true
+		case "sca":
+			Config.Engines.SCA = true
+		case "kics":
+			Config.Engines.KICS = true
+		case "apisec":
+			Config.Engines.APISEC = true
+		}
+	}
 
 	return process.RunTests(cx1client, logger, &Config)
 }

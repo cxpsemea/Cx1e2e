@@ -49,6 +49,7 @@ Tests:
         Preset: e2e-test-preset1
         Test: C
         WaitForEnd: true
+        CancelOnTimeout: true
   - Name: Clean up and remove created elements
     Groups:
       - Name: e2e-test-group2

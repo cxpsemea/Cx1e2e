@@ -4,7 +4,7 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create new corp query, add to preset
+  - Name: create new corp query, add to preset (old api)
     Queries:
       - Name: EtoE_Test_Cheeseburgers
         Group: JavaScript_High_Risk
@@ -16,6 +16,7 @@ Tests:
         Severity: HIGH
         IsExecutable: true
         DeleteAuditSession: true
+        OldAPI: true
         Compile: true
         Test: C
     Presets:

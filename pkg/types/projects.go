@@ -19,15 +19,15 @@ func (t *ProjectCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ProjectCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *ProjectCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *ProjectCRUD) GetModule() string {
 	return MOD_PROJECT
 }
 
-func (t *ProjectCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ProjectCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	group_ids := []string{}
 
 	for _, g := range t.Groups {
@@ -64,7 +64,7 @@ func (t *ProjectCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus
 	return nil
 }
 
-func (t *ProjectCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ProjectCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_Project, err := cx1client.GetProjectByName(t.Name)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func (t *ProjectCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.L
 	return nil
 }
 
-func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	if t.Application != "" {
 		app, err := cx1client.GetApplicationByName(t.Application)
 		if err != nil {
@@ -117,7 +117,7 @@ func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus
 	return nil
 }
 
-func (t *ProjectCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ProjectCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	err := cx1client.DeleteProject(t.Project)
 	if err != nil {
 		return err

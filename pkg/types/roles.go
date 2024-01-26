@@ -19,8 +19,8 @@ func (t *RoleCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *RoleCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *RoleCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *RoleCRUD) GetModule() string {
@@ -98,7 +98,7 @@ func updateRole(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Role
 	return nil
 }
 
-func (t *RoleCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *RoleCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_Role, err := cx1client.CreateAppRole(t.Name, "cx1e2e test")
 	if err != nil {
 		return err
@@ -107,7 +107,7 @@ func (t *RoleCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return updateRole(cx1client, logger, t)
 }
 
-func (t *RoleCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *RoleCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_Role, err := cx1client.GetRoleByName(t.Name)
 	if err != nil {
 		return err
@@ -116,10 +116,10 @@ func (t *RoleCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func (t *RoleCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *RoleCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return updateRole(cx1client, logger, t)
 }
 
-func (t *RoleCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *RoleCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return cx1client.DeleteRoleByID(t.Role.RoleID)
 }

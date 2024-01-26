@@ -24,13 +24,43 @@ const (
 	MOD_USER        = "User"
 )
 
+const (
+	OP_CREATE = "Create"
+	OP_READ   = "Read"
+	OP_UPDATE = "Update"
+	OP_DELETE = "Delete"
+)
+
 var RepoCreds *regexp.Regexp = regexp.MustCompile(`//(.*)@`)
+
+type EnabledEngines struct {
+	SAST   bool
+	KICS   bool
+	SCA    bool
+	APISEC bool
+}
+
+func (e EnabledEngines) IsEnabled(engine string) bool {
+	requestedEngine := strings.ToLower(engine)
+	switch requestedEngine {
+	case "sast":
+		return e.SAST
+	case "sca":
+		return e.SCA
+	case "kics":
+		return e.KICS
+	case "apisec":
+		return e.APISEC
+	}
+	return false
+}
 
 type CRUDTest struct {
 	Test       string   `yaml:"Test"`         // CRUD [create, read, update, delete]
 	FailTest   bool     `yaml:"FailTest"`     // is it a negative test
 	Flags      []string `yaml:"FeatureFlags"` // are there specific feature flags needed for this test
 	TestSource string   // filename
+	ForceRun   bool     `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
 }
 
 type AccessAssignmentCRUD struct {
@@ -80,6 +110,8 @@ type CxQLCRUD struct {
 	Severity      string    `yaml:"Severity"`
 	IsExecutable  bool      `yaml:"IsExecutable"`
 	Compile       bool      `yaml:"Compile"`
+	DeleteSession bool      `yaml:"DeleteAuditSession"`
+	OldAPI        bool      `yaml:"OldAPI"`
 	ScopeID       string
 	Query         *Cx1ClientGo.AuditQuery
 	LastScan      *Cx1ClientGo.Scan
@@ -396,6 +428,7 @@ type ScanCRUD struct {
 	Preset        string      `yaml:"Preset"`
 	Status        string      `yaml:"Status"`
 	Timeout       int         `yaml:"Timeout"`
+	Cancel        bool        `yaml:"CancelOnTimeout"`
 	Filter        *ScanFilter `yaml:"Filter"`
 	Cx1ScanFilter *Cx1ClientGo.ScanFilter
 	Scan          *Cx1ClientGo.Scan

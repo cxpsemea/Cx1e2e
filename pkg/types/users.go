@@ -22,8 +22,8 @@ func (t *UserCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *UserCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *UserCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *UserCRUD) GetModule() string {
@@ -116,7 +116,7 @@ func updateUserFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *UserCRUD) error {
 	return nil
 }
 
-func (t *UserCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *UserCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	var test_User Cx1ClientGo.User
 	test_User.UserName = t.Name
 	test_User.Email = t.Email
@@ -135,7 +135,7 @@ func (t *UserCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return nil
 }
 
-func (t *UserCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *UserCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_User, err := cx1client.GetUserByUserName(t.Name)
 	if err != nil {
 		return err
@@ -144,7 +144,7 @@ func (t *UserCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func (t *UserCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *UserCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	err := updateUserFromConfig(cx1client, t)
 	if err != nil {
 		return err
@@ -153,7 +153,7 @@ func (t *UserCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return cx1client.UpdateUser(t.User)
 }
 
-func (t *UserCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *UserCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	err := cx1client.DeleteUser(t.User)
 	if err != nil {
 		return err

@@ -24,15 +24,19 @@ func (t *ScanCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ScanCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return !(CRUD == OP_UPDATE)
+func (t *ScanCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	if CRUD == OP_UPDATE {
+		return fmt.Errorf("updating a scan is not supported")
+	}
+
+	return nil
 }
 
 func (t *ScanCRUD) GetModule() string {
 	return MOD_SCAN
 }
 
-func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	project, err := cx1client.GetProjectByName(t.Project)
 	if err != nil {
 		return err
@@ -46,7 +50,11 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	engines := make([]string, 0)
 
 	for _, e := range requested_engines {
-		if cx1client.IsEngineAllowed(e) {
+		if !cx1client.IsEngineAllowed(e) && !t.IsForced() {
+			logger.Warnf("Requested to run a scan with engine %v but this is not supported in the license and will be skipped", e)
+		} else if !Engines.IsEnabled(e) && !t.IsForced() {
+			logger.Warnf("Requested to run a scan with engine %v but this was disabled for this test execution", e)
+		} else {
 			engines = append(engines, e)
 			scanConfig := Cx1ClientGo.ScanConfiguration{}
 			scanConfig.ScanType = e
@@ -54,8 +62,6 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 				scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
 			}
 			scanConfigs = append(scanConfigs, scanConfig)
-		} else {
-			logger.Warnf("Requested to run a scan with engine %v but this is not supported in the license and will be skipped", e)
 		}
 	}
 
@@ -87,7 +93,21 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	if t.WaitForEnd {
 		test_Scan, err = cx1client.ScanPollingWithTimeout(&test_Scan, true, scanDelay, t.Timeout)
 		if err != nil {
-			return err
+			if err.Error()[:12] == "scan polling" && t.Cancel {
+				logger.Infof("Scan %v took too long and will be canceled", test_Scan.String())
+				err = cx1client.CancelScanByID(test_Scan.ScanID)
+				if err != nil {
+					return err
+				}
+				test_Scan, err = cx1client.ScanPollingDetailed(&test_Scan)
+				if err == nil {
+					return fmt.Errorf("scan took too long and was canceled")
+				} else {
+					return fmt.Errorf("scan took too long and the attempt to cancel failed with error: %s", err)
+				}
+			} else {
+				return err
+			}
 		}
 
 		t.Scan = &test_Scan
@@ -101,7 +121,9 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 
 		missingEngines := make([]string, 0)
 
-		if (test_Scan.Status == "Completed" || test_Scan.Status == "Failed" || test_Scan.Status == "Partial") && test_Scan.Status != expectedResult {
+		if test_Scan.Status == "Canceled" {
+			return fmt.Errorf("scan was canceled")
+		} else if (test_Scan.Status == "Completed" || test_Scan.Status == "Failed" || test_Scan.Status == "Partial") && test_Scan.Status != expectedResult {
 			// the scan was not cancelled but did not have the expected result, so get the details
 			getWorkflow = true
 		} else if test_Scan.Status == "Completed" && expectedResult == "Completed" {
@@ -153,7 +175,7 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return nil
 }
 
-func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	project, err := cx1client.GetProjectByName(t.Project)
 	if err != nil {
 		return err
@@ -197,10 +219,10 @@ func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func (t *ScanCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ScanCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not implemented")
 }
 
-func (t *ScanCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ScanCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return cx1client.DeleteScanByID(t.Scan.ScanID)
 }

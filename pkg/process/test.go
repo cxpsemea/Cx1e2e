@@ -1,8 +1,6 @@
 package process
 
-import (
-	"github.com/cxpsemea/cx1e2e/pkg/types"
-)
+import "github.com/cxpsemea/cx1e2e/pkg/types"
 
 type TestSet struct {
 	Name              string                       `yaml:"Name"`
@@ -25,17 +23,18 @@ type TestSet struct {
 }
 
 type TestConfig struct {
-	Cx1URL     string    `yaml:"Cx1URL"`
-	IAMURL     string    `yaml:"IAMURL"`
-	Tenant     string    `yaml:"Tenant"`
-	ProxyURL   string    `yaml:"ProxyURL"`
-	Tests      []TestSet `yaml:"Tests"`
-	LogLevel   string    `yaml:"LogLevel"`
-	ConfigPath string    `yaml:"-"`
-	AuthType   string    `yaml:"-"`
-	AuthUser   string    `yaml:"-"`
-	ReportType string    `yaml:"ReportType"`
-	ReportName string    `yaml:"ReportName"`
+	Cx1URL     string               `yaml:"Cx1URL"`
+	IAMURL     string               `yaml:"IAMURL"`
+	Tenant     string               `yaml:"Tenant"`
+	ProxyURL   string               `yaml:"ProxyURL"`
+	Tests      []TestSet            `yaml:"Tests"`
+	LogLevel   string               `yaml:"LogLevel"`
+	ConfigPath string               `yaml:"-"`
+	AuthType   string               `yaml:"-"`
+	AuthUser   string               `yaml:"-"`
+	ReportType string               `yaml:"ReportType"`
+	ReportName string               `yaml:"ReportName"`
+	Engines    types.EnabledEngines `yaml:"-"`
 }
 
 type TestResult struct {

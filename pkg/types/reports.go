@@ -25,15 +25,18 @@ func (t *ReportCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ReportCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return CRUD == OP_CREATE
+func (t *ReportCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	if CRUD != OP_CREATE {
+		return fmt.Errorf("can only create a report")
+	}
+	return nil
 }
 
 func (t *ReportCRUD) GetModule() string {
 	return MOD_REPORT
 }
 
-func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	project, err := cx1client.GetProjectByName(t.ProjectName)
 	if err != nil {
 		return err
@@ -82,14 +85,14 @@ func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	return nil
 }
 
-func (t *ReportCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ReportCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }
 
-func (t *ReportCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ReportCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }
 
-func (t *ReportCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *ReportCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }

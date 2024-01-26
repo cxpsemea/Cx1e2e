@@ -17,4 +17,5 @@ Tests:
         Preset: All
         Engine: sast
         WaitForEnd: true
+        CancelOnTimeout: true
         Test: C
