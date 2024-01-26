@@ -3,17 +3,22 @@ Cx1URL: https://eu.ast.checkmarx.net
 Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
+
+# This test is no longer reliable due to the removal of "system" as a valid requested engine type - using this engine previously caused a scan to run with no engine.
+# The purpose of this test was to trigger a scan that does not run by using an unsupported or disabled engine type to test if it is marked as Failed or completes successfully.
+# This can still possibly be achieved on a per-tenant basis by setting the "Engine" field to an unlicensed engine and setting ForceRun to true.
+
 Tests:
   - Name: Run a scan that will fail because the engine didn't run
-    # this test should trigger a scan using an engine that is not allowed per the license
-    # since that is complicated, instead we simulate the same behavior by using the "system" engine which is allowed but doesn't return a status.
-    # currently this scan will be marked as Completed, not failed.
     Scans:
       - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All
-        Engine: system # somehow system is an option but doesn't do anything, this may not last forever.
-        WaitForEnd: true
+        Engine: apisec # this is disabled in my local test environment
+        ForceRun: true
+        WaitForEnd: true        
+        Timeout: 300 #300 seconds, 5min => scan should fail quickly
+        CancelOnTimeout: true
         Status: Failed # it won't be failed
         Test: C

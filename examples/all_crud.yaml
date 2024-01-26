@@ -36,6 +36,7 @@ Tests:
         Preset: e2e-test-preset1
         Engine: sast
         WaitForEnd: true
+        CancelOnTimeout: true
         Test: C
   - Name: simple test Create Query after scan
     Queries:

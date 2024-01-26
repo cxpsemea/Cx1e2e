@@ -14,7 +14,8 @@ Tests:
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         Source: "result = All.NewCxList();"
         Severity: LOW
-        Compile: true
+        Compile: true        
+        DeleteAuditSession: true
         Test: C
     Scans:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
@@ -23,6 +24,7 @@ Tests:
         Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Engine: sast
         WaitForEnd: true
+        CancelOnTimeout: true
         Test: C
     Results:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%

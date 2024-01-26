@@ -4,6 +4,16 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
+  - Name: Run a SAST valid scan to allow creating custom queries
+    Scans:
+      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+        ZipFile: ../files/SSBAv0.1.zip
+        Branch: zip
+        Preset: All
+        Engine: sast
+        WaitForEnd: true
+        Status: Completed
+        Test: C
   - Name: Create a query override that will fail
     Queries:   
       - Name: Stored_XSS
@@ -14,8 +24,9 @@ Tests:
           Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
         Source: "result = hello this is not valid code ;)"
         Compile: false
+        DeleteAuditSession: true
         Test: C
-  - Name: Run a SAST scan that will fail
+  - Name: Run a SAST scan that will fail due to broken queries
     Scans:
       - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
@@ -23,6 +34,7 @@ Tests:
         Preset: All
         Engine: sast
         WaitForEnd: true
+        CancelOnTimeout: true
         Status: Failed # it won't be failed though
         Test: C
   - Name: delete project query override

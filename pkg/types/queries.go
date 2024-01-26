@@ -23,8 +23,8 @@ func (t *CxQLCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *CxQLCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *CxQLCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *CxQLCRUD) GetModule() string {
@@ -112,12 +112,7 @@ func compileQuery(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuer
 	return nil
 }
 
-func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
-	session, err := getAuditSession(cx1client, t)
-	if err != nil {
-		return err
-	}
-
+func updateQuery(cx1client *Cx1ClientGo.Cx1Client, sessionId string, t *CxQLCRUD) error {
 	t.Query.Severity = cx1client.GetSeverityID(t.Severity)
 
 	if t.Source != "" {
@@ -127,27 +122,41 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 	t.Query.IsExecutable = t.IsExecutable
 
 	if t.Compile {
-		err := compileQuery(cx1client, t.Query, session, t)
+		err := compileQuery(cx1client, t.Query, sessionId, t)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = cx1client.AuditUpdateQuery(session, *t.Query)
-	if err != nil {
-		return err
+	if t.OldAPI {
+		return cx1client.UpdateQuery(*t.Query)
+	} else {
+		return cx1client.AuditUpdateQuery(sessionId, *t.Query)
 	}
-
-	return nil
 }
 
-func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *CxQLCRUD) TerminateSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, sessionId string) {
+	if t.DeleteSession && sessionId != "" {
+		err := cx1client.AuditDeleteSessionByID(sessionId)
+		if err != nil {
+			logger.Errorf("Failed to delete Audit session: %v: %s", sessionId, err)
+		}
+	}
+}
+
+func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	t.Query = getQuery(cx1client, logger, t)
 
-	session, err := getAuditSession(cx1client, t)
-	if err != nil {
-		return err
+	var session string
+	var err error
+
+	if t.Compile || !t.OldAPI {
+		session, err = getAuditSession(cx1client, t)
+		if err != nil {
+			return err
+		}
 	}
+	defer t.TerminateSession(cx1client, logger, session)
 
 	if t.Query != nil {
 		logger.Debugf("Found query: %v", t.Query.String())
@@ -169,7 +178,8 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		}
 
 		logger.Debugf("Updating query %v", t.Query.String())
-		return updateQuery(cx1client, t)
+		err = updateQuery(cx1client, session, t)
+		return err
 	} else {
 		// query does not exist at all so needs to be created on corp level
 		// Second query: create new corp/tenant query
@@ -193,11 +203,6 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 			}
 		}
 
-		session, err := getAuditSession(cx1client, t)
-		if err != nil {
-			return err
-		}
-
 		newQuery, err = cx1client.AuditCreateCorpQuery(session, newQuery)
 		if err != nil {
 			return err
@@ -208,13 +213,11 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	}
 }
 
-func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	query := getQuery(cx1client, logger, t)
 	if query == nil {
 		return fmt.Errorf("no such query %v: %v -> %v -> %v exists", t.Scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
-
-	fmt.Printf("Retrieved query at levelID %v: %v", query.LevelID, query.String())
 
 	if t.Scope.Corp {
 		if query.Level != "Corp" {
@@ -235,10 +238,16 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
-	return updateQuery(cx1client, t)
+func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	session, err := getAuditSession(cx1client, t)
+	if err != nil {
+		return err
+	}
+	defer t.TerminateSession(cx1client, logger, session)
+	err = updateQuery(cx1client, session, t)
+	return err
 }
 
-func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return cx1client.DeleteQuery(*t.Query)
 }

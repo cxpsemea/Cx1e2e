@@ -1,6 +1,8 @@
 package process
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
@@ -18,23 +20,36 @@ type TestRunner interface {
 	Validate(testType string) error
 	String() string
 	IsType(testType string) bool
-	IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testType string) bool
+	IsForced() bool
+	IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testType string, Engines *types.EnabledEngines) error
 	IsNegative() bool
 	GetSource() string
 	GetModule() string
 	GetFlags() []string
 
-	RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error
-	RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error
-	RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error
-	RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error
+	RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
+	RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
+	RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
+	RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
+}
+
+func MakeResult(test TestRunner) TestResult {
+	return TestResult{
+		FailTest:   test.IsNegative(),
+		Result:     TST_SKIP,
+		Module:     test.GetModule(),
+		Duration:   0,
+		Id:         -1,
+		TestObject: test.String(),
+		TestSource: test.GetSource(),
+	}
 }
 
 func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) float32 {
 	all_results := []TestResult{}
 
 	for id := range Config.Tests {
-		all_results = append(all_results, Config.Tests[id].RunTests(cx1client, logger)...)
+		all_results = append(all_results, Config.Tests[id].RunTests(cx1client, logger, Config)...)
 	}
 
 	status, err := GenerateReport(&all_results, logger, Config)
@@ -45,7 +60,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	return status
 }
 
-func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) []TestResult {
+func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) []TestResult {
 	logger.Tracef("Running test set: %v", t.Name)
 
 	if t.Wait > 0 {
@@ -55,117 +70,131 @@ func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 
 	all_results := []TestResult{}
 
-	all_results = append(all_results, t.Run(cx1client, logger, types.OP_CREATE)...)
-	all_results = append(all_results, t.Run(cx1client, logger, types.OP_READ)...)
-	all_results = append(all_results, t.Run(cx1client, logger, types.OP_UPDATE)...)
-	all_results = append(all_results, t.Run(cx1client, logger, types.OP_DELETE)...)
+	all_results = append(all_results, t.Run(cx1client, logger, types.OP_CREATE, Config)...)
+	all_results = append(all_results, t.Run(cx1client, logger, types.OP_READ, Config)...)
+	all_results = append(all_results, t.Run(cx1client, logger, types.OP_UPDATE, Config)...)
+	all_results = append(all_results, t.Run(cx1client, logger, types.OP_DELETE, Config)...)
 
 	return all_results
 }
 
-func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) []TestResult {
+func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Config *TestConfig) []TestResult {
 	results := []TestResult{}
 
 	for id := range t.Flags {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Flags[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Flags[id]), &results, Config)
 	}
 	for id := range t.Imports {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Imports[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Imports[id]), &results, Config)
 	}
 	for id := range t.Groups {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Groups[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Groups[id]), &results, Config)
 	}
 	for id := range t.Applications {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Applications[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Applications[id]), &results, Config)
 	}
 	for id := range t.Projects {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Projects[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Projects[id]), &results, Config)
 	}
 	for id := range t.Roles {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Roles[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Roles[id]), &results, Config)
 	}
 	for id := range t.Users {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Users[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Users[id]), &results, Config)
 	}
 	for id := range t.AccessAssignments {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.AccessAssignments[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.AccessAssignments[id]), &results, Config)
 	}
 	for id := range t.Queries {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Queries[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Queries[id]), &results, Config)
 	}
 	for id := range t.Presets {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Presets[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Presets[id]), &results, Config)
 	}
 	for id := range t.Scans {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Scans[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Scans[id]), &results, Config)
 	}
 	for id := range t.Results {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Results[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Results[id]), &results, Config)
 	}
 	for id := range t.Reports {
-		RunTest(cx1client, logger, CRUD, t.Name, &(t.Reports[id]), &results)
+		RunTest(cx1client, logger, CRUD, t.Name, &(t.Reports[id]), &results, Config)
 	}
 
 	return results
 }
 
-func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName string, test TestRunner, results *[]TestResult) {
+func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName string, test TestRunner, results *[]TestResult, Config *TestConfig) {
 	if test.IsType(CRUD) {
-		if !test.IsSupported(cx1client, logger, CRUD) {
-			logger.Warnf("Test for %v %v is not supported and will be skipped.", CRUD, test.String())
-		} else if !CheckFlags(cx1client, logger, test) {
-			logger.Warnf("Test for %v %v requires features that are not enabled in this environment and will be skipped.", CRUD, test.String())
-		} else {
-			result := Run(cx1client, logger, CRUD, testName, test)
-			LogResult(logger, result)
-			*results = append(*results, result)
+		var result TestResult
+		err := test.IsSupported(cx1client, logger, CRUD, &Config.Engines)
+
+		if err == nil && !CheckFlags(cx1client, logger, test) {
+			err = fmt.Errorf("test requires feature flag(s) %v to be enabled", strings.Join(test.GetFlags(), ","))
 		}
+
+		if err != nil && !test.IsForced() {
+			result = MakeResult(test)
+			result.CRUD = CRUD
+			result.Name = testName
+			result.Duration = 0
+			result.Reason = err.Error()
+			result.Result = TST_SKIP
+			logger.Warnf("Test for %v %v is not supported and will be skipped. Reason: %s", CRUD, test.String(), err)
+		} else {
+			result = Run(cx1client, logger, CRUD, testName, test, Config)
+		}
+
+		LogResult(logger, result)
+		*results = append(*results, result)
 	}
 }
 
-func Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName string, test TestRunner) TestResult {
+func Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName string, test TestRunner, Config *TestConfig) TestResult {
 	//logger.Infof("Running test: %v %v", CRUD, test.String())
 	LogStart(logger, test, CRUD, testName)
+	result := MakeResult(test)
+	result.CRUD = CRUD
+	result.Name = testName
+
 	err := test.Validate(CRUD)
 	if err != nil {
-		//LogSkip(test.FailTest, logger, OP_CREATE, MOD_GROUP, start, testname, id+1, t.String(), t.TestSource, "invalid test (missing name)")
-		return TestResult{
-			test.IsNegative(), TST_SKIP, CRUD, test.GetModule(), 0, testName, -1, test.String(), err.Error(), test.GetSource(),
-		}
+		result.Result = TST_SKIP
+		result.Reason = err.Error()
+		return result
 	}
 	start := time.Now().UnixNano()
 
 	switch CRUD {
 	case types.OP_CREATE:
-		err = test.RunCreate(cx1client, logger)
+		err = test.RunCreate(cx1client, logger, &Config.Engines)
 	case types.OP_READ:
-		err = test.RunRead(cx1client, logger)
+		err = test.RunRead(cx1client, logger, &Config.Engines)
 	case types.OP_UPDATE:
-		err = test.RunUpdate(cx1client, logger)
+		err = test.RunUpdate(cx1client, logger, &Config.Engines)
 	case types.OP_DELETE:
-		err = test.RunDelete(cx1client, logger)
+		err = test.RunDelete(cx1client, logger, &Config.Engines)
 	}
 
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	if err != nil {
+		result.Duration = duration
+		result.Reason = err.Error()
 		if test.IsNegative() { // negative test with error = pass
-			return TestResult{
-				test.IsNegative(), TST_PASS, CRUD, test.GetModule(), duration, testName, -1, test.String(), err.Error(), test.GetSource(),
-			}
+			result.Result = TST_PASS
+			return result
 		} else {
-			return TestResult{
-				test.IsNegative(), TST_FAIL, CRUD, test.GetModule(), duration, testName, -1, test.String(), err.Error(), test.GetSource(),
-			}
+			result.Result = TST_FAIL
+			return result
 		}
 	} else {
 		if test.IsNegative() { // negative test with no error = fail
-			return TestResult{
-				test.IsNegative(), TST_FAIL, CRUD, test.GetModule(), duration, testName, -1, test.String(), "action succeeded but should have failed", test.GetSource(),
-			}
+			result.Result = TST_FAIL
+			result.Reason = "action succeeded but should have failed"
+			return result
 		} else {
-			return TestResult{
-				test.IsNegative(), TST_PASS, CRUD, test.GetModule(), duration, testName, -1, test.String(), "", test.GetSource(),
-			}
+			result.Result = TST_PASS
+			return result
 		}
 	}
 }

@@ -2,13 +2,6 @@ package types
 
 import "strings"
 
-const (
-	OP_CREATE = "Create"
-	OP_READ   = "Read"
-	OP_UPDATE = "Update"
-	OP_DELETE = "Delete"
-)
-
 func (c CRUDTest) IsNegative() bool {
 	return c.FailTest
 }
@@ -33,4 +26,8 @@ func (c CRUDTest) GetSource() string {
 
 func (c CRUDTest) GetFlags() []string {
 	return c.Flags
+}
+
+func (c CRUDTest) IsForced() bool {
+	return c.ForceRun
 }

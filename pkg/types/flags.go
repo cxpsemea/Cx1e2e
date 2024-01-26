@@ -15,19 +15,22 @@ func (t *FlagCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *FlagCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return CRUD == OP_READ
+func (t *FlagCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	if CRUD != OP_READ {
+		return fmt.Errorf("can only read flags")
+	}
+	return nil
 }
 
 func (t *FlagCRUD) GetModule() string {
 	return MOD_FLAG
 }
 
-func (t *FlagCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *FlagCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }
 
-func (t *FlagCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *FlagCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_Flag, err := cx1client.CheckFlag(t.Name)
 	if err != nil {
 		return err
@@ -42,10 +45,10 @@ func (t *FlagCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func (t *FlagCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *FlagCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }
 
-func (t *FlagCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *FlagCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }

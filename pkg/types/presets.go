@@ -19,8 +19,8 @@ func (t *PresetCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *PresetCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string) bool {
-	return true
+func (t *PresetCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+	return nil
 }
 
 func (t *PresetCRUD) GetModule() string {
@@ -45,7 +45,7 @@ func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Pre
 	return query_ids, nil
 }
 
-func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	query_ids, err := getQueryIDs(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	return nil
 }
 
-func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	test_Preset, err := cx1client.GetPresetByName(t.Name)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return nil
 }
 
-func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	query_ids, err := getQueryIDs(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	return err
 }
 
-func (t *PresetCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (t *PresetCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	err := cx1client.DeletePreset(t.Preset)
 	if err != nil {
 		return err
