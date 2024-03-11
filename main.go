@@ -156,6 +156,11 @@ func run() float32 {
 		logger.Fatalf("Failed to get cx1 client current user: %s", err)
 	}
 	Config.AuthUser = currentUser.String()
+	Config.EnvironmentVersion, err = cx1client.GetVersion()
+	if err != nil {
+		logger.Errorf("Failed to get version info: %s", err)
+	}
+	logger.Infof("Cx1 version: %v", Config.EnvironmentVersion.String())
 
 	EngineList := strings.Split(strings.ToLower(*Engines), ",")
 	for _, e := range EngineList {
