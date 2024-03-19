@@ -1,6 +1,9 @@
 package process
 
-import "github.com/cxpsemea/cx1e2e/pkg/types"
+import (
+	"github.com/cxpsemea/Cx1ClientGo"
+	"github.com/cxpsemea/cx1e2e/pkg/types"
+)
 
 type TestSet struct {
 	Name              string                       `yaml:"Name"`
@@ -23,18 +26,19 @@ type TestSet struct {
 }
 
 type TestConfig struct {
-	Cx1URL     string               `yaml:"Cx1URL"`
-	IAMURL     string               `yaml:"IAMURL"`
-	Tenant     string               `yaml:"Tenant"`
-	ProxyURL   string               `yaml:"ProxyURL"`
-	Tests      []TestSet            `yaml:"Tests"`
-	LogLevel   string               `yaml:"LogLevel"`
-	ConfigPath string               `yaml:"-"`
-	AuthType   string               `yaml:"-"`
-	AuthUser   string               `yaml:"-"`
-	ReportType string               `yaml:"ReportType"`
-	ReportName string               `yaml:"ReportName"`
-	Engines    types.EnabledEngines `yaml:"-"`
+	Cx1URL             string                  `yaml:"Cx1URL"`
+	IAMURL             string                  `yaml:"IAMURL"`
+	Tenant             string                  `yaml:"Tenant"`
+	ProxyURL           string                  `yaml:"ProxyURL"`
+	Tests              []TestSet               `yaml:"Tests"`
+	LogLevel           string                  `yaml:"LogLevel"`
+	ConfigPath         string                  `yaml:"-"`
+	AuthType           string                  `yaml:"-"`
+	AuthUser           string                  `yaml:"-"`
+	ReportType         string                  `yaml:"ReportType"`
+	ReportName         string                  `yaml:"ReportName"`
+	Engines            types.EnabledEngines    `yaml:"-"`
+	EnvironmentVersion Cx1ClientGo.VersionInfo `yaml:"-"`
 }
 
 type TestResult struct {
@@ -64,11 +68,12 @@ type CounterSet struct {
 }
 
 type ReportSettings struct {
-	Target    string `json:"TestTarget"`
-	Auth      string `json:"Authentication"`
-	Config    string `json:"TestConfig"`
-	Timestamp string `json:"ExecutionTime"`
-	E2ESuffix string `json:"E2ESuffix"`
+	Target    string                  `json:"TestTarget"`
+	Auth      string                  `json:"Authentication"`
+	Config    string                  `json:"TestConfig"`
+	Timestamp string                  `json:"ExecutionTime"`
+	E2ESuffix string                  `json:"E2ESuffix"`
+	Version   Cx1ClientGo.VersionInfo `json:"TargetVersions"`
 }
 
 type ReportSummary struct {
