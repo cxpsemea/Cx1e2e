@@ -177,8 +177,8 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName
 	}
 
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
+	result.Duration = duration
 	if err != nil {
-		result.Duration = duration
 		result.Reason = err.Error()
 		if test.IsNegative() { // negative test with error = pass
 			result.Result = TST_PASS
