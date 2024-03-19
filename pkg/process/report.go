@@ -164,6 +164,7 @@ func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig)
 
 	report.WriteString("<h2>Settings</h2>")
 	report.WriteString(fmt.Sprintf("Running end to end tests against %v<br>", reportData.Settings.Target))
+	report.WriteString(fmt.Sprintf("Target versions are: %v", reportData.Settings.Version.String()))
 	report.WriteString(fmt.Sprintf("Authenticated using %v<br>", reportData.Settings.Auth))
 	report.WriteString(fmt.Sprintf("Test set defined in configuration %v<br>", reportData.Settings.Config))
 	report.WriteString(fmt.Sprintf("Execution timestamp: %v.<br>", reportData.Settings.Timestamp))

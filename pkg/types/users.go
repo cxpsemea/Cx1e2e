@@ -37,7 +37,7 @@ func updateUserFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *UserCRUD) error {
 	}
 
 	for _, g := range t.Groups { // groups to add
-		if !t.User.IsInGroupByName(g) {
+		if val, _ := t.User.IsInGroupByName(g); !val {
 			group, err := cx1client.GetGroupByName(g)
 			if err != nil {
 				return fmt.Errorf("failed to find group %v: %s", g, err)
@@ -74,7 +74,7 @@ func updateUserFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *UserCRUD) error {
 	new_roles := []Cx1ClientGo.Role{}
 
 	for _, newrole := range t.Roles { // check for roles to add
-		if !t.User.HasRoleByName(newrole) {
+		if val, _ := t.User.HasRoleByName(newrole); !val {
 			role, err := cx1client.GetRoleByName(newrole)
 			if err != nil {
 				return err
