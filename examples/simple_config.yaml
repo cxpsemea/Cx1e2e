@@ -45,7 +45,7 @@ Tests:
       - Project: e2e-test-project1
         Engine: sast
         Repository: https://github.com/cxpsemea/cx1clientgo
-        Branch: master
+        Branch: main
         Preset: e2e-test-preset1
         Test: C
         WaitForEnd: true
