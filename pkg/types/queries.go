@@ -147,16 +147,6 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSessio
 	}
 	queries.AddQueries(&paQueries)
 
-	for _, lang := range queries.QueryLanguages {
-		for _, group := range lang.QueryGroups {
-			for _, query := range group.Queries {
-				if query.Name == "Client_DOM_XSS" {
-					logger.Info(query.StringDetailed())
-				}
-			}
-		}
-	}
-
 	var query *Cx1ClientGo.Query
 	if t.Scope.Corp {
 		logger.Debugf("Trying to find corp query on scope %v: %v -> %v -> %v", Cx1ClientGo.AUDIT_QUERY_TENANT, t.QueryLanguage, t.QueryGroup, t.QueryName)
@@ -301,7 +291,7 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 				t.Query = &newq
 			} else {
 				logger.Debugf("Will create project override on %v", t.Scope.Project)
-				newq, err := cx1client.CreateQueryOverride(&session, Cx1ClientGo.AUDIT_QUERY_APPLICATION, baseQuery)
+				newq, err := cx1client.CreateQueryOverride(&session, Cx1ClientGo.AUDIT_QUERY_PROJECT, baseQuery)
 				if err != nil {
 					return fmt.Errorf("failed to create application override of %v: %s", baseQuery.StringDetailed(), err)
 				}

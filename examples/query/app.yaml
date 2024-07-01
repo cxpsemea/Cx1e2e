@@ -14,7 +14,7 @@ Tests:
           Tenant: false
           Application: e2e-test-query-app%E2E_RUN_SUFFIX%
           Project: e2e-test-query-project%E2E_RUN_SUFFIX% #Project is still required since the web-audit session is opened in a project's context
-        Source: "result = All.NewCxList();"
+        Source: "result = All.NewCxList(); // application override"
         Severity: LOW
         Compile: true
         DeleteAuditSession: true

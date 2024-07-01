@@ -12,7 +12,7 @@ Tests:
         Scope: 
           Tenant: false
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
-        Source: "result = All.NewCxList();"
+        Source: "result = All.NewCxList(); //project override"
         Severity: LOW
         Compile: true        
         DeleteAuditSession: true

@@ -12,7 +12,7 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
-        Source: "result = Find_Strings().FindByName(\"cheeseburger\");"
+        Source: "result = Find_Strings().FindByName(\"cheeseburger\"); // brand new corp query"
         Severity: HIGH
         IsExecutable: true
         DeleteAuditSession: true
