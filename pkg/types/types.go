@@ -113,7 +113,7 @@ type CxQLCRUD struct {
 	DeleteSession bool      `yaml:"DeleteAuditSession"`
 	OldAPI        bool      `yaml:"OldAPI"`
 	ScopeID       string
-	Query         *Cx1ClientGo.AuditQuery
+	Query         *Cx1ClientGo.Query
 	LastScan      *Cx1ClientGo.Scan
 }
 

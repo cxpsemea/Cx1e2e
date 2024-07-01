@@ -27,7 +27,7 @@ func (t *GroupCRUD) GetModule() string {
 	return MOD_GROUP
 }
 
-func updateGroup(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *GroupCRUD) error {
+func updateGroup(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, t *GroupCRUD) error {
 	var err error
 	if len(t.ClientRoles) > 0 {
 		if len(t.Group.ClientRoles) == 0 {

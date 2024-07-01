@@ -27,7 +27,7 @@ func (t *PresetCRUD) GetModule() string {
 	return MOD_PRESET
 }
 
-func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *PresetCRUD) ([]uint64, error) {
+func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, t *PresetCRUD) ([]uint64, error) {
 	query_ids := make([]uint64, len(t.Queries))
 
 	qc, err := cx1client.GetQueries()

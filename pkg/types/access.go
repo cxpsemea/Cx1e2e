@@ -35,7 +35,7 @@ func (t *AccessAssignmentCRUD) GetModule() string {
 	return MOD_ACCESS
 }
 
-func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *AccessAssignmentCRUD) (Cx1ClientGo.AccessAssignment, error) {
+func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, t *AccessAssignmentCRUD) (Cx1ClientGo.AccessAssignment, error) {
 	access := Cx1ClientGo.AccessAssignment{
 		TenantID:     cx1client.GetTenantID(),
 		EntityType:   t.EntityType,

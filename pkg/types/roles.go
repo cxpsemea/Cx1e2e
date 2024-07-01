@@ -27,7 +27,7 @@ func (t *RoleCRUD) GetModule() string {
 	return MOD_ROLE
 }
 
-func getRole(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, roleID string) (*Cx1ClientGo.Role, error) {
+func getRole(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, roleID string) (*Cx1ClientGo.Role, error) {
 	role, err := cx1client.GetRoleByID(roleID)
 	if err != nil {
 		return nil, err
