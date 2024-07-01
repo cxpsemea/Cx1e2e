@@ -41,15 +41,21 @@ func CheckALQFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
 	return appLevelQueries
 }
 
-func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (Cx1ClientGo.AuditSession, error) {
+func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD) (Cx1ClientGo.AuditSession, error) {
 	var session Cx1ClientGo.AuditSession
 
-	if auditSession != nil && (t.Scope.Corp || auditSession.ProjectID == t.ScopeID) {
-		err := cx1client.AuditSessionKeepAlive(auditSession)
-		if err != nil {
-			auditSession = nil
+	if auditSession != nil {
+		if (t.Scope.Corp || auditSession.ProjectID == t.ScopeID) && auditSession.HasLanguage(t.QueryLanguage) {
+			err := cx1client.AuditSessionKeepAlive(auditSession)
+			if err != nil {
+				auditSession = nil
+				logger.Warningf("Tried to reuse existing audit session but it couldn't be refreshed")
+			} else {
+				logger.Warningf("Reusing existing audit session %v", auditSession.ID)
+				return *auditSession, nil
+			}
 		} else {
-			return *auditSession, nil
+			logger.Warningf("Existing audit session is not suitable (corp? %v, has %v? %v, is project id %v? %v)", t.Scope.Corp, t.QueryLanguage, auditSession.HasLanguage(t.QueryLanguage), t.ScopeID, auditSession.ProjectID)
 		}
 	}
 
@@ -72,7 +78,7 @@ func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (Cx1ClientGo
 	}
 
 	session, err := cx1client.GetAuditSessionByID("sast", t.LastScan.ProjectID, t.LastScan.ScanID)
-	if err != nil {
+	if err == nil {
 		auditSession = &session
 	}
 
@@ -259,7 +265,7 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 	var err error
 
 	if t.Compile {
-		session, err = getAuditSession(cx1client, t)
+		session, err = getAuditSession(cx1client, logger, t)
 		if err != nil {
 			return err
 		}
@@ -419,7 +425,7 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	if t.OldAPI {
 		query = getQuery_old(cx1client, logger, t)
 	} else {
-		session, err := getAuditSession(cx1client, t)
+		session, err := getAuditSession(cx1client, logger, t)
 		if err != nil {
 			return err
 		}
@@ -462,7 +468,7 @@ func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		err = updateQuery_old(cx1client, session, t)
 		return err
 	} else {
-		session, err := getAuditSession(cx1client, t)
+		session, err := getAuditSession(cx1client, logger, t)
 		if err != nil {
 			return err
 		}
@@ -478,7 +484,7 @@ func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		return cx1client.DeleteQuery_v310(t.Query.ToAuditQuery_v310())
 	}
 
-	session, err := getAuditSession(cx1client, t)
+	session, err := getAuditSession(cx1client, logger, t)
 	if err != nil {
 		return err
 	}

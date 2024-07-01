@@ -45,3 +45,4 @@ Tests:
           Tenant: false
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         Test: RD
+        OldAPI: true
