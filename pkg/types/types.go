@@ -113,6 +113,7 @@ type CxQLCRUD struct {
 	DeleteSession bool      `yaml:"DeleteAuditSession"`
 	OldAPI        bool      `yaml:"OldAPI"`
 	ScopeID       string
+	ScopeStr      string
 	Query         *Cx1ClientGo.Query
 	LastScan      *Cx1ClientGo.Scan
 }
@@ -141,6 +142,7 @@ type CxQLScope struct {
 	Corp        bool   `yaml:"Tenant"`
 	Project     string `yaml:"Project"`
 	Application string `yaml:"Application"`
+	ProjectID   string `yaml:"-"`
 }
 
 type FlagCRUD struct {

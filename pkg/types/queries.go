@@ -111,34 +111,41 @@ func getAuditSession_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string,
 }
 */
 
-func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error) {
+func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, string, error) {
 	scope := "Corp"
+	scopeStr := cx1client.QueryTypeTenant()
 	if !t.Scope.Corp {
+		proj, err := cx1client.GetProjectByName(t.Scope.Project)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to find project named %v", t.Scope.Project)
+		}
+
+		t.Scope.ProjectID = proj.ProjectID
+
 		if t.Scope.Application != "" {
 			app, err := cx1client.GetApplicationByName(t.Scope.Application)
 			if err != nil {
-				return "", fmt.Errorf("failed to find application named %v", t.Scope.Application)
+				return "", "", fmt.Errorf("failed to find application named %v", t.Scope.Application)
 			}
 			scope = app.ApplicationID
+			scopeStr = cx1client.QueryTypeApplication()
 		} else {
-			proj, err := cx1client.GetProjectByName(t.Scope.Project)
-			if err != nil {
-				return "", fmt.Errorf("failed to find project named %v", t.Scope.Project)
-			}
 			scope = proj.ProjectID
+			scopeStr = cx1client.QueryTypeProject()
 		}
 	}
-	return scope, nil
+	return scope, scopeStr, nil
 }
 
 func getQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSession, logger *logrus.Logger, t *CxQLCRUD) (*Cx1ClientGo.Query, *Cx1ClientGo.Query) {
-	scope, err := getQueryScope(cx1client, t)
+	scope, scopeStr, err := getQueryScope(cx1client, t)
 	if err != nil {
 		logger.Errorf("Error with query scope: %v", err)
 		return nil, nil
 	}
 
 	t.ScopeID = scope
+	t.ScopeStr = scopeStr
 
 	queries, err := cx1client.GetQueries()
 	if err != nil {
@@ -148,9 +155,9 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSessio
 
 	var paQueries []Cx1ClientGo.Query
 	if t.Scope.Corp {
-		paQueries, err = cx1client.GetAuditQueriesByLevelID(session, cx1client.QueryTypeTenant(), cx1client.QueryTypeTenant())
+		paQueries, err = cx1client.GetAuditQueriesByLevelID(session, scopeStr, scope)
 	} else {
-		paQueries, err = cx1client.GetAuditQueriesByLevelID(session, cx1client.QueryTypeProject(), t.ScopeID)
+		paQueries, err = cx1client.GetAuditQueriesByLevelID(session, cx1client.QueryTypeProject(), t.Scope.ProjectID)
 	}
 	if err != nil {
 		logger.Errorf("Failed to get project-level queries for project %v: %s", t.ScopeID, err)
@@ -158,16 +165,8 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSessio
 	queries.AddQueries(&paQueries)
 
 	var query *Cx1ClientGo.Query
-	if t.Scope.Corp {
-		logger.Debugf("Trying to find corp query on scope %v: %v -> %v -> %v", cx1client.QueryTypeTenant(), t.QueryLanguage, t.QueryGroup, t.QueryName)
-		query = queries.GetQueryByLevelAndName(cx1client.QueryTypeTenant(), cx1client.QueryTypeTenant(), t.QueryLanguage, t.QueryGroup, t.QueryName)
-	} else if t.Scope.Application != "" {
-		logger.Debugf("Trying to find application query on scope %v: %v -> %v -> %v", t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
-		query = queries.GetQueryByLevelAndName(cx1client.QueryTypeApplication(), t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
-	} else {
-		logger.Debugf("Trying to find project query on scope %v: %v -> %v -> %v", t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
-		query = queries.GetQueryByLevelAndName(cx1client.QueryTypeProject(), t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
-	}
+	logger.Debugf("Trying to find query on scope %v: %v -> %v -> %v", scopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
+	query = queries.GetQueryByLevelAndName(scopeStr, scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 
 	if query != nil {
 		logger.Debugf("Found query: %v", query.StringDetailed())
@@ -181,24 +180,15 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSessio
 }
 
 func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD) (*Cx1ClientGo.Query, *Cx1ClientGo.Query) {
-	scope, err := getQueryScope(cx1client, t)
+	scope, scopeStr, err := getQueryScope(cx1client, t)
 	if err != nil {
 		logger.Errorf("Error with query scope: %v", err)
 		return nil, nil
 	}
 
 	t.ScopeID = scope
-
-	scopeStr := ""
-	if t.Scope.Corp {
-		scopeStr = cx1client.QueryTypeTenant()
-	} else if t.Scope.Application != "" {
-		scopeStr = cx1client.QueryTypeApplication()
-	} else {
-		scopeStr = cx1client.QueryTypeProject()
-	}
-
 	queries, err := cx1client.GetQueriesByLevelID_v310(scopeStr, scope)
+
 	if err != nil {
 		logger.Errorf("Failed to get queries: %s", err)
 		return nil, nil
