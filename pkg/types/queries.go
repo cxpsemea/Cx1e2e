@@ -85,6 +85,9 @@ func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t 
 	return session, err
 }
 
+/*
+there is no more old audit session
+
 func getAuditSession_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error) {
 	if t.LastScan == nil {
 		proj, err := cx1client.GetProjectByName(t.Scope.Project)
@@ -106,6 +109,7 @@ func getAuditSession_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string,
 
 	return cx1client.GetAuditSessionByID_v310(t.LastScan.ProjectID, t.LastScan.ScanID, true)
 }
+*/
 
 func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, error) {
 	scope := "Corp"
@@ -196,19 +200,6 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Cx
 	return &query
 }
 
-func compileQuery_old(cx1client *Cx1ClientGo.Cx1Client, query *Cx1ClientGo.AuditQuery_v310, session string) error {
-	err := cx1client.AuditCompileQuery_v310(session, *query)
-	if err != nil {
-		return fmt.Errorf("error triggering query compile: %s", err)
-	}
-
-	err = cx1client.AuditCompilePollingByID_v310(session)
-	if err != nil {
-		return fmt.Errorf("error while polling compiler: %s", err)
-	}
-	return nil
-}
-
 func updateQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSession, t *CxQLCRUD) error {
 	t.Query.Severity = t.Severity
 
@@ -221,7 +212,7 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSes
 	return cx1client.UpdateQuery(session, t.Query)
 }
 
-func updateQuery_old(cx1client *Cx1ClientGo.Cx1Client, sessionId string, t *CxQLCRUD) error {
+func updateQuery_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 	t.Query.Severity = t.Severity
 
 	if t.Source != "" {
@@ -230,16 +221,8 @@ func updateQuery_old(cx1client *Cx1ClientGo.Cx1Client, sessionId string, t *CxQL
 
 	t.Query.IsExecutable = t.IsExecutable
 
-	if t.Compile {
-		query := t.Query.ToAuditQuery_v310()
-		err := compileQuery_old(cx1client, &query, sessionId)
-		if err != nil {
-			return err
-		}
-	}
-
 	query := t.Query.ToAuditQuery_v310()
-	return cx1client.AuditUpdateQuery_v310(sessionId, query)
+	return cx1client.AuditUpdateQuery_v310(query)
 }
 
 func (t *CxQLCRUD) TerminateSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, session *Cx1ClientGo.AuditSession) {
@@ -247,15 +230,6 @@ func (t *CxQLCRUD) TerminateSession(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 		err := cx1client.AuditDeleteSession(session)
 		if err != nil {
 			logger.Errorf("Failed to delete Audit session %v: %s", session.ID, err)
-		}
-	}
-}
-
-func (t *CxQLCRUD) TerminateSession_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, sessionId string) {
-	if t.DeleteSession && sessionId != "" {
-		err := cx1client.AuditDeleteSessionByID_v310(sessionId)
-		if err != nil {
-			logger.Errorf("Failed to delete Audit session %v: %s", sessionId, err)
 		}
 	}
 }
@@ -336,16 +310,7 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 }
 
 func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD) error {
-	var session string
 	var err error
-
-	if t.Compile {
-		session, err = getAuditSession_old(cx1client, t)
-		if err != nil {
-			return err
-		}
-	}
-	defer t.TerminateSession_old(cx1client, logger, session)
 
 	t.Query = getQuery_old(cx1client, logger, t)
 
@@ -369,7 +334,7 @@ func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQL
 		}
 
 		logger.Debugf("Updating query %v", t.Query.String())
-		err = updateQuery_old(cx1client, session, t)
+		err = updateQuery_old(cx1client, t)
 		return err
 	} else {
 		// query does not exist at all so needs to be created on corp level
@@ -379,36 +344,7 @@ func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQL
 			return fmt.Errorf("query %v does not exist and must be created at Tenant level before it can be created on a Project or Application level", t.String())
 		}
 
-		newQuery, err := cx1client.AuditNewQuery_v310(t.QueryLanguage, t.QueryGroup, t.QueryName)
-		if err != nil {
-			return err
-		}
-		newQuery.Source = t.Source
-		newQuery.Severity = cx1client.GetSeverityID(t.Severity)
-		newQuery.IsExecutable = t.IsExecutable
-
-		if t.Compile {
-			err = compileQuery_old(cx1client, &newQuery, session)
-			if err != nil {
-				return err
-			}
-		}
-
-		newQuery, err = cx1client.AuditCreateCorpQuery_v310(session, newQuery)
-		if err != nil {
-			return err
-		}
-		q := newQuery.ToQuery()
-
-		queries, err := cx1client.GetQueries()
-		if err != nil {
-			return fmt.Errorf("failed to get an updated list of queries after creating new corp query: %s", err)
-		}
-
-		queries.UpdateNewQuery(&q)
-		t.Query = &q
-
-		return nil
+		return fmt.Errorf("creating a new Tenant-level query is no longer possible with the old API")
 	}
 }
 
@@ -460,13 +396,7 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 
 func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	if t.OldAPI {
-		session, err := getAuditSession_old(cx1client, t)
-		if err != nil {
-			return err
-		}
-		defer t.TerminateSession_old(cx1client, logger, session)
-		err = updateQuery_old(cx1client, session, t)
-		return err
+		return updateQuery_old(cx1client, t)
 	} else {
 		session, err := getAuditSession(cx1client, logger, t)
 		if err != nil {
