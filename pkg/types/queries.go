@@ -189,7 +189,16 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Cx
 
 	t.ScopeID = scope
 
-	auditQuery, err := cx1client.GetQueryByName_v310(scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
+	scopeStr := ""
+	if t.Scope.Corp {
+		scopeStr = Cx1ClientGo.AUDIT_QUERY_TENANT
+	} else if t.Scope.Application != "" {
+		scopeStr = Cx1ClientGo.AUDIT_QUERY_APPLICATION
+	} else {
+		scopeStr = Cx1ClientGo.AUDIT_QUERY_PROJECT
+	}
+
+	auditQuery, err := cx1client.GetQueryByName_v310(scopeStr, scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	if err != nil {
 		logger.Warnf("Error getting query %v: %s", t.String(), err)
 		return nil
@@ -222,7 +231,7 @@ func updateQuery_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 	t.Query.IsExecutable = t.IsExecutable
 
 	query := t.Query.ToAuditQuery_v310()
-	return cx1client.AuditUpdateQuery_v310(query)
+	return cx1client.UpdateQuery_v310(query)
 }
 
 func (t *CxQLCRUD) TerminateSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, session *Cx1ClientGo.AuditSession) {
