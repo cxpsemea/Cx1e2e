@@ -389,7 +389,7 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
 	var query *Cx1ClientGo.Query
 	if t.OldAPI {
-		query = getQuery_old(cx1client, logger, t)
+		query, _ = getQuery_old(cx1client, logger, t)
 	} else {
 		session, err := getAuditSession(cx1client, logger, t)
 		if err != nil {
