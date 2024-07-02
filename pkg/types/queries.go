@@ -180,11 +180,11 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSessio
 	return query, baseQuery
 }
 
-func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD) *Cx1ClientGo.Query {
+func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD) (*Cx1ClientGo.Query, *Cx1ClientGo.Query) {
 	scope, err := getQueryScope(cx1client, t)
 	if err != nil {
 		logger.Errorf("Error with query scope: %v", err)
-		return nil
+		return nil, nil
 	}
 
 	t.ScopeID = scope
@@ -198,15 +198,32 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Cx
 		scopeStr = Cx1ClientGo.AUDIT_QUERY_PROJECT
 	}
 
-	auditQuery, err := cx1client.GetQueryByName_v310(scopeStr, scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
+	queries, err := cx1client.GetQueriesByLevelID_v310(scopeStr, scope)
 	if err != nil {
-		logger.Warnf("Error getting query %v: %s", t.String(), err)
-		return nil
+		logger.Errorf("Failed to get queries: %s", err)
+		return nil, nil
 	}
 
-	query := auditQuery.ToQuery()
+	var newQuery, baseQuery *Cx1ClientGo.Query
 
-	return &query
+	auditQuery, err := cx1client.FindQueryByName_v310(queries, scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
+
+	if err != nil {
+		logger.Warnf("Error getting %v-level query %v: %s", scopeStr, t.String(), err)
+	} else {
+		query := auditQuery.ToQuery()
+		newQuery = &query
+	}
+
+	bq, err := cx1client.FindQueryByName_v310(queries, Cx1ClientGo.AUDIT_QUERY_PRODUCT, t.QueryLanguage, t.QueryGroup, t.QueryName)
+	if err != nil {
+		logger.Warnf("Error getting product-level query %v: %s", t.String(), err)
+	} else {
+		query := bq.ToQuery()
+		baseQuery = &query
+	}
+
+	return newQuery, baseQuery
 }
 
 func updateQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSession, t *CxQLCRUD) error {
@@ -320,40 +337,44 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 
 func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD) error {
 	var err error
+	var baseQuery *Cx1ClientGo.Query
 
-	t.Query = getQuery_old(cx1client, logger, t)
+	t.Query, baseQuery = getQuery_old(cx1client, logger, t)
 
 	if t.Query != nil {
-		logger.Debugf("Found query: %v", t.Query.String())
-
-		if t.Scope.Corp {
-			//logger.Info("Will create corp override")
-			newq := t.Query.ToAuditQuery_v310().CreateTenantOverride().ToQuery()
-			t.Query = &newq
-		} else {
-			if t.Scope.Application != "" {
-				logger.Debugf("Will create application override on %v", t.Scope.Application)
-				newq := t.Query.ToAuditQuery_v310().CreateApplicationOverrideByID(t.ScopeID).ToQuery()
-				t.Query = &newq
-			} else {
-				logger.Debugf("Will create project override on %v", t.Scope.Project)
-				newq := t.Query.ToAuditQuery_v310().CreateProjectOverrideByID(t.ScopeID).ToQuery()
-				t.Query = &newq
-			}
-		}
-
 		logger.Debugf("Updating query %v", t.Query.String())
 		err = updateQuery_old(cx1client, t)
 		return err
 	} else {
-		// query does not exist at all so needs to be created on corp level
-		// Second query: create new corp/tenant query
+		// query does not exist at all so needs to be created
 
-		if !t.Scope.Corp {
-			return fmt.Errorf("query %v does not exist and must be created at Tenant level before it can be created on a Project or Application level", t.String())
+		if baseQuery == nil {
+			if !t.Scope.Corp {
+				return fmt.Errorf("query %v does not exist and must be created at Tenant level before it can be created on a Project or Application level", t.String())
+			} else {
+				return fmt.Errorf("creating a new Tenant-level query is no longer possible with the old API")
+			}
+		} else {
+			logger.Debugf("Found base query: %v", baseQuery.String())
+
+			if t.Scope.Corp {
+				logger.Debugf("Will create corp override of %v", baseQuery.String())
+				newq := baseQuery.ToAuditQuery_v310().CreateTenantOverride().ToQuery()
+				t.Query = &newq
+			} else {
+				if t.Scope.Application != "" {
+					logger.Debugf("Will create application override on %v", t.Scope.Application)
+					newq := baseQuery.ToAuditQuery_v310().CreateApplicationOverrideByID(t.ScopeID).ToQuery()
+					t.Query = &newq
+				} else {
+					logger.Debugf("Will create project override on %v", t.Scope.Project)
+					newq := baseQuery.ToAuditQuery_v310().CreateProjectOverrideByID(t.ScopeID).ToQuery()
+					t.Query = &newq
+				}
+			}
+			err = updateQuery_old(cx1client, t)
+			return err
 		}
-
-		return fmt.Errorf("creating a new Tenant-level query is no longer possible with the old API")
 	}
 }
 
