@@ -148,9 +148,9 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSessio
 
 	var paQueries []Cx1ClientGo.Query
 	if t.Scope.Corp {
-		paQueries, err = cx1client.GetAuditQueriesByLevelID(session, Cx1ClientGo.AUDIT_QUERY_TENANT, Cx1ClientGo.AUDIT_QUERY_TENANT)
+		paQueries, err = cx1client.GetAuditQueriesByLevelID(session, cx1client.QueryTypeTenant(), cx1client.QueryTypeTenant())
 	} else {
-		paQueries, err = cx1client.GetAuditQueriesByLevelID(session, Cx1ClientGo.AUDIT_QUERY_PROJECT, t.ScopeID)
+		paQueries, err = cx1client.GetAuditQueriesByLevelID(session, cx1client.QueryTypeProject(), t.ScopeID)
 	}
 	if err != nil {
 		logger.Errorf("Failed to get project-level queries for project %v: %s", t.ScopeID, err)
@@ -159,14 +159,14 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, session *Cx1ClientGo.AuditSessio
 
 	var query *Cx1ClientGo.Query
 	if t.Scope.Corp {
-		logger.Debugf("Trying to find corp query on scope %v: %v -> %v -> %v", Cx1ClientGo.AUDIT_QUERY_TENANT, t.QueryLanguage, t.QueryGroup, t.QueryName)
-		query = queries.GetQueryByLevelAndName(Cx1ClientGo.AUDIT_QUERY_TENANT, Cx1ClientGo.AUDIT_QUERY_TENANT, t.QueryLanguage, t.QueryGroup, t.QueryName)
+		logger.Debugf("Trying to find corp query on scope %v: %v -> %v -> %v", cx1client.QueryTypeTenant(), t.QueryLanguage, t.QueryGroup, t.QueryName)
+		query = queries.GetQueryByLevelAndName(cx1client.QueryTypeTenant(), cx1client.QueryTypeTenant(), t.QueryLanguage, t.QueryGroup, t.QueryName)
 	} else if t.Scope.Application != "" {
 		logger.Debugf("Trying to find application query on scope %v: %v -> %v -> %v", t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
-		query = queries.GetQueryByLevelAndName(Cx1ClientGo.AUDIT_QUERY_APPLICATION, t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
+		query = queries.GetQueryByLevelAndName(cx1client.QueryTypeApplication(), t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	} else {
 		logger.Debugf("Trying to find project query on scope %v: %v -> %v -> %v", t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
-		query = queries.GetQueryByLevelAndName(Cx1ClientGo.AUDIT_QUERY_PROJECT, t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
+		query = queries.GetQueryByLevelAndName(cx1client.QueryTypeProject(), t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
 
 	if query != nil {
@@ -191,11 +191,11 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Cx
 
 	scopeStr := ""
 	if t.Scope.Corp {
-		scopeStr = Cx1ClientGo.AUDIT_QUERY_TENANT
+		scopeStr = cx1client.QueryTypeTenant()
 	} else if t.Scope.Application != "" {
-		scopeStr = Cx1ClientGo.AUDIT_QUERY_APPLICATION
+		scopeStr = cx1client.QueryTypeApplication()
 	} else {
-		scopeStr = Cx1ClientGo.AUDIT_QUERY_PROJECT
+		scopeStr = cx1client.QueryTypeProject()
 	}
 
 	queries, err := cx1client.GetQueriesByLevelID_v310(scopeStr, scope)
@@ -282,7 +282,7 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 		logger.Debugf("Found base query: %v", baseQuery.String())
 
 		if t.Scope.Corp {
-			newq, err := cx1client.CreateQueryOverride(&session, Cx1ClientGo.AUDIT_QUERY_TENANT, baseQuery)
+			newq, err := cx1client.CreateQueryOverride(&session, cx1client.QueryTypeTenant(), baseQuery)
 			if err != nil {
 				return fmt.Errorf("failed to create tenant override of %v: %s", baseQuery.StringDetailed(), err)
 			}
@@ -290,14 +290,14 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 		} else {
 			if t.Scope.Application != "" {
 				logger.Debugf("Will create application override on %v", t.Scope.Application)
-				newq, err := cx1client.CreateQueryOverride(&session, Cx1ClientGo.AUDIT_QUERY_APPLICATION, baseQuery)
+				newq, err := cx1client.CreateQueryOverride(&session, cx1client.QueryTypeApplication(), baseQuery)
 				if err != nil {
 					return fmt.Errorf("failed to create application override of %v: %s", baseQuery.StringDetailed(), err)
 				}
 				t.Query = &newq
 			} else {
 				logger.Debugf("Will create project override on %v", t.Scope.Project)
-				newq, err := cx1client.CreateQueryOverride(&session, Cx1ClientGo.AUDIT_QUERY_PROJECT, baseQuery)
+				newq, err := cx1client.CreateQueryOverride(&session, cx1client.QueryTypeProject(), baseQuery)
 				if err != nil {
 					return fmt.Errorf("failed to create application override of %v: %s", baseQuery.StringDetailed(), err)
 				}
@@ -313,8 +313,8 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 		}
 
 		newQuery := Cx1ClientGo.Query{
-			Level:        Cx1ClientGo.AUDIT_QUERY_TENANT,
-			LevelID:      Cx1ClientGo.AUDIT_QUERY_TENANT,
+			Level:        cx1client.QueryTypeTenant(),
+			LevelID:      cx1client.QueryTypeTenant(),
 			Source:       t.Source,
 			Name:         t.QueryName,
 			Group:        t.QueryGroup,
@@ -406,15 +406,15 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	}
 
 	if t.Scope.Corp {
-		if query.Level != Cx1ClientGo.AUDIT_QUERY_TENANT {
+		if query.Level != cx1client.QueryTypeTenant() {
 			return fmt.Errorf("no Corp-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
 		}
 	} else if t.Scope.Application != "" {
-		if query.Level != Cx1ClientGo.AUDIT_QUERY_APPLICATION {
+		if query.Level != cx1client.QueryTypeApplication() {
 			return fmt.Errorf("no Application-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
 		}
 	} else if t.Scope.Project != "" {
-		if query.Level != Cx1ClientGo.AUDIT_QUERY_PROJECT {
+		if query.Level != cx1client.QueryTypeProject() {
 			return fmt.Errorf("no Project-level query override for %v -> %v -> %v exists", t.QueryLanguage, t.QueryGroup, t.QueryName)
 		}
 	}
