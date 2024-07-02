@@ -187,7 +187,15 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Cx
 	}
 
 	t.ScopeID = scope
-	queries, err := cx1client.GetQueriesByLevelID_v310(scopeStr, scope)
+
+	var queries []Cx1ClientGo.AuditQuery_v310
+
+	if t.Scope.Corp {
+		scopeStr = cx1client.QueryTypeTenant()
+		queries, err = cx1client.GetQueriesByLevelID_v310(scopeStr, scope)
+	} else {
+		queries, err = cx1client.GetQueriesByLevelID_v310(scopeStr, t.Scope.ProjectID)
+	}
 
 	if err != nil {
 		logger.Errorf("Failed to get queries: %s", err)
