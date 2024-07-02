@@ -206,7 +206,7 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Cx
 
 	var newQuery, baseQuery *Cx1ClientGo.Query
 
-	auditQuery, err := cx1client.FindQueryByName_v310(queries, scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
+	auditQuery, err := cx1client.FindQueryByName_v310(queries, scopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
 
 	if err != nil {
 		logger.Warnf("Error getting %v-level query %v: %s", scopeStr, t.String(), err)
