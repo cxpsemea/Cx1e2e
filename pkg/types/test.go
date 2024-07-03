@@ -31,3 +31,7 @@ func (c CRUDTest) GetFlags() []string {
 func (c CRUDTest) IsForced() bool {
 	return c.ForceRun
 }
+
+func (c CRUDTest) OnFail() FailAction {
+	return c.OnFailAction
+}

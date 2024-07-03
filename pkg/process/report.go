@@ -110,9 +110,10 @@ func (r *Report) AddTest(t *TestResult) {
 	case TST_PASS:
 		details.Result = "PASS"
 	case TST_FAIL:
-		details.Result = fmt.Sprintf("FAIL: %v", t.Reason)
+		details.Result = fmt.Sprintf("FAIL: %v", t.Reason[0])
+		details.FailOutputs = t.Reason[1:]
 	case TST_SKIP:
-		details.Result = fmt.Sprintf("SKIP: %v", t.Reason)
+		details.Result = fmt.Sprintf("SKIP: %v", t.Reason[0])
 	}
 
 	r.Details = append(r.Details, details)
@@ -205,7 +206,7 @@ func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig)
 		case TST_SKIP:
 			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:orange'>%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result))
 		case TST_FAIL:
-			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:red'>%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result))
+			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:red'>%v\n%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result, strings.Join(t.FailOutputs, "<br>\n")))
 		}
 	}
 

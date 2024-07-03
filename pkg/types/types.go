@@ -56,11 +56,18 @@ func (e EnabledEngines) IsEnabled(engine string) bool {
 }
 
 type CRUDTest struct {
-	Test       string   `yaml:"Test"`         // CRUD [create, read, update, delete]
-	FailTest   bool     `yaml:"FailTest"`     // is it a negative test
-	Flags      []string `yaml:"FeatureFlags"` // are there specific feature flags needed for this test
-	TestSource string   // filename
-	ForceRun   bool     `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
+	Test         string     `yaml:"Test"`         // CRUD [create, read, update, delete]
+	FailTest     bool       `yaml:"FailTest"`     // is it a negative test
+	Flags        []string   `yaml:"FeatureFlags"` // are there specific feature flags needed for this test
+	TestSource   string     // filename
+	ForceRun     bool       `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
+	OnFailAction FailAction `yaml:"OnFail"`   // actions to take if this command fails
+}
+
+type FailAction struct {
+	RetryCount uint     `yaml:"Retries"`     // how many times to retry the action, 0 for none
+	FailSet    bool     `yaml:"FailTestSet"` // whole test set fails if this test fails (skip remaining tests)
+	Commands   []string `yaml:"Commands"`    // command to run when the test fails
 }
 
 type AccessAssignmentCRUD struct {
