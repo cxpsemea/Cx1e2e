@@ -9,7 +9,7 @@ Tests:
       - Name: Client_DOM_XSS
         Group: JavaScript_High_Risk
         Language: JavaScript
-        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
+        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED", "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         Scope: 
           Tenant: false
           Application: e2e-test-query-app%E2E_RUN_SUFFIX%
@@ -20,12 +20,14 @@ Tests:
         OldAPI: true
         DeleteAuditSession: true
         Test: C
+        OnFail:
+          FailTestSet: true
     Scans:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
         Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
-        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
+        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED", "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
@@ -33,7 +35,7 @@ Tests:
     Results:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # this finding should be gone again
-        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
+        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED", "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         Type: SAST
         SASTFilter:
           Query: Client_DOM_XSS
@@ -45,7 +47,7 @@ Tests:
       - Name: Client_DOM_XSS
         Group: JavaScript_High_Risk
         Language: JavaScript
-        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
+        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED", "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         Scope: 
           Tenant: false
           Application: e2e-test-query-app%E2E_RUN_SUFFIX%

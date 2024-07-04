@@ -18,6 +18,8 @@ Tests:
         DeleteAuditSession: true
         Compile: true
         Test: C
+        OnFail:
+          FailTestSet: true
     Presets:
       - Name: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        

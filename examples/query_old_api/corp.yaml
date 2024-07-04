@@ -15,15 +15,19 @@ Tests:
         Source: "result = All.NewCxList();"
         Severity: MEDIUM # currently, you cannot change anything except the source, but this should work june/july
         Compile: true
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         DeleteAuditSession: true
         OldAPI: true
         Test: C
+        OnFail:
+          FailTestSet: true
     Scans:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
         Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Engine: sast
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         WaitForEnd: true
         CancelOnTimeout: true
         Test: C
@@ -35,6 +39,7 @@ Tests:
           Query: Client_DOM_XSS
           Severity: HIGH
         Test: R
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         FailTest: true
   - Name: delete corp override
     Queries:
@@ -45,4 +50,5 @@ Tests:
           Tenant: true
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         Test: RD
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         OldAPI: true

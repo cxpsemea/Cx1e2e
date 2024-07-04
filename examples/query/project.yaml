@@ -17,6 +17,9 @@ Tests:
         Compile: true        
         DeleteAuditSession: true
         Test: C
+
+        OnFail:
+          FailTestSet: true
     Scans:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
