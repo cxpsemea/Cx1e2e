@@ -50,7 +50,7 @@ type TestResult struct {
 	Name       string
 	Id         int
 	TestObject string
-	Reason     string
+	Reason     []string
 	TestSource string
 }
 
@@ -96,12 +96,13 @@ type ReportSummary struct {
 }
 
 type ReportTestDetails struct {
-	Name       string
-	Source     string
-	Test       string
-	Duration   float64
-	ResultType int `json:"-"`
-	Result     string
+	Name        string
+	Source      string
+	Test        string
+	Duration    float64
+	ResultType  int `json:"-"`
+	Result      string
+	FailOutputs []string `json:"FailOutputs,omitempty"`
 }
 
 type Report struct {

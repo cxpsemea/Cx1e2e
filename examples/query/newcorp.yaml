@@ -12,12 +12,14 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
-        Source: "result = Find_Strings().FindByName(\"cheeseburger\");"
+        Source: "result = Find_Strings().FindByName(\"cheeseburger\"); // brand new corp query"
         Severity: HIGH
         IsExecutable: true
         DeleteAuditSession: true
         Compile: true
         Test: C
+        OnFail:
+          FailTestSet: true
     Presets:
       - Name: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        

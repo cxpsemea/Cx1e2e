@@ -17,6 +17,8 @@ Tests:
         WaitForEnd: true
         CancelOnTimeout: true
         Test: C
+        OnFail:
+          FailTestSet: true
     Results:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # there will be one stored_xss finding

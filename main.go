@@ -45,7 +45,7 @@ func run() float32 {
 	Cx1URL := flag.String("cx1", "", "Optional: CheckmarxOne platform URL, if not defined in the test config.yaml")
 	IAMURL := flag.String("iam", "", "Optional: CheckmarxOne IAM URL, if not defined in the test config.yaml")
 	Tenant := flag.String("tenant", "", "Optional: CheckmarxOne tenant, if not defined in the test config.yaml")
-	LogLevel := flag.String("log", "INFO", "Log level: TRACE, DEBUG, INFO, WARNING, ERROR, FATAL")
+	LogLevel := flag.String("log", "", "Log level: TRACE, DEBUG, INFO, WARNING, ERROR, FATAL")
 	ReportType := flag.String("report-type", "html,json", "Report output format: html or json")
 	ReportName := flag.String("report-name", "cx1e2e_result", "Report output base name")
 	Engines := flag.String("engines", "sast,sca,kics,apisec", "Run tests only for these engines")

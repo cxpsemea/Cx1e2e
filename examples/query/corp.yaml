@@ -12,11 +12,13 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
-        Source: "result = All.NewCxList();"
+        Source: "result = All.NewCxList(); // corp override"
         Severity: MEDIUM # currently, you cannot change anything except the source, but this should work june/july
         Compile: true
         DeleteAuditSession: true
         Test: C
+        OnFail:
+          FailTestSet: true
     Scans:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip

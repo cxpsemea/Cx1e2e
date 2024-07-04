@@ -18,7 +18,7 @@ func (t *ApplicationCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ApplicationCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+func (t *ApplicationCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
 	return nil
 }
 
@@ -26,7 +26,7 @@ func (t *ApplicationCRUD) GetModule() string {
 	return MOD_APPLICATION
 }
 
-func updateApplication(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *ApplicationCRUD) error {
+func updateApplication(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, t *ApplicationCRUD) error {
 	t.Application.Tags = make(map[string]string)
 	for _, tag := range t.Tags {
 		t.Application.Tags[tag.Key] = tag.Value

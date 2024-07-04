@@ -16,9 +16,12 @@ Tests:
         Severity: HIGH
         IsExecutable: true
         DeleteAuditSession: true
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         OldAPI: true
         Compile: true
         Test: C
+        OnFail:
+          FailTestSet: true
     Presets:
       - Name: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        
@@ -29,6 +32,7 @@ Tests:
           - Language: JavaScript
             Group: JavaScript_High_Risk
             Name: EtoE_Test_Cheeseburgers
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         Test: RU
   - Name: run a scan with the new preset
     Scans:
@@ -38,6 +42,7 @@ Tests:
         Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
         Engine: sast
         WaitForEnd: true
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         CancelOnTimeout: true
         Test: C
     Results:
@@ -48,6 +53,7 @@ Tests:
           Query: Client_DOM_XSS
           Severity: HIGH
         Test: R
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # this new finding should be reported now
         Type: SAST
@@ -55,6 +61,7 @@ Tests:
           Query: EtoE_Test_Cheeseburgers
           Severity: HIGH
         Test: R
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
   - Name: Delete new corp query
     Queries:
       - Name: EtoE_Test_Cheeseburgers
@@ -64,3 +71,5 @@ Tests:
           Tenant: true
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         Test: RD
+        FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
+        OldAPI: true
