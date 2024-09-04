@@ -21,6 +21,7 @@ Tests:
         Engine: sast # sca kics apisec
         WaitForEnd: true
         CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
     Results:
       - Project: e2e-test-import-project

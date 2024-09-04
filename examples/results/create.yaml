@@ -16,6 +16,7 @@ Tests:
         Engine: sast sca kics apisec
         WaitForEnd: true
         CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
         OnFail:
           FailTestSet: true

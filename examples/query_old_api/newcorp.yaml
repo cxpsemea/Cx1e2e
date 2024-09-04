@@ -44,6 +44,7 @@ Tests:
         WaitForEnd: true
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
     Results:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%

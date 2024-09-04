@@ -51,6 +51,3 @@ Tests:
   - Name: New Access Management
     File: access/all.yaml
   - Name: 10 second pause
-    Wait: 10
-  - Name: Scan Failure testing
-    File: failure/all.yaml

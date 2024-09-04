@@ -13,6 +13,7 @@ Tests:
         Engine: sast
         WaitForEnd: true
         Status: Completed
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
   - Name: Create a query override that will fail
     Queries:   
@@ -35,6 +36,7 @@ Tests:
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Status: Failed # it won't be failed though
         Test: C
   - Name: delete project query override

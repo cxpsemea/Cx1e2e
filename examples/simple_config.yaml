@@ -50,6 +50,7 @@ Tests:
         Test: C
         WaitForEnd: true
         CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
   - Name: Clean up and remove created elements
     Groups:
       - Name: e2e-test-group2
