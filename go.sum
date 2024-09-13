@@ -1,7 +1,5 @@
-github.com/cxpsemea/Cx1ClientGo v0.0.69 h1:uatSor4nU4UjagTUnvVM/nAhT3DbxqPztkFDtOrTS2c=
-github.com/cxpsemea/Cx1ClientGo v0.0.69/go.mod h1:ZwnGbjc37SzyVc74gnDYCDO5UGkWnQ9R+rBBbxeOWTg=
-github.com/cxpsemea/Cx1ClientGo v0.0.75 h1:XuJstazIJjaltCihd9qkCm0o9m8UUaOGTRg8IMsazvI=
-github.com/cxpsemea/Cx1ClientGo v0.0.75/go.mod h1:ZwnGbjc37SzyVc74gnDYCDO5UGkWnQ9R+rBBbxeOWTg=
+github.com/cxpsemea/Cx1ClientGo v0.0.77 h1:dVyAsyXRjZFnGpbnUQgnahsoCtCp+2dOWWIdNNdnWuI=
+github.com/cxpsemea/Cx1ClientGo v0.0.77/go.mod h1:ZwnGbjc37SzyVc74gnDYCDO5UGkWnQ9R+rBBbxeOWTg=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
