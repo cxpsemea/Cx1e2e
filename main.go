@@ -151,7 +151,7 @@ func run() float32 {
 	}
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
-	currentUser, err := cx1client.Whoami()
+	currentUser, err := cx1client.GetCurrentUser()
 	if err != nil {
 		logger.Fatalf("Failed to get cx1 client current user: %s", err)
 	}
