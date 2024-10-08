@@ -49,6 +49,7 @@ func run() float32 {
 	ReportType := flag.String("report-type", "html,json", "Report output format: html or json")
 	ReportName := flag.String("report-name", "cx1e2e_result", "Report output base name")
 	Engines := flag.String("engines", "sast,sca,kics,apisec", "Run tests only for these engines")
+	Proxy := flag.String("proxy", "", "Optional: Proxy to use when connecting to CheckmarxOne")
 
 	flag.Parse()
 
@@ -113,10 +114,17 @@ func run() float32 {
 	var cx1client *Cx1ClientGo.Cx1Client
 	httpClient := &http.Client{}
 
-	if Config.ProxyURL != "" {
-		proxyURL, err := url.Parse(Config.ProxyURL)
+	systemProxy := ""
+	if *Proxy != "" {
+		systemProxy = *Proxy
+	} else if Config.ProxyURL != "" {
+		systemProxy = Config.ProxyURL
+	}
+
+	if systemProxy != "" {
+		proxyURL, err := url.Parse(systemProxy)
 		if err != nil {
-			logger.Fatalf("Failed to parse specified proxy address %v: %s", Config.ProxyURL, err)
+			logger.Fatalf("Failed to parse specified proxy address %v: %s", systemProxy, err)
 			return 0
 		}
 		transport := &http.Transport{}
@@ -124,7 +132,7 @@ func run() float32 {
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 		httpClient.Transport = transport
-		logger.Infof("Running with proxy: %v", Config.ProxyURL)
+		logger.Infof("Running with proxy: %v", systemProxy)
 	}
 
 	if *Tenant != "" {
