@@ -261,7 +261,8 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, test
 				result = Run(cx1client, logger, CRUD, testName, test, Config)
 				if failAction.RetryCount > 0 && result.Result == TST_FAIL {
 					for count := 1; count <= (int)(failAction.RetryCount); count++ {
-						logger.Infof("Test for %v %v failed due to %v, retry %d of %d", CRUD, test.String(), result.Reason[0], count, failAction.RetryCount)
+						logger.Infof("Test for %v %v failed due to %v, waiting %d seconds for retry %d of %d", CRUD, test.String(), result.Reason[0], failAction.RetryDelay, count, failAction.RetryCount)
+						time.Sleep(time.Duration(failAction.RetryDelay) * time.Second)
 						result = Run(cx1client, logger, CRUD, testName, test, Config)
 					}
 				}
