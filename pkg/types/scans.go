@@ -189,8 +189,10 @@ func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 			t.Filter.Index = 1 //
 		}
 		t.Cx1ScanFilter = &(Cx1ClientGo.ScanFilter{
-			Offset:   0,
-			Limit:    t.Filter.Index,
+			BaseFilter: Cx1ClientGo.BaseFilter{
+				Offset: 0,
+				Limit:  uint64(t.Filter.Index),
+			},
 			Statuses: t.Filter.Statuses,
 			Branches: t.Filter.Branches,
 		})

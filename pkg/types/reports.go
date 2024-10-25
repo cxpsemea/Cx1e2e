@@ -49,7 +49,7 @@ func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	if t.Status != "" {
 		filter.Statuses = []string{t.Status}
 	}
-	filter.Limit = int(t.Number)
+	filter.Limit = uint64(t.Number)
 
 	scans, err := cx1client.GetLastScansByIDFiltered(project.ProjectID, filter)
 	if err != nil {

@@ -24,8 +24,6 @@ Tests:
     Wait: 10
   - Name: Query
     File: query/all.yaml
-  - Name: Query (Old API)
-    File: query_old_api/all.yaml
   - Name: 10 second pause
     Wait: 10
   - Name: Results
