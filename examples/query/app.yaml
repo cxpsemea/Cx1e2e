@@ -17,7 +17,6 @@ Tests:
         Source: "result = All.NewCxList(); // application override"
         Severity: LOW
         Compile: true
-        DeleteAuditSession: true
         Test: C
         OnFail:
           FailTestSet: true

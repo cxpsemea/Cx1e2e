@@ -11,6 +11,7 @@ import (
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/cxpsemea/cx1e2e/pkg/process"
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
 )
@@ -112,7 +113,10 @@ func run() float32 {
 	}
 
 	var cx1client *Cx1ClientGo.Cx1Client
-	httpClient := &http.Client{}
+	cx1retryclient := retryablehttp.NewClient()
+	cx1retryclient.RetryMax = 3
+	cx1retryclient.Logger = logger
+	httpClient := cx1retryclient.StandardClient()
 
 	systemProxy := ""
 	if *Proxy != "" {

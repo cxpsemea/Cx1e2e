@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
@@ -49,7 +50,7 @@ func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t 
 				auditSession = nil
 				logger.Warningf("Tried to reuse existing audit session but it couldn't be refreshed")
 			} else {
-				logger.Warningf("Reusing existing audit session %v", auditSession.ID)
+				logger.Warningf("Reusing existing %v (scope: corp? %v, project ID: %v, language: %v)", auditSession.String(), t.Scope.Corp, t.QueryLanguage, t.Scope.ProjectID)
 				return nil
 			}
 		} else {
@@ -126,14 +127,34 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCR
 	}
 
 	var paQueries []Cx1ClientGo.Query
-	if t.Scope.Corp {
-		paQueries, err = cx1client.GetAuditQueriesByLevelID(auditSession, scopeStr, scope)
-	} else {
-		paQueries, err = cx1client.GetAuditQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID)
+
+	// sometimes this fails with a 404 for some reason
+	// quick-and-dirty retry
+
+	maxRetry := 3
+	retryDelay := 30
+	for i := 0; i < maxRetry; i++ {
+		if t.Scope.Corp {
+			paQueries, err = cx1client.GetAuditQueriesByLevelID(auditSession, scopeStr, scope)
+		} else {
+			paQueries, err = cx1client.GetAuditQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID)
+		}
+		if err == nil {
+			break
+		} else {
+			logger.Warnf("Attempt %d/%d to get %v-level queries failed with error '%s', waiting %d sec to retry...", i, maxRetry, scopeStr, err, retryDelay)
+			if err = cx1client.AuditSessionKeepAlive(auditSession); err != nil {
+				logger.Errorf("%v has expired, generating a new session", auditSession.String())
+				auditSession = nil
+				getAuditSession(cx1client, logger, t)
+			}
+			time.Sleep(time.Duration(retryDelay) * time.Second)
+		}
 	}
 	if err != nil {
-		logger.Errorf("Failed to get project-level queries for project %v: %s", t.ScopeID, err)
+		logger.Errorf("Failed to get %v-level queries for project %v: %s", scopeStr, t.ScopeID, err)
 	}
+
 	queries.AddQueries(&paQueries)
 
 	var query *Cx1ClientGo.Query
@@ -415,6 +436,11 @@ func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		return err
 	}
 	defer t.TerminateSession(cx1client, logger)
+
+	if t.Query.EditorKey == "" {
+		logger.Warnf("Editor key for query %v is empty - attempting to calculate", t.Query.StringDetailed())
+		t.Query.CalculateEditorKey()
+	}
 
 	return cx1client.DeleteQueryOverrideByKey(auditSession, t.Query.EditorKey)
 }

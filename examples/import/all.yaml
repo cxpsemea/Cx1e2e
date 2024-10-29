@@ -6,6 +6,8 @@ Tenant: your_tenant_here
 Tests:
   - Name: Create
     File: create.yaml
+  - Name: 10 second pause for imported query
+    Wait: 10  
   - Name: Verify
     File: verify.yaml
   - Name: Delete

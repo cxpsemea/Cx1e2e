@@ -15,7 +15,6 @@ Tests:
         Source: "result = Find_Strings().FindByName(\"cheeseburger\"); // brand new corp query"
         Severity: HIGH
         IsExecutable: true
-        DeleteAuditSession: true
         Compile: true
         Test: C
         OnFail:
@@ -66,3 +65,4 @@ Tests:
           Tenant: true
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
         Test: RD
+        DeleteAuditSession: true
