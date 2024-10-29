@@ -50,7 +50,15 @@ func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t 
 				auditSession = nil
 				logger.Warningf("Tried to reuse existing audit session but it couldn't be refreshed")
 			} else {
-				logger.Warningf("Reusing existing %v (scope: corp? %v, project ID: %v, language: %v)", auditSession.String(), t.Scope.Corp, t.QueryLanguage, t.Scope.ProjectID)
+				scope := "Tenant"
+				if !t.Scope.Corp {
+					if t.Scope.Application != "" {
+						scope = fmt.Sprintf("application %v", t.Scope.Application)
+					} else {
+						scope = fmt.Sprintf("project %v", t.Scope.Project)
+					}
+				}
+				logger.Warningf("Reusing existing %v (scope: %v, project ID: %v, language: %v)", auditSession.String(), scope, t.Scope.ProjectID, t.QueryLanguage)
 				return nil
 			}
 		} else {
