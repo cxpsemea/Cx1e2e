@@ -64,7 +64,7 @@ Tests:
         FindingNumber: 1 # the stored_xss finding should now be medium
         Type: SAST
         SASTFilter:
-          QueryID: 14350862106797905179 # as of 3.20+ this has changed
+          QueryID: 14350862106797905179 # as of 3.23+ this has changed. It was previously 13625251660291496964
           Severity: MEDIUM
         Test: R
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%

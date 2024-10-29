@@ -12,7 +12,7 @@ Tests:
     File: app.yaml
   - Name: Tenant override
     File: corp.yaml
-  - Name: Tenant new query
-    File: newcorp.yaml
+#  - Name: Tenant new query # old-API new Tenant-query no longer works in 3.20+
+#    File: newcorp.yaml
   - Name: Delete
     File: delete.yaml
