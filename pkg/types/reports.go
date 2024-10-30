@@ -68,13 +68,15 @@ func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	}
 
 	var reportID string
-	if version, err := cx1client.GetVersion(); err == nil && version.CheckCxOne("3.20.0") >= 0 && version.CheckCxOne("3.21.0") == -1 && t.Format == "pdf" {
+	if version, err := cx1client.GetVersion(); err == nil && version.CheckCxOne("3.20.0") >= 0 && version.CheckCxOne("3.21.0") == -1 {
 		// version is somewhere in 3.20.x - regular PDF report-gen is broken
-		reportID, err = cx1client.RequestNewReportByIDv2(t.Scan.ScanID, []string{"sast"}) // todo: generate an all-engine report?
+		logger.Infof("Using v2 report-gen API")
+		reportID, err = cx1client.RequestNewReportByIDv2(t.Scan.ScanID, []string{"sast"}, t.Format) // todo: generate an all-engine report?
 		if err != nil {
 			return err
 		}
 	} else {
+		logger.Infof("Using v1 report-gen API")
 		reportID, err = cx1client.RequestNewReportByID(t.Scan.ScanID, project.ProjectID, t.Branch, t.Format)
 		if err != nil {
 			return err
