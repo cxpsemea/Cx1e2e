@@ -66,6 +66,7 @@ type CRUDTest struct {
 
 type FailAction struct {
 	RetryCount uint     `yaml:"Retries"`     // how many times to retry the action, 0 for none
+	RetryDelay uint     `yaml:"RetryDelay"`  // delay (in seconds) between retries
 	FailSet    bool     `yaml:"FailTestSet"` // whole test set fails if this test fails (skip remaining tests)
 	Commands   []string `yaml:"Commands"`    // command to run when the test fails
 }
