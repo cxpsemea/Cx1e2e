@@ -9,5 +9,4 @@ Tests:
       - Name: e2e-test-role-role%E2E_RUN_SUFFIX%
         Filter: [ view-projects-if-in-group ]
         Test: R
-        FailTest: true
 
