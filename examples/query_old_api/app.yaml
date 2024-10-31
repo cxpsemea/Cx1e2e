@@ -53,5 +53,5 @@ Tests:
           Tenant: false
           Application: e2e-test-query-app%E2E_RUN_SUFFIX%
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D
         OldAPI: true

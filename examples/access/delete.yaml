@@ -8,16 +8,16 @@ Tests:
     Projects:
       - Name: e2e-test-access-project%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
-        Test: RD
+        Test: D
     Applications:
       - Name: e2e-test-access-app%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
-        Test: RD
+        Test: D
     Users:
       - Name: e2e-test-access-user%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
-        Test: RD
+        Test: D
     Groups:
       - Name: e2e-test-access-group%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
-        Test: RD
+        Test: D

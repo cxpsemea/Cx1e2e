@@ -146,9 +146,10 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 }
 
 func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error) {
+	leveledlogger := LeveledLogger{logger: logger}
 	cx1retryclient := retryablehttp.NewClient()
 	cx1retryclient.RetryMax = 3
-	cx1retryclient.Logger = logger
+	cx1retryclient.Logger = leveledlogger
 	httpClient := cx1retryclient.StandardClient()
 
 	if o.ProxyURL != "" {

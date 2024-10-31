@@ -7,7 +7,7 @@ Tests:
   - Name: Delete Project
     Projects:
       - Name: e2e-test-project-project%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D
     Applications:
       - Name: e2e-test-project-app%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D

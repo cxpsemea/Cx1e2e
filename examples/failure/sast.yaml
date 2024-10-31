@@ -47,4 +47,4 @@ Tests:
         Scope: 
           Tenant: false
           Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D

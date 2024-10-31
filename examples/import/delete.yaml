@@ -7,7 +7,7 @@ Tests:
   - Name: Delete imported data
     Presets:
       - Name: e2e-test-import-preset
-        Test: RD
+        Test: D
     Queries:
       - Name: Cheeseburgers
         Group: JavaScript_Low_Visibility
@@ -15,10 +15,10 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-import-project
-        Test: RD
+        Test: D
     Projects:
       - Name: e2e-test-import-project
-        Test: RD
+        Test: D
     Applications:
       - Name: e2e-test-import-app
-        Test: RD
+        Test: D

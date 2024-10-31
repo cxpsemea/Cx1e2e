@@ -12,7 +12,7 @@ Tests:
         ResourceType: project
         ResourceName: e2e-test-access-project%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
-        Test: RD
+        Test: D
     Users:
       - Name: e2e-test-access-user%E2E_RUN_SUFFIX%
         Groups: [ e2e-test-access-group%E2E_RUN_SUFFIX% ]

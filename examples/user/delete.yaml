@@ -8,8 +8,8 @@ Tests:
     Users:
       - Name: e2e-test-user-user%E2E_RUN_SUFFIX%
         Email: e2e_test_user1@cx.local
-        Test: RD
+        Test: D
   - Name: delete temporary group
     Groups:
       - Name: e2e-test-user-group%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D

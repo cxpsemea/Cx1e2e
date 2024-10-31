@@ -73,7 +73,7 @@ More complicated set of 3 tests to create, read & update (set a permission), the
       - Name: simple delete for all
         Roles:
         - Name: e2e-test-role1
-          Test: RD
+          Test: D
 ```
 In the tests above, each "Test" parameter includes different combinations of CRUD operations. Tests are selected through the "Test: CRUD" line which defines if the [C]reate, [R]ead, [U]pdate, or [D]elete tests are performed. 
 

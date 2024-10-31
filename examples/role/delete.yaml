@@ -7,5 +7,5 @@ Tests:
   - Name: Role Delete
     Roles:
       - Name: e2e-test-role-role%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D
 

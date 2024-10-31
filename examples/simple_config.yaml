@@ -54,19 +54,19 @@ Tests:
   - Name: Clean up and remove created elements
     Groups:
       - Name: e2e-test-group2
-        Test: RD
+        Test: D
       - Name: e2e-test-group1
-        Test: RD
+        Test: D
     Applications:
       - Name: e2e-test-app1
-        Test: RD
+        Test: D
     Projects:
       - Name: e2e-test-project1
-        Test: RD
+        Test: D
     Presets:
       - Name: e2e-test-preset1
-        Test: RD
+        Test: D
     Roles: 
       - Name: e2e-test-role1
-        Test: RD
+        Test: D
     

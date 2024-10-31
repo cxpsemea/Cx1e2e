@@ -71,6 +71,6 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-query-project%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         OldAPI: true
