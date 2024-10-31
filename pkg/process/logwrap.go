@@ -17,7 +17,10 @@ func (l LeveledLogger) Info(msg string, keysAndValues ...interface{}) {
 	l.logger.Info(makeMsg(msg, keysAndValues...))
 }
 func (l LeveledLogger) Debug(msg string, keysAndValues ...interface{}) {
-	l.logger.Trace(makeMsg(msg, keysAndValues...))
+	if msg == "performing request" {
+		return
+	}
+	l.logger.Debug(makeMsg(msg, keysAndValues...))
 }
 func (l LeveledLogger) Warn(msg string, keysAndValues ...interface{}) {
 	l.logger.Warn(makeMsg(msg, keysAndValues...))
