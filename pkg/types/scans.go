@@ -10,10 +10,6 @@ import (
 )
 
 func (t *ScanCRUD) Validate(CRUD string) error {
-	if CRUD == OP_DELETE && t.Scan == nil {
-		return fmt.Errorf("must read before deleting")
-	}
-
 	if t.Project == "" {
 		return fmt.Errorf("project name is missing")
 	}
@@ -206,7 +202,7 @@ func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 			return fmt.Errorf("requested %d scans matching filter %v but only received %d", t.Filter.Index, t.Filter.String(), len(scans))
 		}
 
-		t.Scan = &scans[len(scans)]
+		t.Scan = &scans[len(scans)-1]
 	} else {
 		scans, err = cx1client.GetLastScansByID(project.ProjectID, 1)
 		if err != nil {
@@ -226,5 +222,15 @@ func (t *ScanCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 }
 
 func (t *ScanCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Scan == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	return cx1client.DeleteScanByID(t.Scan.ScanID)
 }

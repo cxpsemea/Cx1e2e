@@ -1,0 +1,16 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Delete Project, Client, and Group
+    Projects:
+      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Test: D # should succeed because the runas user didn't have permission
+    OIDCClients:
+      - Name: e2e-test-runas-client%E2E_RUN_SUFFIX%
+        Test: D
+    Groups:
+      - Name: e2e-test-runas-group%E2E_RUN_SUFFIX%
+        Test: D

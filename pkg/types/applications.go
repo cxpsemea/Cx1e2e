@@ -8,9 +8,6 @@ import (
 )
 
 func (t *ApplicationCRUD) Validate(CRUD string) error {
-	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Application == nil {
-		return fmt.Errorf("must read before updating or deleting")
-	}
 	if t.Name == "" {
 		return fmt.Errorf("application name is missing")
 	}
@@ -78,6 +75,16 @@ func (t *ApplicationCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logr
 }
 
 func (t *ApplicationCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Application == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	err := updateApplication(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -86,6 +93,16 @@ func (t *ApplicationCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 }
 
 func (t *ApplicationCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Application == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	err := cx1client.DeleteApplicationByID(t.Application.ApplicationID)
 	if err != nil {
 		return err

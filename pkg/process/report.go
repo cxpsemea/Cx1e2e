@@ -56,6 +56,8 @@ func (s *ReportSummary) AddTest(t *TestResult) {
 		s.Area.Access.AddTest(t)
 	case types.MOD_APPLICATION:
 		s.Area.Application.AddTest(t)
+	case types.MOD_CLIENT:
+		s.Area.Client.AddTest(t)
 	case types.MOD_FLAG:
 		s.Area.Flag.AddTest(t)
 	case types.MOD_GROUP:
@@ -183,6 +185,7 @@ func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig)
 	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
 	writeCounterSet(report, "Access Assignment", &reportData.Summary.Area.Access)
 	writeCounterSet(report, "Application", &reportData.Summary.Area.Application)
+	writeCounterSet(report, "Client", &reportData.Summary.Area.Client)
 	writeCounterSet(report, "Flag", &reportData.Summary.Area.Flag)
 	writeCounterSet(report, "Group", &reportData.Summary.Area.Group)
 	writeCounterSet(report, "Import", &reportData.Summary.Area.Import)

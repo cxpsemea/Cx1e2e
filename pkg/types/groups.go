@@ -8,10 +8,6 @@ import (
 )
 
 func (t *GroupCRUD) Validate(CRUD string) error {
-	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Group == nil {
-		return fmt.Errorf("must read before updating or deleting")
-	}
-
 	if t.Name == "" {
 		return fmt.Errorf("group name is missing")
 	}
@@ -92,6 +88,16 @@ func (t *GroupCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 }
 
 func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Group == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	err := updateGroup(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -101,6 +107,16 @@ func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.L
 }
 
 func (t *GroupCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Group == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	err := cx1client.DeleteGroup(t.Group)
 	if err != nil {
 		return err

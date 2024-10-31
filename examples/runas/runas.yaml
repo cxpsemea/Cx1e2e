@@ -1,0 +1,40 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Update Project fail-test
+    Projects:
+      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Test: R
+      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Test: U
+        FailTest: true
+        Tags: 
+          - Key: tag2
+            Value: tag2
+  - Name: Run scan
+    Scans:
+      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        ZipFile: ../files/SSBAv0.1.zip
+        Branch: zip
+        Preset: All
+        Engine: sast # sca kics apisec
+        WaitForEnd: true
+        CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
+        Test: C
+  - Name: Delete scan fail-test
+    Scans:
+      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Filter:
+          Index: 1 # there should be the scan we just ran
+          Statuses: [ "Completed", "Canceled" ]
+        Test: D
+        FailTest: true
+  - Name: Delete Project fail-test
+    Projects:
+      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Test: D
+        FailTest: true

@@ -1,17 +1,13 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
 	"fmt"
-	"net/http"
-	"net/url"
 	"os"
 	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/cxpsemea/cx1e2e/pkg/process"
-	retryablehttp "github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
 	easy "github.com/t-tomalak/logrus-easy-formatter"
 )
@@ -113,30 +109,14 @@ func run() float32 {
 	}
 
 	var cx1client *Cx1ClientGo.Cx1Client
-	cx1retryclient := retryablehttp.NewClient()
-	cx1retryclient.RetryMax = 3
-	cx1retryclient.Logger = logger
-	httpClient := cx1retryclient.StandardClient()
 
-	systemProxy := ""
 	if *Proxy != "" {
-		systemProxy = *Proxy
-	} else if Config.ProxyURL != "" {
-		systemProxy = Config.ProxyURL
+		Config.ProxyURL = *Proxy
 	}
 
-	if systemProxy != "" {
-		proxyURL, err := url.Parse(systemProxy)
-		if err != nil {
-			logger.Fatalf("Failed to parse specified proxy address %v: %s", systemProxy, err)
-			return 0
-		}
-		transport := &http.Transport{}
-		transport.Proxy = http.ProxyURL(proxyURL)
-		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-		httpClient.Transport = transport
-		logger.Infof("Running with proxy: %v", systemProxy)
+	httpClient, err := Config.CreateHTTPClient(logger)
+	if err != nil {
+		logger.Fatalf("Failed to create HTTP client: %s", err)
 	}
 
 	if *Tenant != "" {
