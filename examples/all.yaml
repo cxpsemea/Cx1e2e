@@ -42,6 +42,10 @@ Tests:
     File: user/all.yaml
   - Name: 10 second pause
     Wait: 10
+  - Name: RunAs
+    File: runas/all.yaml
+  - Name: 10 second pause
+    Wait: 10
   - Name: Import
     File: import/all.yaml
   - Name: 10 second pause
