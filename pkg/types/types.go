@@ -298,7 +298,7 @@ type ResultCRUD struct {
 	SASTFilter  SASTResultFilter `yaml:"SASTFilter"`
 	KICSFilter  KICSResultFilter `yaml:"KICSFilter"`
 	SCAFilter   SCAResultFilter  `yaml:"SCAFilter"`
-	Results     Cx1ClientGo.ScanResultSet
+	Results     *Cx1ClientGo.ScanResultSet
 	Project     *Cx1ClientGo.Project
 }
 

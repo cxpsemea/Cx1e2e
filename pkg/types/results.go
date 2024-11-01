@@ -11,9 +11,6 @@ import (
 )
 
 func (t *ResultCRUD) Validate(CRUD string) error {
-	if CRUD == OP_UPDATE && (len(t.Results.SAST)+len(t.Results.SCA)+len(t.Results.KICS) == 0) {
-		return fmt.Errorf("must read before updating")
-	}
 	if t.Type == "" {
 		return fmt.Errorf("result type not specified, should be one of: SAST, SCA, KICS")
 	}
@@ -198,7 +195,8 @@ func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 		return err
 	}
 
-	t.Results = t.Filter(&results)
+	filteredResults := t.Filter(&results)
+	t.Results = &filteredResults
 
 	switch t.Type {
 	case "SAST":
@@ -219,6 +217,16 @@ func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 }
 
 func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Results == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	switch t.Type {
 	case "SAST":
 		if len(t.Results.SAST) == 0 {
@@ -244,5 +252,5 @@ func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 }
 
 func (t *ResultCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
-	return fmt.Errorf("not implemented")
+	return fmt.Errorf("not possible to delete results")
 }
