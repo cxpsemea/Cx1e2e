@@ -12,7 +12,7 @@ Tests:
         SASTFilter:
           Query: Stored_XSS
           Severity: HIGH
-        Test: RU
+        Test: U
         Severity: MEDIUM
         Comment: "This Stored XSS is medium, not high"
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
@@ -21,7 +21,7 @@ Tests:
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
-        Test: RU
+        Test: U
         State: CONFIRMED
         Comment: "This Reflected XSS is confirmed"
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
@@ -30,7 +30,7 @@ Tests:
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
-        Test: RU
+        Test: U
         State: URGENT
         Severity: MEDIUM
         Comment: "This Reflected XSS is urgent, but medium"
@@ -39,7 +39,7 @@ Tests:
         Type: SAST
         SASTFilter:
           ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
-        Test: RU
+        Test: U
         Comment: "This parameter tampering is actually high rish"
         Severity: HIGH
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
@@ -47,7 +47,7 @@ Tests:
         Type: SAST
         SASTFilter:
           SimilarityID: 715549665
-        Test: RU
+        Test: U
         Comment: "This hardcoded password is my secret backdoor, not exploitable"
         State: NOT_EXPLOITABLE
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
@@ -55,7 +55,7 @@ Tests:
         Type: KICS
         KICSFilter:
           SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
-        Test: RU
+        Test: U
         Comment: "I don't care about the health of my container"
         State: NOT_EXPLOITABLE
   - Name: Read project scan results to verify the updates worked

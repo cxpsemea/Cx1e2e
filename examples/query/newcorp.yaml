@@ -29,7 +29,7 @@ Tests:
           - Language: JavaScript
             Group: JavaScript_High_Risk
             Name: EtoE_Test_Cheeseburgers
-        Test: RU
+        Test: U
   - Name: run a scan with the new preset
     Scans:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%

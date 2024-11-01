@@ -17,7 +17,7 @@ Tests:
       - Name: e2e-test-access-user%E2E_RUN_SUFFIX%
         Groups: [ e2e-test-access-group%E2E_RUN_SUFFIX% ]
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
-        Test: RU
+        Test: U
   - Name: Give group access to Application
     AccessAssignments:
       - EntityType: group
