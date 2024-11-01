@@ -51,27 +51,27 @@ Tests:
         Compile: true
         Severity: LOW
         Test: C
-  - Name: simple test RU for all
+  - Name: simple test U for all
     Roles:
       - Name: e2e-test-role1
         Permissions: [ view-scans-if-in-group ]
-        Test: RU
+        Test: U
     Groups:
       - Name: e2e-test-group1
         Roles: [ e2e-test-role1 ]
-        Test: RU
+        Test: U
     Users:
       - Name: e2e-test-user1
         Email: e2e_test_user1@cx.local
         Roles: [ e2e-test-role1 ]
         Groups: [ e2e-test-group1 ]
-        Test: RU
+        Test: U
     Applications:
       - Name: e2e-test-app1
         Tags: 
           - Test: tag1
             Test2: tag2
-        Test: RU
+        Test: U
     Presets:
       - Name: e2e-test-preset1
         Description: This is my test preset        
@@ -79,7 +79,7 @@ Tests:
           - Language: Java
             Group: "Java_High_Risk"
             Name: "SQL_Injection"    
-        Test: RU
+        Test: U
     Projects:
       - Name: e2e-test-project1
         Groups: [ e2e-test-group1 ]
@@ -87,7 +87,7 @@ Tests:
         Tags: 
           - Test: tag1
             Test2: tag2
-        Test: RU
+        Test: U
     Scans:
       - Project: e2e-test-project1
         Test: R
@@ -96,7 +96,7 @@ Tests:
         FindingNumber: 1
         State: CONFIRMED
         Severity: HIGH
-        Test: RU
+        Test: U
     Queries:
       - Name: "e2e_test_query1"
         Group: "e2e_test_querygroup1"
@@ -106,30 +106,30 @@ Tests:
           Project: e2e-test-project1
         Source: "// no result but updated"
         Severity: HIGH
-        Test: RU
+        Test: U
   - Name: simple delete for all
     Roles:
       - Name: e2e-test-role1
-        Test: RD
+        Test: D
     Groups:
       - Name: e2e-test-group1
-        Test: RD
+        Test: D
     Users:
       - Name: e2e-test-user1
         Email: e2e_test_user1@cx.local
-        Test: RD
+        Test: D
     Applications:
       - Name: e2e-test-app1
-        Test: RD
+        Test: D
     Presets:
       - Name: e2e-test-preset1
-        Test: RD
+        Test: D
     Projects:
       - Name: e2e-test-project1
-        Test: RD
+        Test: D
     Scans:
       - Project: e2e-test-project1
-        Test: RD
+        Test: D
     Queries:
       - Name: "e2e_test_query1"
         Group: "e2e_test_querygroup1"
@@ -137,4 +137,4 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-project1
-        Test: RD
+        Test: D

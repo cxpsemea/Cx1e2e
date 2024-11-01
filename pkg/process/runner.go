@@ -65,6 +65,9 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) []TestResult {
 	logger.Tracef("Running test set: %v", t.Name)
 
+	var err error
+	var testClient *Cx1ClientGo.Cx1Client
+
 	if t.Wait > 0 {
 		logger.Infof("Waiting for %d seconds", t.Wait)
 		time.Sleep(time.Duration(t.Wait) * time.Second)
@@ -72,14 +75,35 @@ func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 
 	all_results := []TestResult{}
 
-	results, err := t.Run(cx1client, logger, types.OP_CREATE, Config, nil)
-	all_results = append(all_results, results...)
-	results, err = t.Run(cx1client, logger, types.OP_READ, Config, err)
-	all_results = append(all_results, results...)
-	results, err = t.Run(cx1client, logger, types.OP_UPDATE, Config, err)
-	all_results = append(all_results, results...)
-	results, _ = t.Run(cx1client, logger, types.OP_DELETE, Config, err)
-	all_results = append(all_results, results...)
+	if t.OtherUser() {
+		logger.Infof("Test is configured to run as other user")
+		testClient, err = t.GetOtherClient(cx1client, logger, Config)
+		if err != nil {
+			logger.Errorf("Failed to get new Cx1 client for test set %v: %s", t.Name, err)
+		} else {
+			logger.Infof("Created new Cx1 client for test set %v: %s", t.Name, testClient.String())
+		}
+	} else {
+		testClient = cx1client
+	}
+
+	var results []TestResult
+
+	if len(t.SubTests) > 0 {
+		for id := range t.SubTests {
+			results = t.SubTests[id].RunTests(testClient, logger, Config)
+			all_results = append(all_results, results...)
+		}
+	} else {
+		results, err = t.Run(testClient, logger, types.OP_CREATE, Config, err)
+		all_results = append(all_results, results...)
+		results, err = t.Run(testClient, logger, types.OP_READ, Config, err)
+		all_results = append(all_results, results...)
+		results, err = t.Run(testClient, logger, types.OP_UPDATE, Config, err)
+		all_results = append(all_results, results...)
+		results, _ = t.Run(testClient, logger, types.OP_DELETE, Config, err)
+		all_results = append(all_results, results...)
+	}
 
 	return all_results
 }
@@ -129,6 +153,12 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, C
 		}
 		for id := range t.Users {
 			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Users[id]), &results, Config, TestSetFailError)
+			if err != nil && TestSetFailError == nil {
+				TestSetFailError = err
+			}
+		}
+		for id := range t.Clients {
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Clients[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
@@ -190,6 +220,12 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, C
 		}
 		for id := range t.AccessAssignments {
 			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.AccessAssignments[id]), &results, Config, TestSetFailError)
+			if err != nil && TestSetFailError == nil {
+				TestSetFailError = err
+			}
+		}
+		for id := range t.Clients {
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Clients[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
@@ -399,4 +435,39 @@ func FailError(result TestResult) error {
 		testType = "Negative-Test"
 	}
 	return fmt.Errorf("previous test %v %v %v '%v' (%v) failed: %v", result.CRUD, result.Module, testType, result.Name, result.TestObject, result.Reason[0])
+}
+
+func (t TestSet) OtherUser() bool {
+	return t.RunAs.APIKey != "" || (t.RunAs.ClientID != "" && t.RunAs.ClientSecret != "") || t.RunAs.OIDCClient != ""
+}
+
+func (t TestSet) GetOtherClient(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, config *TestConfig) (*Cx1ClientGo.Cx1Client, error) {
+	httpClient, err := config.CreateHTTPClient(logger)
+	if err != nil {
+		return nil, err
+	}
+
+	if t.RunAs.APIKey != "" {
+		return Cx1ClientGo.NewAPIKeyClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, t.RunAs.APIKey, logger)
+	}
+
+	if t.RunAs.ClientID != "" && t.RunAs.ClientSecret != "" {
+		return Cx1ClientGo.NewOAuthClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, t.RunAs.ClientID, t.RunAs.ClientSecret, logger)
+	}
+
+	if t.RunAs.OIDCClient != "" {
+		client, err := cx1client.GetClientByName(t.RunAs.OIDCClient)
+		if err != nil {
+			return nil, err
+		}
+
+		secret, err := cx1client.GetClientSecret(&client)
+		if err != nil {
+			return nil, err
+		}
+
+		return Cx1ClientGo.NewOAuthClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, client.ClientID, secret, logger)
+	}
+
+	return nil, fmt.Errorf("no credentials provided in test %v step, file %v", t.Name, t.File)
 }

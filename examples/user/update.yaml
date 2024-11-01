@@ -17,4 +17,4 @@ Tests:
         Email: e2e_test_user1@cx.local
         Roles: [ ast-viewer ]
         Groups: [ e2e-test-user-group%E2E_RUN_SUFFIX% ]
-        Test: RU
+        Test: U

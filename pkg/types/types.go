@@ -22,6 +22,7 @@ const (
 	MOD_ROLE        = "Role"
 	MOD_SCAN        = "Scan"
 	MOD_USER        = "User"
+	MOD_CLIENT      = "OIDCClient"
 )
 
 const (
@@ -194,6 +195,22 @@ func (o ImportCRUD) String() string {
 	} else {
 		return fmt.Sprintf("%v (%d sec timeout)", o.Name, o.TimeoutSeconds)
 	}
+}
+
+type OIDCClientCRUD struct {
+	CRUDTest `yaml:",inline"`
+	Name     string   `yaml:"Name"`
+	Groups   []string `yaml:"Groups"`
+	Roles    []string `yaml:"Roles"`
+	Client   *Cx1ClientGo.OIDCClient
+	User     *Cx1ClientGo.User
+}
+
+func (o OIDCClientCRUD) String() string {
+	if o.Client == nil {
+		return "New OIDC Client: " + o.Name
+	}
+	return o.Client.String()
 }
 
 type PresetCRUD struct {
@@ -419,6 +436,7 @@ type RoleCRUD struct {
 	CRUDTest    `yaml:",inline"`
 	Name        string   `yaml:"Name"`
 	Permissions []string `yaml:"Permissions"`
+	Filter      []string `yaml:"Filter"`
 	Role        *Cx1ClientGo.Role
 }
 

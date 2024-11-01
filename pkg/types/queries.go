@@ -11,10 +11,6 @@ import (
 var auditSession *Cx1ClientGo.AuditSession
 
 func (t *CxQLCRUD) Validate(CRUD string) error {
-	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Query == nil {
-		return fmt.Errorf("must read before updating or deleting")
-	}
-
 	if t.QueryLanguage == "" || t.QueryGroup == "" || t.QueryName == "" {
 		return fmt.Errorf("query language, group, or name is missing")
 	}
@@ -420,6 +416,16 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 }
 
 func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Query == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	if t.OldAPI {
 		return updateQuery_old(cx1client, t)
 	} else {
@@ -435,6 +441,16 @@ func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 }
 
 func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Query == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	if t.OldAPI {
 		return cx1client.DeleteQuery_v310(t.Query.ToAuditQuery_v310())
 	}

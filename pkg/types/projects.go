@@ -8,9 +8,9 @@ import (
 )
 
 func (t *ProjectCRUD) Validate(CRUD string) error {
-	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Project == nil {
+	/*if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Project == nil {
 		return fmt.Errorf("must read before updating or deleting")
-	}
+	}*/
 
 	if t.Name == "" {
 		return fmt.Errorf("project name is missing")
@@ -91,6 +91,16 @@ func (t *ProjectCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.L
 }
 
 func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Project == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	if t.Application != "" {
 		app, err := cx1client.GetApplicationByName(t.Application)
 		if err != nil {
@@ -114,10 +124,22 @@ func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus
 		}
 	}
 
+	// TODO: what about group updates?
+
 	return nil
 }
 
 func (t *ProjectCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Project == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	err := cx1client.DeleteProject(t.Project)
 	if err != nil {
 		return err

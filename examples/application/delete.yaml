@@ -7,10 +7,10 @@ Tests:
   - Name: App, Project, and Group Delete
     Groups:
       - Name: e2e-test-app-group%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D
     Projects:
       - Name: e2e-test-app-project%E2E_RUN_SUFFIX%    
-        Test: RD
+        Test: D
     Applications:
       - Name: e2e-test-app-app%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D

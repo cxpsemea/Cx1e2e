@@ -7,7 +7,7 @@ Tests:
   - Name: Update Project
     Projects:
       - Name: e2e-test-scan-project%E2E_RUN_SUFFIX%
-        Test: RU
+        Test: U
         Tags: 
           - Key: tag2
             Value: tag2

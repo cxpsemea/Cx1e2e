@@ -8,5 +8,5 @@ Tests:
     Roles:
       - Name: e2e-test-role-role%E2E_RUN_SUFFIX%
         Permissions: [ view-projects-if-in-group ]
-        Test: RU
+        Test: U
 

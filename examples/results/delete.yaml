@@ -7,4 +7,4 @@ Tests:
   - Name: delete temporary project
     Projects:
       - Name: e2e-test-result-project%E2E_RUN_SUFFIX%
-        Test: RD
+        Test: D

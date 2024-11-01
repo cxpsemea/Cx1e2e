@@ -6,10 +6,17 @@ import (
 )
 
 type TestSet struct {
-	Name              string                       `yaml:"Name"`
-	File              string                       `yaml:"File"`
+	Name  string `yaml:"Name"`
+	File  string `yaml:"File"`
+	RunAs struct {
+		APIKey       string `yaml:"APIKey"`
+		ClientID     string `yaml:"ClientID"`
+		ClientSecret string `yaml:"ClientSecret"`
+		OIDCClient   string `yaml:"OIDCClient"`
+	} `yaml:"RunAs"`
 	AccessAssignments []types.AccessAssignmentCRUD `yaml:"AccessAssignments"`
 	Applications      []types.ApplicationCRUD      `yaml:"Applications"`
+	Clients           []types.OIDCClientCRUD       `yaml:"OIDCClients"`
 	Flags             []types.FlagCRUD             `yaml:"Flags"`
 	Groups            []types.GroupCRUD            `yaml:"Groups"`
 	Imports           []types.ImportCRUD           `yaml:"Imports"`
@@ -22,7 +29,8 @@ type TestSet struct {
 	Scans             []types.ScanCRUD             `yaml:"Scans"`
 	Users             []types.UserCRUD             `yaml:"Users"`
 
-	Wait uint `yaml:"Wait"`
+	SubTests []TestSet `yaml:"-"`
+	Wait     uint      `yaml:"Wait"`
 }
 
 type TestConfig struct {
@@ -81,6 +89,7 @@ type ReportSummary struct {
 	Area  struct {
 		Access      CounterSet
 		Application CounterSet
+		Client      CounterSet
 		Flag        CounterSet
 		Group       CounterSet
 		Import      CounterSet

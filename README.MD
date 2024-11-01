@@ -69,11 +69,11 @@ More complicated set of 3 tests to create, read & update (set a permission), the
         Roles:
         - Name: e2e-test-role1
           Permissions: [ view-scans-if-in-group ]
-          Test: RU
+          Test: U
       - Name: simple delete for all
         Roles:
         - Name: e2e-test-role1
-          Test: RD
+          Test: D
 ```
 In the tests above, each "Test" parameter includes different combinations of CRUD operations. Tests are selected through the "Test: CRUD" line which defines if the [C]reate, [R]ead, [U]pdate, or [D]elete tests are performed. 
 
@@ -95,7 +95,7 @@ Currently this testing tool covers the following objects:
 - Presets (CRUD)
 - Projects (CRUD)
 - Queries (CRUD)
-- Results (RU)
+- Results (U)
 - Roles (CRUD)
 - Scans (CRD)
 - Users (CRUD)

@@ -11,4 +11,4 @@ Tests:
         Tags: 
           - Key: tag1
             Value: value1
-        Test: RU
+        Test: U

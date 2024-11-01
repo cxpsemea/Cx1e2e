@@ -1,13 +1,17 @@
 package process
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -43,7 +47,7 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 		return conf, err
 	}
 
-	testSet := make([]TestSet, 0)
+	//testSet := make([]TestSet, 0)
 
 	// propagate the filename to sub-tests
 	// TODO: refactor this to use generics?
@@ -89,7 +93,8 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 		}
 	}
 
-	for _, set := range conf.Tests {
+	for tid := range conf.Tests {
+		set := &conf.Tests[tid]
 		logger.Tracef("Checking TestSet %v for file references", set.Name)
 		if set.File != "" {
 			configPath, err := getFilePath(currentRoot, set.File)
@@ -102,7 +107,8 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 				return conf, fmt.Errorf("error loading sub-test %v: %s", set.File, err)
 			}
 			logger.Debugf("Loaded sub-config from %v", conf2.ConfigPath)
-			testSet = append(testSet, conf2.Tests...)
+			//testSet = append(testSet, conf2.Tests...)
+			conf.Tests[tid].SubTests = conf2.Tests
 		} else {
 			for id, scan := range set.Scans {
 				logger.Tracef(" - Checking Scan TestSet %v for file references", set.Name)
@@ -131,12 +137,35 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 					set.Imports[id].ProjectMapFile = filePath
 				}
 			}
-			testSet = append(testSet, set)
+			//testSet = append(testSet, set)
 		}
 	}
-	conf.Tests = testSet
+	//conf.Tests = testSet
 
 	return conf, nil
+}
+
+func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error) {
+	leveledlogger := LeveledLogger{logger: logger}
+	cx1retryclient := retryablehttp.NewClient()
+	cx1retryclient.RetryMax = 3
+	cx1retryclient.Logger = leveledlogger
+	httpClient := cx1retryclient.StandardClient()
+
+	if o.ProxyURL != "" {
+		proxyURL, err := url.Parse(o.ProxyURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse specified proxy address %v: %s", o.ProxyURL, err)
+		}
+		transport := &http.Transport{}
+		transport.Proxy = http.ProxyURL(proxyURL)
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+		httpClient.Transport = transport
+		logger.Infof("Running with proxy: %v", o.ProxyURL)
+	}
+
+	return httpClient, nil
 }
 
 func getFilePath(currentRoot, file string) (string, error) {

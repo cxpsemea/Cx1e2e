@@ -2,16 +2,13 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
 func (t *RoleCRUD) Validate(CRUD string) error {
-	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Role == nil {
-		return fmt.Errorf("must read before updating or deleting")
-	}
-
 	if t.Name == "" {
 		return fmt.Errorf("role name is missing")
 	}
@@ -112,14 +109,63 @@ func (t *RoleCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	if err != nil {
 		return err
 	}
+	sub_roles, err := cx1client.GetRoleComposites(&test_Role)
+	if err != nil {
+		return err
+	}
+	test_Role.SubRoles = sub_roles
+
+	if len(t.Filter) > 0 {
+		match_count := 0
+		missing_roles := []string{}
+
+		for _, filter := range t.Filter {
+			matched := false
+			for _, sr := range test_Role.SubRoles {
+				if strings.EqualFold(filter, sr.Name) {
+					match_count++
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				missing_roles = append(missing_roles, filter)
+			}
+		}
+
+		if match_count != len(t.Filter) {
+			return fmt.Errorf("role %v exists but is missing the following sub-roles set in the test filter: %v", test_Role.String(), strings.Join(missing_roles, ", "))
+		}
+	}
+
 	t.Role = &test_Role
 	return nil
 }
 
 func (t *RoleCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Role == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	return updateRole(cx1client, logger, t)
 }
 
 func (t *RoleCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Role == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	return cx1client.DeleteRoleByID(t.Role.RoleID)
 }

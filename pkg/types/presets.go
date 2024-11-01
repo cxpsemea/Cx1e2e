@@ -8,10 +8,6 @@ import (
 )
 
 func (t *PresetCRUD) Validate(CRUD string) error {
-	if (CRUD == OP_UPDATE || CRUD == OP_DELETE) && t.Preset == nil {
-		return fmt.Errorf("must read before updating or deleting")
-	}
-
 	if t.Name == "" {
 		return fmt.Errorf("preset name is missing")
 	}
@@ -69,6 +65,16 @@ func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 }
 
 func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Preset == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	query_ids, err := getQueryIDs(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -80,6 +86,16 @@ func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 }
 
 func (t *PresetCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+	if t.Preset == nil {
+		if t.CRUDTest.IsType(OP_READ) { // already tried to read
+			return fmt.Errorf("read operation failed")
+		} else {
+			if err := t.RunRead(cx1client, logger, Engines); err != nil {
+				return fmt.Errorf("read operation failed: %s", err)
+			}
+		}
+	}
+
 	err := cx1client.DeletePreset(t.Preset)
 	if err != nil {
 		return err
