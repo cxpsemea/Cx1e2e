@@ -4,16 +4,12 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: Delete imported project & app
+  - Name: Delete imported project, app, query
     Projects:
       - Name: e2e-test-import-project
         Test: D
     Applications:
       - Name: e2e-test-import-app
-        Test: D
-  - Name: Delete imported preset & query
-    Presets:
-      - Name: e2e-test-import-preset
         Test: D
     Queries:
       - Name: Cheeseburgers
@@ -22,4 +18,8 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-test-import-project
+        Test: D
+  - Name: Delete imported preset
+    Presets:
+      - Name: e2e-test-import-preset
         Test: D
