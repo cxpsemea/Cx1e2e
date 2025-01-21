@@ -77,7 +77,7 @@ func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 		}
 	} else {
 		logger.Infof("Using v1 report-gen API")
-		reportID, err = cx1client.RequestNewReportByID(t.Scan.ScanID, project.ProjectID, t.Branch, t.Format)
+		reportID, err = cx1client.RequestNewReportByID(t.Scan.ScanID, project.ProjectID, t.Branch, t.Format, []string{"SAST"}, []string{"ScanSummary", "ExecutiveSummary", "ScanResults"})
 		if err != nil {
 			return err
 		}
