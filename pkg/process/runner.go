@@ -409,7 +409,7 @@ func LogStart(logger *logrus.Logger, test TestRunner, CRUD, testName string) {
 		testType = "Negative-Test"
 	}
 
-	logger.Infof("Starting %v %v %v '%v' - %v", CRUD, test.GetModule(), testType, testName, test.String())
+	logger.Infof("Starting %v %v %v '%v' - %v [%v]", CRUD, test.GetModule(), testType, testName, test.String(), test.GetSource())
 }
 
 func LogResult(logger *logrus.Logger, result TestResult) {
