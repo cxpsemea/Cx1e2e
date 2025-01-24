@@ -48,3 +48,4 @@ Tests:
           Tenant: false
           Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
         Test: D
+        DeleteAuditSession: true

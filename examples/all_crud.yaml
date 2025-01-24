@@ -50,6 +50,7 @@ Tests:
         Source: "// no result"
         Compile: true
         Severity: LOW
+        DeleteAuditSession: true
         Test: C
   - Name: simple test U for all
     Roles:
@@ -106,6 +107,7 @@ Tests:
           Project: e2e-test-project1
         Source: "// no result but updated"
         Severity: HIGH
+        DeleteAuditSession: true
         Test: U
   - Name: simple delete for all
     Roles:
@@ -138,3 +140,4 @@ Tests:
           Tenant: true
           Project: e2e-test-project1
         Test: D
+        DeleteAuditSession: true

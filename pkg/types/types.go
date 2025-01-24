@@ -267,6 +267,7 @@ type ReportCRUD struct {
 	Status      string `yaml:"ScanStatus"`
 	Branch      string `yaml:"Branch"`
 	Format      string `yaml:"Format"`
+	Timeout     int    `yaml:"Timeout"`
 	Scan        *Cx1ClientGo.Scan
 }
 

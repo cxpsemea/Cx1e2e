@@ -83,7 +83,14 @@ func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 		}
 	}
 
-	reportURL, err := cx1client.ReportPollingByID(reportID)
+	var reportURL string
+
+	if t.Timeout > 0 {
+		reportURL, err = cx1client.ReportPollingByIDWithTimeout(reportID, cx1client.GetClientVars().ReportPollingDelaySeconds, t.Timeout)
+	} else {
+		reportURL, err = cx1client.ReportPollingByID(reportID)
+	}
+
 	if err != nil {
 		return err
 	}
