@@ -88,7 +88,6 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	t.Scan = &test_Scan
 	if t.WaitForEnd {
 		test_Scan, err = cx1client.ScanPollingWithTimeout(&test_Scan, true, scanDelay, t.Timeout)
-		logger.Infof("Scan failed with error: %s", err)
 		if err != nil {
 			if err.Error()[:4] == "scan" && err.Error()[12:19] == "polling" && t.Cancel {
 				logger.Infof("Scan %v took too long and will be canceled", test_Scan.String())
