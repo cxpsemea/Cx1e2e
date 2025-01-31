@@ -5,14 +5,12 @@ Tenant: your_tenant_here
 #LogLevel: TRACE
 Tests:
   - Name: create temporary application, project, new preset, run a scan
-    Projects:
-      - Name: e2e-test-query-project%E2E_RUN_SUFFIX%
-        Test: C
     Applications:
       - Name: e2e-test-query-app%E2E_RUN_SUFFIX%
-        Rules: 
-          - Type: "project.name.in"
-            Value: "e2e-test-query-project%E2E_RUN_SUFFIX%"
+        Test: C
+    Projects:
+      - Name: e2e-test-query-project%E2E_RUN_SUFFIX%
+        Application: e2e-test-query-app%E2E_RUN_SUFFIX%
         Test: C
     Presets:
       - Name: e2e-test-query-preset%E2E_RUN_SUFFIX%

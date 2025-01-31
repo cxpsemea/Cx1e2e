@@ -96,8 +96,9 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 					return err
 				}
 				test_Scan, err = cx1client.ScanPollingWithTimeout(&test_Scan, true, 30, 300) // allow up to 5 minutes to cancel.
+				t.Scan = &test_Scan
 				if err == nil {
-					return fmt.Errorf("scan took too long and was canceled")
+					return fmt.Errorf("scan took too long and was canceled - status: %v", test_Scan.Status)
 				} else {
 					return fmt.Errorf("scan took too long and the attempt to cancel failed with error: %s", err)
 				}

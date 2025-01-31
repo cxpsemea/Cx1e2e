@@ -35,9 +35,7 @@ func updateApplication(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, t *Ap
 		t.Application.AddRule(r.Type, r.Value)
 	}
 
-	cx1client.UpdateApplication(t.Application)
-
-	return nil
+	return cx1client.UpdateApplication(t.Application)
 }
 
 func (t *ApplicationCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
