@@ -167,7 +167,9 @@ func (o FlagCRUD) String() string {
 type GroupCRUD struct {
 	CRUDTest    `yaml:",inline"`
 	Name        string `yaml:"Name"`
+	Path        string `yaml:"Path"`
 	Parent      string `yaml:"Parent"`
+	ParentPath  string `yaml:"ParentPath"`
 	ClientRoles []struct {
 		Client string   `yaml:"Client"`
 		Roles  []string `yaml:"Roles"`
@@ -176,7 +178,11 @@ type GroupCRUD struct {
 }
 
 func (o GroupCRUD) String() string {
-	return o.Name
+	if o.Name != "" {
+		return o.Name
+	}
+
+	return o.Path
 }
 
 type ImportCRUD struct {
