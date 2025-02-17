@@ -47,6 +47,7 @@ func run() float32 {
 	ReportName := flag.String("report-name", "cx1e2e_result", "Report output base name")
 	Engines := flag.String("engines", "sast,sca,kics,apisec", "Run tests only for these engines")
 	Proxy := flag.String("proxy", "", "Optional: Proxy to use when connecting to CheckmarxOne")
+	NoTLS := flag.Bool("notls", false, "Optional: Disable TLS verification")
 
 	flag.Parse()
 
@@ -112,6 +113,10 @@ func run() float32 {
 
 	if *Proxy != "" {
 		Config.ProxyURL = *Proxy
+	}
+
+	if *NoTLS {
+		Config.NoTLS = true
 	}
 
 	httpClient, err := Config.CreateHTTPClient(logger)

@@ -38,6 +38,7 @@ type TestConfig struct {
 	IAMURL             string                  `yaml:"IAMURL"`
 	Tenant             string                  `yaml:"Tenant"`
 	ProxyURL           string                  `yaml:"ProxyURL"`
+	NoTLS              bool                    `yaml:"NoTLS"`
 	Tests              []TestSet               `yaml:"Tests"`
 	LogLevel           string                  `yaml:"LogLevel"`
 	ConfigPath         string                  `yaml:"-"`

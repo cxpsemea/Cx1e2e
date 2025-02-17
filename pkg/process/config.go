@@ -163,6 +163,12 @@ func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error
 
 		httpClient.Transport = transport
 		logger.Infof("Running with proxy: %v", o.ProxyURL)
+	} else if o.NoTLS {
+		transport := &http.Transport{}
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+		httpClient.Transport = transport
+		logger.Info("Running without TLS verification")
 	}
 
 	return httpClient, nil
