@@ -8,9 +8,16 @@ Tests:
     Groups:
       - Name: e2e-test-runas-group%E2E_RUN_SUFFIX%
         Test: C
+        FeatureFlags: [ "!ACCESS_MANAGEMENT_ENABLED" ]
         ClientRoles:
           - Client: ast-app
             Roles: [ view-projects-if-in-group, create-scan-if-in-group, view-scans-if-in-group, view-project-params-if-in-group, update-project-params-if-in-group ]
+      - Name: e2e-test-runas-group%E2E_RUN_SUFFIX%
+        Test: C
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
+        ClientRoles:
+          - Client: ast-app
+            Roles: [ view-projects, create-scan, view-scans, view-project-params, update-project-params ]
   - Name: Create Project
     Projects:
       - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
@@ -21,3 +28,12 @@ Tests:
       - Name: e2e-test-runas-client%E2E_RUN_SUFFIX%
         Test: C
         Groups: [ e2e-test-runas-group%E2E_RUN_SUFFIX% ]
+  - Name: Grant OIDC Client access to project        
+    AccessAssignments:
+      - EntityType: group
+        EntityName: e2e-test-runas-group%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
+        ResourceType: project
+        ResourceName: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Roles: [ view-projects, create-scan, view-scans, view-project-params, update-project-params ]
+        Test: C

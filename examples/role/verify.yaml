@@ -7,6 +7,6 @@ Tests:
   - Name: Role Update
     Roles:
       - Name: e2e-test-role-role%E2E_RUN_SUFFIX%
-        Filter: [ view-projects-if-in-group ]
+        Filter: [ view-projects ]
         Test: R
 

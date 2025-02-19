@@ -69,6 +69,14 @@ func (t *ImportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 		return fmt.Errorf("import failed")
 	}
 
+	logs, err := cx1client.GetImportLogsByID(importID)
+	if err != nil {
+		return err
+	}
+	if len(logs) == 0 {
+		return fmt.Errorf("import ID %v: downloaded logs are 0 bytes", importID)
+	}
+
 	return nil
 }
 

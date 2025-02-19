@@ -35,7 +35,7 @@ func (t *AccessAssignmentCRUD) GetModule() string {
 	return MOD_ACCESS
 }
 
-func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, t *AccessAssignmentCRUD) (Cx1ClientGo.AccessAssignment, error) {
+func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *AccessAssignmentCRUD) (Cx1ClientGo.AccessAssignment, error) {
 	access := Cx1ClientGo.AccessAssignment{
 		TenantID:     cx1client.GetTenantID(),
 		EntityType:   t.EntityType,
@@ -84,7 +84,14 @@ func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger,
 	access.EntityRoles = make([]Cx1ClientGo.AccessAssignedRole, len(t.Roles))
 
 	for id, r := range t.Roles {
-		access.EntityRoles[id].Name = r
+		role, err := cx1client.GetRoleByName(r)
+		if err != nil {
+			logger.Errorf("Failed to find role with name %v: %s", r, err)
+		} else {
+			access.EntityRoles[id].Name = r
+			access.EntityRoles[id].Id = role.RoleID
+		}
+
 	}
 
 	return access, nil

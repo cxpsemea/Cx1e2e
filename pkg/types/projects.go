@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
@@ -59,6 +60,23 @@ func (t *ProjectCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus
 			return err
 		}
 		t.Project = &test_Project
+	}
+
+	if t.Project != nil {
+		if t.Preset != "" {
+			projConfig := Cx1ClientGo.ConfigurationSetting{
+				Key:           "scan.config.sast.presetName",
+				Name:          "presetName",
+				Category:      "sast",
+				AllowOverride: true,
+				Value:         t.Preset,
+			}
+
+			err := cx1client.UpdateProjectConfiguration(t.Project, []Cx1ClientGo.ConfigurationSetting{projConfig})
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
@@ -124,7 +142,49 @@ func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus
 		}
 	}
 
-	// TODO: what about group updates?
+	if t.Preset != "" {
+		projConfig := Cx1ClientGo.ConfigurationSetting{
+			Key:           "scan.config.sast.presetName",
+			Name:          "presetName",
+			Category:      "sast",
+			AllowOverride: true,
+			Value:         t.Preset,
+		}
+
+		err := cx1client.UpdateProjectConfiguration(t.Project, []Cx1ClientGo.ConfigurationSetting{projConfig})
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(t.Groups) > 0 || len(t.Project.Groups) > 0 {
+		group_ids := []string{}
+
+		diffGroups := false
+		for _, g := range t.Groups {
+			group, err := cx1client.GetGroupByName(g)
+			if err != nil {
+				return err
+			}
+			group_ids = append(group_ids, group.GroupID)
+			if !slices.Contains(t.Project.Groups, group.GroupID) {
+				diffGroups = true
+			}
+		}
+
+		for _, g := range t.Project.Groups {
+			if !slices.Contains(group_ids, g) {
+				diffGroups = true
+			}
+		}
+
+		if diffGroups {
+			t.Project.Groups = group_ids
+			if err := cx1client.UpdateProject(t.Project); err != nil {
+				return err
+			}
+		}
+	}
 
 	return nil
 }

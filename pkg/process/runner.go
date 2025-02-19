@@ -27,6 +27,7 @@ type TestRunner interface {
 	GetSource() string
 	GetModule() string
 	GetFlags() []string
+	GetVersion() string
 	OnFail() types.FailAction
 
 	RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
@@ -51,7 +52,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	all_results := []TestResult{}
 
 	for id := range Config.Tests {
-		all_results = append(all_results, Config.Tests[id].RunTests(cx1client, logger, Config)...)
+		all_results = append(all_results, Config.Tests[id].RunTests(cx1client, logger, Config, nil)...)
 	}
 
 	status, err := GenerateReport(&all_results, logger, Config)
@@ -62,10 +63,10 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	return status
 }
 
-func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) []TestResult {
+func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig, testSetFail error) []TestResult {
 	logger.Tracef("Running test set: %v", t.Name)
 
-	var err error
+	var err error = testSetFail
 	var testClient *Cx1ClientGo.Cx1Client
 
 	if t.Wait > 0 {
@@ -75,23 +76,32 @@ func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 
 	all_results := []TestResult{}
 
-	if t.OtherUser() {
-		logger.Infof("Test is configured to run as other user")
-		testClient, err = t.GetOtherClient(cx1client, logger, Config)
-		if err != nil {
-			logger.Errorf("Failed to get new Cx1 client for test set %v: %s", t.Name, err)
+	if err == nil {
+		if t.OtherUser() {
+			logger.Infof("Test is configured to run as other user")
+
+			for counter := 3; counter > 0 && testClient == nil; counter-- {
+				testClient, err = t.GetOtherClient(cx1client, logger, Config)
+
+				if err != nil {
+					logger.Errorf("Failed to get new Cx1 client for test set %v: %s", t.Name, err)
+				} else {
+					logger.Infof("Created new Cx1 client for test set %v: %s", t.Name, testClient.String())
+					break
+				}
+				logger.Infof("Waiting 15 seconds to retry")
+				time.Sleep(time.Second * time.Duration(15))
+			}
 		} else {
-			logger.Infof("Created new Cx1 client for test set %v: %s", t.Name, testClient.String())
+			testClient = cx1client
 		}
-	} else {
-		testClient = cx1client
 	}
 
 	var results []TestResult
 
 	if len(t.SubTests) > 0 {
 		for id := range t.SubTests {
-			results = t.SubTests[id].RunTests(testClient, logger, Config)
+			results = t.SubTests[id].RunTests(testClient, logger, Config, err)
 			all_results = append(all_results, results...)
 		}
 	} else {
@@ -282,7 +292,12 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, test
 			err := test.IsSupported(cx1client, logger, CRUD, &Config.Engines)
 
 			if err == nil && !CheckFlags(cx1client, logger, test) {
-				err = fmt.Errorf("test requires feature flag(s) %v to be enabled", strings.Join(test.GetFlags(), ","))
+				err = fmt.Errorf("test requires feature flag(s): %v ", strings.Join(test.GetFlags(), ","))
+			}
+
+			if err == nil && test.GetVersion() != "" && !CheckVersion(cx1client, logger, test) {
+				v, _ := cx1client.GetVersion()
+				err = fmt.Errorf("test expects Cx1 version %v, current version is %v", test.GetVersion(), v.String())
 			}
 
 			if err != nil && !test.IsForced() {
@@ -388,18 +403,41 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName
 
 func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test TestRunner) bool {
 	for _, flag := range test.GetFlags() {
+		negative := false
+		if flag[0] == '!' {
+			negative = true
+			flag = flag[1:]
+		}
+
 		val, err := cx1client.CheckFlag(flag)
 		if err != nil {
 			logger.Errorf("Failed to check flag %v: %s", flag, err)
 			return false
 		}
-		if !val {
+
+		if !val && !negative {
 			logger.Debugf("Test requires feature flag %v but it is disabled", flag)
+			return false
+		}
+		if val && negative {
+			logger.Debugf("Test requires absence of feature flag %v but it is enabled", flag)
 			return false
 		}
 	}
 
 	return true
+}
+
+func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test TestRunner) bool {
+	version := test.GetVersion()
+	cur, _ := cx1client.GetVersion()
+
+	if version[0] == '!' {
+		version = version[1:]
+
+		return cur.CheckCxOne(version) < 0
+	}
+	return cur.CheckCxOne(version) >= 0
 }
 
 func LogStart(logger *logrus.Logger, test TestRunner, CRUD, testName string) {
@@ -419,13 +457,13 @@ func LogResult(logger *logrus.Logger, result TestResult) {
 	}
 	switch result.Result {
 	case TST_FAIL:
-		logger.Errorf("FAIL [%.3fs]: %v %v %v '%v' (%v)", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject)
+		logger.Errorf("FAIL [%.3fs]: %v %v %v '%v' (%v) [%v]", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject, result.TestSource)
 		logger.Errorf("Failure reason: %v", result.Reason[0])
 	case TST_SKIP:
-		logger.Warnf("SKIP [%.3fs]: %v %v %v '%v' (%v)", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject)
+		logger.Warnf("SKIP [%.3fs]: %v %v %v '%v' (%v) [%v]", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject, result.TestSource)
 		logger.Warnf("Skip reason: %v", result.Reason)
 	case TST_PASS:
-		logger.Infof("PASS [%.3fs]: %v %v %v '%v' (%v)", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject)
+		logger.Infof("PASS [%.3fs]: %v %v %v '%v' (%v) [%v]", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject, result.TestSource)
 	}
 }
 

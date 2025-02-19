@@ -11,3 +11,4 @@ Tests:
         Tags: 
           - Key: tag2
             Value: value2
+        Preset: All

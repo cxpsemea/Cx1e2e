@@ -28,6 +28,10 @@ func (c CRUDTest) GetFlags() []string {
 	return c.Flags
 }
 
+func (c CRUDTest) GetVersion() string {
+	return c.Version
+}
+
 func (c CRUDTest) IsForced() bool {
 	return c.ForceRun
 }

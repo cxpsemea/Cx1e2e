@@ -181,7 +181,6 @@ func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	var scans []Cx1ClientGo.Scan
 
 	if t.Filter != nil {
-		fmt.Println("filter is: ", t.Filter)
 		if t.Filter.Index == 0 {
 			t.Filter.Index = 1 //
 		}

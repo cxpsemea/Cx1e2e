@@ -59,7 +59,8 @@ func (e EnabledEngines) IsEnabled(engine string) bool {
 type CRUDTest struct {
 	Test         string     `yaml:"Test"`         // CRUD [create, read, update, delete]
 	FailTest     bool       `yaml:"FailTest"`     // is it a negative test
-	Flags        []string   `yaml:"FeatureFlags"` // are there specific feature flags needed for this test
+	Flags        []string   `yaml:"FeatureFlags"` // are there specific feature flags needed for this test, with ! for negative-flag-test
+	Version      string     `yaml:"Version"`      // is there a specific minimum version for this test, with a ! for "less than this version"
 	TestSource   string     // filename
 	ForceRun     bool       `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
 	OnFailAction FailAction `yaml:"OnFail"`   // actions to take if this command fails
@@ -242,6 +243,7 @@ type ProjectCRUD struct {
 	Groups      []string `yaml:"Groups"`
 	Application string   `yaml:"Application"`
 	Tags        []Tag    `yaml:"Tags"`
+	Preset      string   `yaml:"Preset"`
 	Project     *Cx1ClientGo.Project
 }
 
