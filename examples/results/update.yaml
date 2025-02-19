@@ -96,7 +96,7 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # the stored_xss finding should now be medium
         Type: SAST
-        Version: "!3.30.0"
+        Version: "!3.25.0"
         SASTFilter:
           QueryID: 14350862106797905179 # as of 3.23+ this has changed. It was previously 13625251660291496964
           Severity: MEDIUM
@@ -104,9 +104,9 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # the stored_xss finding should now be medium
         Type: SAST
-        Version: "3.30.0"
+        Version: "3.25.0"
         SASTFilter:
-          QueryID: 13625251660291496964 # as of 3.30+ this is 13625251660291496964 again
+          QueryID: 13625251660291496964 # as of 3.25+ this is 13625251660291496964 again
           Severity: MEDIUM
         Test: R
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
