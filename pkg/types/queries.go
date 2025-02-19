@@ -171,7 +171,7 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCR
 		logger.Debugf("Query doesn't exist")
 	}
 
-	baseQuery := queries.GetQueryByName(t.QueryLanguage, t.QueryGroup, t.QueryName)
+	baseQuery := queries.GetQueryByName(t.QueryLanguage, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
 
 	return query, baseQuery
 }
@@ -230,7 +230,8 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 
 	t.Query.IsExecutable = t.IsExecutable
 
-	return cx1client.UpdateQuery(auditSession, t.Query)
+	_, err := cx1client.UpdateQuery(auditSession, t.Query)
+	return err
 }
 
 func updateQuery_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
@@ -315,7 +316,7 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 			Custom:       true,
 		}
 
-		newQuery, err := cx1client.CreateNewQuery(auditSession, newQuery)
+		newQuery, _, err := cx1client.CreateNewQuery(auditSession, newQuery)
 		if err != nil {
 			return err
 		}

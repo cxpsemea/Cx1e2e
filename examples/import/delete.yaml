@@ -19,6 +19,7 @@ Tests:
           Tenant: true
           Project: e2e-test-import-project
         Test: D
+        DeleteAuditSession: true
   - Name: Delete imported preset
     Presets:
       - Name: e2e-test-import-preset

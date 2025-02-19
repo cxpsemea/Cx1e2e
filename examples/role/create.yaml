@@ -7,5 +7,5 @@ Tests:
   - Name: Role Create
     Roles:
       - Name: e2e-test-role-role%E2E_RUN_SUFFIX%
-        Permissions: [ view-scans-if-in-group ]
+        Permissions: [ view-scans ]
         Test: C

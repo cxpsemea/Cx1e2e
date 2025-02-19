@@ -77,13 +77,20 @@ func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 		}
 	} else {
 		logger.Infof("Using v1 report-gen API")
-		reportID, err = cx1client.RequestNewReportByID(t.Scan.ScanID, project.ProjectID, t.Branch, t.Format)
+		reportID, err = cx1client.RequestNewReportByID(t.Scan.ScanID, project.ProjectID, t.Branch, t.Format, []string{"SAST"}, []string{"ScanSummary", "ExecutiveSummary", "ScanResults"})
 		if err != nil {
 			return err
 		}
 	}
 
-	reportURL, err := cx1client.ReportPollingByID(reportID)
+	var reportURL string
+
+	if t.Timeout > 0 {
+		reportURL, err = cx1client.ReportPollingByIDWithTimeout(reportID, cx1client.GetClientVars().ReportPollingDelaySeconds, t.Timeout)
+	} else {
+		reportURL, err = cx1client.ReportPollingByID(reportID)
+	}
+
 	if err != nil {
 		return err
 	}

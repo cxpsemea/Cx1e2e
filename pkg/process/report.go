@@ -18,6 +18,7 @@ func prepareReportData(tests *[]TestResult, Config *TestConfig) Report {
 	report.Settings.Config = Config.ConfigPath
 	report.Settings.Timestamp = time.Now().String()
 	report.Settings.E2ESuffix = os.Getenv("E2E_RUN_SUFFIX")
+	report.Settings.Version = Config.EnvironmentVersion
 
 	for _, r := range *tests {
 		report.AddTest(&r)

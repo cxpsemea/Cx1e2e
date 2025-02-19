@@ -59,7 +59,8 @@ func (e EnabledEngines) IsEnabled(engine string) bool {
 type CRUDTest struct {
 	Test         string     `yaml:"Test"`         // CRUD [create, read, update, delete]
 	FailTest     bool       `yaml:"FailTest"`     // is it a negative test
-	Flags        []string   `yaml:"FeatureFlags"` // are there specific feature flags needed for this test
+	Flags        []string   `yaml:"FeatureFlags"` // are there specific feature flags needed for this test, with ! for negative-flag-test
+	Version      string     `yaml:"Version"`      // is there a specific minimum version for this test, with a ! for "less than this version"
 	TestSource   string     // filename
 	ForceRun     bool       `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
 	OnFailAction FailAction `yaml:"OnFail"`   // actions to take if this command fails
@@ -167,7 +168,9 @@ func (o FlagCRUD) String() string {
 type GroupCRUD struct {
 	CRUDTest    `yaml:",inline"`
 	Name        string `yaml:"Name"`
+	Path        string `yaml:"Path"`
 	Parent      string `yaml:"Parent"`
+	ParentPath  string `yaml:"ParentPath"`
 	ClientRoles []struct {
 		Client string   `yaml:"Client"`
 		Roles  []string `yaml:"Roles"`
@@ -176,7 +179,11 @@ type GroupCRUD struct {
 }
 
 func (o GroupCRUD) String() string {
-	return o.Name
+	if o.Name != "" {
+		return o.Name
+	}
+
+	return o.Path
 }
 
 type ImportCRUD struct {
@@ -236,6 +243,7 @@ type ProjectCRUD struct {
 	Groups      []string `yaml:"Groups"`
 	Application string   `yaml:"Application"`
 	Tags        []Tag    `yaml:"Tags"`
+	Preset      string   `yaml:"Preset"`
 	Project     *Cx1ClientGo.Project
 }
 
@@ -267,6 +275,7 @@ type ReportCRUD struct {
 	Status      string `yaml:"ScanStatus"`
 	Branch      string `yaml:"Branch"`
 	Format      string `yaml:"Format"`
+	Timeout     int    `yaml:"Timeout"`
 	Scan        *Cx1ClientGo.Scan
 }
 

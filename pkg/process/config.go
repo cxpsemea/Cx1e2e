@@ -58,6 +58,9 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 		for id2 := range conf.Tests[id].Applications {
 			conf.Tests[id].Applications[id2].TestSource = configPath
 		}
+		for id2 := range conf.Tests[id].Clients {
+			conf.Tests[id].Clients[id2].TestSource = configPath
+		}
 		for id2 := range conf.Tests[id].Flags {
 			conf.Tests[id].Flags[id2].TestSource = configPath
 		}
@@ -163,6 +166,12 @@ func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error
 
 		httpClient.Transport = transport
 		logger.Infof("Running with proxy: %v", o.ProxyURL)
+	} else if o.NoTLS {
+		transport := &http.Transport{}
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+		httpClient.Transport = transport
+		logger.Info("Running without TLS verification")
 	}
 
 	return httpClient, nil

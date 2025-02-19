@@ -89,15 +89,16 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	if t.WaitForEnd {
 		test_Scan, err = cx1client.ScanPollingWithTimeout(&test_Scan, true, scanDelay, t.Timeout)
 		if err != nil {
-			if err.Error()[:12] == "scan polling" && t.Cancel {
+			if err.Error()[:4] == "scan" && err.Error()[12:19] == "polling" && t.Cancel {
 				logger.Infof("Scan %v took too long and will be canceled", test_Scan.String())
 				err = cx1client.CancelScanByID(test_Scan.ScanID)
 				if err != nil {
 					return err
 				}
 				test_Scan, err = cx1client.ScanPollingWithTimeout(&test_Scan, true, 30, 300) // allow up to 5 minutes to cancel.
+				t.Scan = &test_Scan
 				if err == nil {
-					return fmt.Errorf("scan took too long and was canceled")
+					return fmt.Errorf("scan took too long and was canceled - status: %v", test_Scan.Status)
 				} else {
 					return fmt.Errorf("scan took too long and the attempt to cancel failed with error: %s", err)
 				}
@@ -180,7 +181,6 @@ func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	var scans []Cx1ClientGo.Scan
 
 	if t.Filter != nil {
-		fmt.Println("filter is: ", t.Filter)
 		if t.Filter.Index == 0 {
 			t.Filter.Index = 1 //
 		}
