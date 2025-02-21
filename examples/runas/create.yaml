@@ -21,8 +21,12 @@ Tests:
   - Name: Create Project
     Projects:
       - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
-        Test: C
-        Groups: [ e2e-test-runas-group%E2E_RUN_SUFFIX% ]
+        Test: C        
+        FeatureFlags: [ "!ACCESS_MANAGEMENT_ENABLED" ]
+        Groups: [ e2e-test-runas-group%E2E_RUN_SUFFIX% ]      
+      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Test: C        
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
   - Name: Create OIDC Client
     OIDCClients:
       - Name: e2e-test-runas-client%E2E_RUN_SUFFIX%

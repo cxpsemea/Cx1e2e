@@ -4,16 +4,32 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: Create Project
+  - Name: Create Project 1 and run a scan
     Projects:
-      - Name: e2e-test-report-project%E2E_RUN_SUFFIX%
+      - Name: e2e-test-report-project-1%E2E_RUN_SUFFIX%
         Test: C
         Tags: 
           - Test: tag1
     Scans:
-      - Project: e2e-test-report-project%E2E_RUN_SUFFIX%
+      - Project: e2e-test-report-project-1%E2E_RUN_SUFFIX%
         Repository: https://github.com/michaelkubiaczyk/ssba
         Branch: master
+        Preset: All
+        Engine: sast
+        WaitForEnd: true
+        CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
+        Test: C
+  - Name: Create Project 2 and run a scan
+    Projects:
+      - Name: e2e-test-report-project-2%E2E_RUN_SUFFIX%
+        Test: C
+        Tags: 
+          - Test: tag1
+    Scans:
+      - Project: e2e-test-report-project-2%E2E_RUN_SUFFIX%
+        Repository: https://github.com/michaelkubiaczyk/simple-java-command-injection
+        Branch: main
         Preset: All
         Engine: sast
         WaitForEnd: true

@@ -269,31 +269,39 @@ func (o QueryCRUD) String() string {
 }
 
 type ReportCRUD struct {
-	CRUDTest    `yaml:",inline"`
-	ProjectName string `yaml:"Project"`
-	Number      uint   `yaml:"Number"`
-	Status      string `yaml:"ScanStatus"`
-	Branch      string `yaml:"Branch"`
-	Format      string `yaml:"Format"`
-	Timeout     int    `yaml:"Timeout"`
-	Scan        *Cx1ClientGo.Scan
+	CRUDTest      `yaml:",inline"`
+	ReportType    string   `yaml:"Type"`          // "scan" (one project, last #Number scan in branch) or "project" (multiple projects)
+	ReportVersion int      `yaml:"ReportVersion"` // 1 or 2
+	ProjectNames  []string `yaml:"Projects"`
+	Scanners      []string `yaml:"Scanners"`
+	Number        uint     `yaml:"Number"`
+	Status        string   `yaml:"ScanStatus"`
+	Branch        string   `yaml:"Branch"`
+	Format        string   `yaml:"Format"`
+	Timeout       int      `yaml:"Timeout"`
+	Scan          *Cx1ClientGo.Scan
+	Projects      []*Cx1ClientGo.Project
 }
 
 func (o ReportCRUD) String() string {
 	filters := []string{}
 
-	if o.Status != "" {
-		filters = append(filters, fmt.Sprintf("Scan status: %v", o.Status))
-	}
+	if o.ReportType == "scan" {
+		if o.Status != "" {
+			filters = append(filters, fmt.Sprintf("Scan status: %v", o.Status))
+		}
 
-	if o.Branch != "" {
-		filters = append(filters, fmt.Sprintf("Branch: %v", o.Branch))
-	}
+		if o.Branch != "" {
+			filters = append(filters, fmt.Sprintf("Branch: %v", o.Branch))
+		}
 
-	if len(filters) > 0 {
-		return fmt.Sprintf("Report for project %v scan #%d matching filter %v, in %v format", o.ProjectName, o.Number, strings.Join(filters, ", "), o.Format)
+		if len(filters) > 0 {
+			return fmt.Sprintf("Scan report v%d for %v for project %v scan #%d matching filter %v, in %v format", o.ReportVersion, strings.Join(o.Scanners, ", "), o.ProjectNames[0], o.Number, strings.Join(filters, ", "), o.Format)
+		}
+		return fmt.Sprintf("Scan report v%d for %v for project %v scan #%d in %v format", o.ReportVersion, strings.Join(o.Scanners, ", "), o.ProjectNames[0], o.Number, o.Format)
+	} else {
+		return fmt.Sprintf("Project report v%d for %v for projects %v in %v format", o.ReportVersion, strings.Join(o.Scanners, ", "), strings.Join(o.ProjectNames, ", "), o.Format)
 	}
-	return fmt.Sprintf("Report for project %v scan #%d in %v format", o.ProjectName, o.Number, o.Format)
 }
 
 type ResultCRUD struct {
