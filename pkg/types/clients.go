@@ -66,6 +66,8 @@ func updateOIDCClientFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *OIDCClientC
 
 	new_roles := []Cx1ClientGo.Role{}
 
+	fmt.Printf("Expecting to have %d roles\n", len(t.Roles))
+
 	for _, newrole := range t.Roles { // check for roles to add
 		if val, _ := t.User.HasRoleByName(newrole); !val {
 			role, err := cx1client.GetRoleByName(newrole)

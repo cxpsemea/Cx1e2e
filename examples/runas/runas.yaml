@@ -25,6 +25,78 @@ Tests:
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
+  - Name: Generate a scan-level report
+    Reports:
+      - Type: scan
+        ReportVersion: 1
+        Projects: [ e2e-test-runas-project%E2E_RUN_SUFFIX% ]
+        Branch: zip
+        Status: Completed
+        Number: 1
+        Format: pdf
+        Scanners: [ SAST ]
+        Test: C
+  - Name: Update some results
+    Results:
+      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        FindingNumber: 1 #
+        Type: SAST
+        Version: "!3.31.0" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        SASTFilter:
+          Query: Reflected_XSS_All_Clients
+          Severity: HIGH
+        Test: U
+        State: URGENT
+        Severity: MEDIUM
+        Comment: "This Reflected XSS is urgent, but medium"
+      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        FindingNumber: 1 #
+        Type: SAST
+        Version: "3.31.0" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        SASTFilter:
+          Query: Reflected_XSS
+          Severity: HIGH
+        Test: U
+        State: URGENT
+        Severity: MEDIUM
+        Comment: "This Reflected XSS is urgent, but medium"
+  - Name: Check that results are updated
+    Results:
+      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        FindingNumber: 1 # Only one of the reflected xss findings is "confirmed" now
+        Type: SAST
+        Version: "!3.31.0" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        SASTFilter:
+          Query: Reflected_XSS_All_Clients
+          State: URGENT
+        Test: R
+      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        FindingNumber: 1 # Only one of the reflected xss findings is "confirmed" now
+        Type: SAST
+        Version: "3.31.0" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        SASTFilter:
+          Query: Reflected_XSS
+          State: URGENT
+        Test: R
+  - Name: Generate single scan report v2
+    Reports:
+      - Type: scan
+        ReportVersion: 2
+        Projects: [ e2e-test-runas-project%E2E_RUN_SUFFIX% ]
+        Branch: zip
+        Status: Completed
+        Number: 1
+        Format: pdf
+        Scanners: [ sast ]
+        Test: C
+  - Name: Generate single project report v2
+    Reports:
+      - Type: project
+        ReportVersion: 2
+        Projects: [ e2e-test-runas-project%E2E_RUN_SUFFIX% ]
+        Format: pdf
+        Scanners: [ sast ]
+        Test: C
   - Name: Delete scan fail-test
     Scans:
       - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
