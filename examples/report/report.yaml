@@ -4,11 +4,33 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: Generate report
+  - Name: Generate single scan report v1
     Reports:
-      - Project: e2e-test-report-project%E2E_RUN_SUFFIX%
+      - Type: scan
+        ReportVersion: 1
+        Projects: [ e2e-test-report-project-1%E2E_RUN_SUFFIX% ]
         Branch: master
         Status: Completed
         Number: 1
         Format: pdf
+        Scanners: [ SAST ]
+        Test: C
+  - Name: Generate single scan report v2
+    Reports:
+      - Type: scan
+        ReportVersion: 2
+        Projects: [ e2e-test-report-project-1%E2E_RUN_SUFFIX% ]
+        Branch: master
+        Status: Completed
+        Number: 1
+        Format: pdf
+        Scanners: [ sast ]
+        Test: C
+  - Name: Generate multiple project report v2
+    Reports:
+      - Type: project
+        ReportVersion: 2
+        Projects: [ e2e-test-report-project-1%E2E_RUN_SUFFIX%, e2e-test-report-project-2%E2E_RUN_SUFFIX% ]
+        Format: pdf
+        Scanners: [ sast ]
         Test: C

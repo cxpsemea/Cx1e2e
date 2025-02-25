@@ -11,18 +11,22 @@ Tests:
         FeatureFlags: [ "!ACCESS_MANAGEMENT_ENABLED" ]
         ClientRoles:
           - Client: ast-app
-            Roles: [ view-projects-if-in-group, create-scan-if-in-group, view-scans-if-in-group, view-project-params-if-in-group, update-project-params-if-in-group ]
+            Roles: [ view-projects-if-in-group, create-scan-if-in-group, view-scans-if-in-group, view-project-params-if-in-group, update-project-params-if-in-group, view-results-if-in-group, update-result-if-in-group, view-queries, manage-reports ]
       - Name: e2e-test-runas-group%E2E_RUN_SUFFIX%
         Test: C
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         ClientRoles:
           - Client: ast-app
-            Roles: [ view-projects, create-scan, view-scans, view-project-params, update-project-params ]
+            Roles: [ view-projects, create-scan, view-scans, view-project-params, update-project-params, view-results, update-results, view-queries, manage-reports ]
   - Name: Create Project
     Projects:
       - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
-        Test: C
-        Groups: [ e2e-test-runas-group%E2E_RUN_SUFFIX% ]
+        Test: C        
+        FeatureFlags: [ "!ACCESS_MANAGEMENT_ENABLED" ]
+        Groups: [ e2e-test-runas-group%E2E_RUN_SUFFIX% ]      
+      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Test: C        
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
   - Name: Create OIDC Client
     OIDCClients:
       - Name: e2e-test-runas-client%E2E_RUN_SUFFIX%
