@@ -244,7 +244,7 @@ func OutputReportJSON(reportName string, reportData *Report) error {
 	return report.Sync()
 }
 
-func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConfig) (float32, error) {
+func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConfig) (uint, error) {
 	reportData := prepareReportData(tests, Config)
 	OutputSummaryConsole(&reportData, logger)
 
@@ -262,9 +262,9 @@ func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConf
 		}
 	}
 
-	status := float32(reportData.Summary.Total.Pass) / float32(reportData.Summary.Total.Skip+reportData.Summary.Total.Fail+reportData.Summary.Total.Pass)
+	//status := float32(reportData.Summary.Total.Pass) / float32(reportData.Summary.Total.Skip+reportData.Summary.Total.Fail+reportData.Summary.Total.Pass)
 
-	return status, nil
+	return reportData.Summary.Total.Fail, nil
 }
 
 func writeCell(report *os.File, count uint, good bool) {

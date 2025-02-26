@@ -36,7 +36,7 @@ Tests:
         Format: pdf
         Scanners: [ SAST ]
         Test: C
-  - Name: Update some results
+  - Name: Update a scan result
     Results:
       - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 #
@@ -60,7 +60,7 @@ Tests:
         State: URGENT
         Severity: MEDIUM
         Comment: "This Reflected XSS is urgent, but medium"
-  - Name: Check that results are updated
+  - Name: Check that the scan result is updated
     Results:
       - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
         FindingNumber: 1 # Only one of the reflected xss findings is "confirmed" now

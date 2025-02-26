@@ -4,8 +4,8 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-#  - Name: Create
-#    File: create.yaml
+  - Name: Create
+    File: create.yaml
   - Name: RunAs
     File: runas.yaml
     RunAs:
@@ -13,5 +13,5 @@ Tests:
       #ClientSecret: %E2E_CLIENT2_SECRET%
       #APIKey: %E2E_CLIENT2_APIKEY%
       OIDCClient: e2e-test-runas-client%E2E_RUN_SUFFIX%
-#  - Name: Delete
-#    File: delete.yaml
+  - Name: Delete
+    File: delete.yaml

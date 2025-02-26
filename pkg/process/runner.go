@@ -48,7 +48,7 @@ func MakeResult(test TestRunner) TestResult {
 	}
 }
 
-func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) float32 {
+func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) uint {
 	all_results := []TestResult{}
 
 	for id := range Config.Tests {
