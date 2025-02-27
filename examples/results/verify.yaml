@@ -1,0 +1,85 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Read project scan results to verify the updates worked
+    Results:
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # the stored_xss finding should now be medium
+        Type: SAST
+        Version: 
+          CxOne: "3.32.0"
+        SASTFilter:
+          QueryID: 14350862106797905179 # from 3.23-3.30+, before 3.23 was 13625251660291496964
+          Severity: MEDIUM
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # the stored_xss finding should now be medium
+        Type: SAST
+        Version: 
+          CxOne: "!3.32.0"
+        SASTFilter:
+          QueryID: 13625251660291496964 # before 3.23 and in 3.30-3.31?+ this is 13625251660291496964
+          Severity: MEDIUM
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # Only one of the reflected xss findings is "confirmed" now
+        Type: SAST
+        Version: 
+          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        SASTFilter:
+          Query: Reflected_XSS_All_Clients
+          State: CONFIRMED
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # Only one of the reflected xss findings is "confirmed" now
+        Type: SAST
+        Version: 
+          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        SASTFilter:
+          Query: Reflected_XSS
+          State: CONFIRMED
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+        FindingNumber: 3 # there should no longer be 3 ref_xss HIGH findings, only two
+        Type: SAST
+        Version: 
+          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        SASTFilter:
+          Query: Reflected_XSS_All_Clients
+          Severity: HIGH
+        Test: R
+        FailTest: true
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+        FindingNumber: 3 # there should no longer be 3 ref_xss HIGH findings, only two
+        Type: SAST
+        Version: 
+          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        SASTFilter:
+          Query: Reflected_XSS
+          Severity: HIGH
+        Test: R
+        FailTest: true
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # this specific reflected xss finding is now medium
+        Type: SAST
+        SASTFilter:
+          SimilarityID: 1318375675
+          Severity: MEDIUM
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # the only parameter tampering finding should now be High
+        Type: SAST
+        SASTFilter:
+          SimilarityID: -1732526860
+          Severity: HIGH
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # there is also a use_of_hardcoded_password vulnerability
+        Type: SAST
+        SASTFilter:
+          Query: Use_Of_Hardcoded_Password
+          State: NOT_EXPLOITABLE
+        Test: R
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # there is also a Healthcheck Instruction Missing finding from KICS
+        Type: KICS
+        KICSFilter:
+          SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
+          State: NOT_EXPLOITABLE
+        Test: R
+        

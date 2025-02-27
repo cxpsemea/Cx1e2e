@@ -27,7 +27,8 @@ type TestRunner interface {
 	GetSource() string
 	GetModule() string
 	GetFlags() []string
-	GetVersion() string
+	GetVersion() types.ProductVersion
+	GetVersionStr() string
 	OnFail() types.FailAction
 
 	RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
@@ -295,9 +296,9 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, test
 				err = fmt.Errorf("test requires feature flag(s): %v ", strings.Join(test.GetFlags(), ","))
 			}
 
-			if err == nil && test.GetVersion() != "" && !CheckVersion(cx1client, logger, test) {
+			if err == nil && !CheckVersion(cx1client, logger, test) {
 				v, _ := cx1client.GetVersion()
-				err = fmt.Errorf("test expects Cx1 version %v, current version is %v", test.GetVersion(), v.String())
+				err = fmt.Errorf("test expects %v, current version is %v", test.GetVersionStr(), v.String())
 			}
 
 			if err != nil && !test.IsForced() {
@@ -429,15 +430,86 @@ func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test Te
 }
 
 func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test TestRunner) bool {
-	version := test.GetVersion()
 	cur, _ := cx1client.GetVersion()
 
-	if version[0] == '!' {
-		version = version[1:]
+	pv := test.GetVersion()
 
-		return cur.CheckCxOne(version) < 0
+	if pv.CxOne != "" {
+		version := pv.CxOne
+		if version[0] == '!' {
+			version = version[1:]
+			check, err := cur.CheckCxOne(version)
+			if err != nil {
+				logger.Errorf("Failed to parse version %v: %s", version, err)
+				return false
+			}
+
+			if check >= 0 {
+				return false
+			}
+		} else {
+			check, err := cur.CheckCxOne(version)
+			if err != nil {
+				logger.Errorf("Failed to parse version %v: %s", version, err)
+				return false
+			}
+			if check < 0 {
+				return false
+			}
+		}
 	}
-	return cur.CheckCxOne(version) >= 0
+
+	if pv.SAST != "" {
+		version := pv.SAST
+		if version[0] == '!' {
+			version = version[1:]
+			check, err := cur.CheckSAST(version)
+			if err != nil {
+				logger.Errorf("Failed to parse version %v: %s", version, err)
+				return false
+			}
+
+			if check >= 0 {
+				return false
+			}
+		} else {
+			check, err := cur.CheckSAST(version)
+			if err != nil {
+				logger.Errorf("Failed to parse version %v: %s", version, err)
+				return false
+			}
+			if check < 0 {
+				return false
+			}
+		}
+	}
+
+	if pv.KICS != "" {
+		version := pv.KICS
+		if version[0] == '!' {
+			version = version[1:]
+			check, err := cur.CheckKICS(version)
+			if err != nil {
+				logger.Errorf("Failed to parse version %v: %s", version, err)
+				return false
+			}
+
+			if check >= 0 {
+				return false
+			}
+		} else {
+			check, err := cur.CheckKICS(version)
+			if err != nil {
+				logger.Errorf("Failed to parse version %v: %s", version, err)
+				return false
+			}
+			if check < 0 {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func LogStart(logger *logrus.Logger, test TestRunner, CRUD, testName string) {

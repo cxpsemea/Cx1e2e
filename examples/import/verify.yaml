@@ -25,16 +25,16 @@ Tests:
         Test: C
     Results:
       - Project: e2e-test-import-project
-        FindingNumber: 1
         Type: SAST
-        Version: "!3.31.0" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        Version: 
+          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="
         Test: R
       - Project: e2e-test-import-project
-        FindingNumber: 1
         Type: SAST
-        Version: "3.31.0" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        Version: 
+          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           ResultHash: "BCAQgoeGeO58tg81+LCMZxK/NI8="
         Test: R

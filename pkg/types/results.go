@@ -18,7 +18,11 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 		return fmt.Errorf("project name is missing")
 	}
 	if t.Number == 0 {
-		return fmt.Errorf("result number is missing (starting from 1)")
+		t.Number = 1
+	} else {
+		if CRUD != OP_READ {
+			return fmt.Errorf("specifying the finding number for any operation other than Read is not supported (results are not always in consistent order)")
+		}
 	}
 
 	return nil
