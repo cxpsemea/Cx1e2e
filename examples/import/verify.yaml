@@ -27,16 +27,27 @@ Tests:
       - Project: e2e-test-import-project
         Type: SAST
         Version: 
-          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          CxOne: 
+            Below: "3.32.0" 
         SASTFilter:
           ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="
         Test: R
       - Project: e2e-test-import-project
         Type: SAST
         Version: 
-          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            AtLeast: "3.32.0"
+            Below: "3.33.0"
         SASTFilter:
           ResultHash: "BCAQgoeGeO58tg81+LCMZxK/NI8="
+        Test: R
+      - Project: e2e-test-import-project
+        Type: SAST
+        Version: 
+          CxOne: 
+            AtLeast: "3.33.0" 
+        SASTFilter:
+          ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="
         Test: R
 
         

@@ -434,76 +434,64 @@ func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test 
 
 	pv := test.GetVersion()
 
-	if pv.CxOne != "" {
-		version := pv.CxOne
-		if version[0] == '!' {
-			version = version[1:]
-			check, err := cur.CheckCxOne(version)
+	if pv.CxOne.IsSet() {
+		if pv.CxOne.Min != "" {
+			check, err := cur.CheckCxOne(pv.CxOne.Min)
 			if err != nil {
-				logger.Errorf("Failed to parse version %v: %s", version, err)
-				return false
-			}
-
-			if check >= 0 {
-				return false
-			}
-		} else {
-			check, err := cur.CheckCxOne(version)
-			if err != nil {
-				logger.Errorf("Failed to parse version %v: %s", version, err)
-				return false
+				logger.Errorf("Failed to check version: %s", err)
 			}
 			if check < 0 {
 				return false
 			}
 		}
-	}
-
-	if pv.SAST != "" {
-		version := pv.SAST
-		if version[0] == '!' {
-			version = version[1:]
-			check, err := cur.CheckSAST(version)
+		if pv.CxOne.Max != "" {
+			check, err := cur.CheckCxOne(pv.CxOne.Max)
 			if err != nil {
-				logger.Errorf("Failed to parse version %v: %s", version, err)
-				return false
+				logger.Errorf("Failed to check version: %s", err)
 			}
-
 			if check >= 0 {
-				return false
-			}
-		} else {
-			check, err := cur.CheckSAST(version)
-			if err != nil {
-				logger.Errorf("Failed to parse version %v: %s", version, err)
-				return false
-			}
-			if check < 0 {
 				return false
 			}
 		}
 	}
 
-	if pv.KICS != "" {
-		version := pv.KICS
-		if version[0] == '!' {
-			version = version[1:]
-			check, err := cur.CheckKICS(version)
+	if pv.SAST.IsSet() {
+		if pv.SAST.Min != "" {
+			check, err := cur.CheckSAST(pv.SAST.Min)
 			if err != nil {
-				logger.Errorf("Failed to parse version %v: %s", version, err)
+				logger.Errorf("Failed to check version: %s", err)
+			}
+			if check < 0 {
 				return false
 			}
-
+		}
+		if pv.SAST.Max != "" {
+			check, err := cur.CheckSAST(pv.SAST.Max)
+			if err != nil {
+				logger.Errorf("Failed to check version: %s", err)
+			}
 			if check >= 0 {
 				return false
 			}
-		} else {
-			check, err := cur.CheckKICS(version)
+		}
+	}
+
+	if pv.KICS.IsSet() {
+		if pv.KICS.Min != "" {
+			check, err := cur.CheckKICS(pv.KICS.Min)
 			if err != nil {
-				logger.Errorf("Failed to parse version %v: %s", version, err)
-				return false
+				logger.Errorf("Failed to check version: %s", err)
 			}
 			if check < 0 {
+				return false
+			}
+		}
+		if pv.KICS.Max != "" {
+			check, err := cur.CheckKICS(pv.KICS.Max)
+			if err != nil {
+				logger.Errorf("Failed to check version: %s", err)
+			}
+			if check >= 0 {
 				return false
 			}
 		}

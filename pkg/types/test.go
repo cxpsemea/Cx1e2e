@@ -33,14 +33,14 @@ func (c CRUDTest) GetFlags() []string {
 
 func (c CRUDTest) GetVersionStr() string {
 	versions := []string{}
-	if c.Version.CxOne != "" {
-		versions = append(versions, fmt.Sprintf("Cx1 version %v", c.Version.CxOne))
+	if c.Version.CxOne.IsSet() {
+		versions = append(versions, fmt.Sprintf("Cx1 version %v", c.Version.CxOne.String()))
 	}
-	if c.Version.SAST != "" {
-		versions = append(versions, fmt.Sprintf("SAST version %v", c.Version.SAST))
+	if c.Version.SAST.IsSet() {
+		versions = append(versions, fmt.Sprintf("SAST version %v", c.Version.SAST.String()))
 	}
-	if c.Version.KICS != "" {
-		versions = append(versions, fmt.Sprintf("KICS version %v", c.Version.KICS))
+	if c.Version.KICS.IsSet() {
+		versions = append(versions, fmt.Sprintf("KICS version %v", c.Version.KICS.String()))
 	}
 	return strings.Join(versions, ", ")
 }

@@ -9,7 +9,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # the stored_xss finding should now be medium
         Type: SAST
         Version: 
-          CxOne: "3.32.0"
+          CxOne: 
+            AtLeast: "3.32.0"
         SASTFilter:
           QueryID: 14350862106797905179 # from 3.23-3.30+, before 3.23 was 13625251660291496964
           Severity: MEDIUM
@@ -17,7 +18,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # the stored_xss finding should now be medium
         Type: SAST
         Version: 
-          CxOne: "!3.32.0"
+          CxOne: 
+            Below: "3.32.0"
         SASTFilter:
           QueryID: 13625251660291496964 # before 3.23 and in 3.30-3.31?+ this is 13625251660291496964
           Severity: MEDIUM
@@ -25,7 +27,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # Only one of the reflected xss findings is "confirmed" now
         Type: SAST
         Version: 
-          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           State: CONFIRMED
@@ -33,7 +36,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # Only one of the reflected xss findings is "confirmed" now
         Type: SAST
         Version: 
-          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           State: CONFIRMED
@@ -42,7 +46,8 @@ Tests:
         FindingNumber: 3 # there should no longer be 3 ref_xss HIGH findings, only two
         Type: SAST
         Version: 
-          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
@@ -52,7 +57,8 @@ Tests:
         FindingNumber: 3 # there should no longer be 3 ref_xss HIGH findings, only two
         Type: SAST
         Version: 
-          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           Severity: HIGH

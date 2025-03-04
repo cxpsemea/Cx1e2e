@@ -74,12 +74,36 @@ type FailAction struct {
 }
 
 type ProductVersion struct {
-	CxOne string `yaml:"CxOne"`
-	SAST  string `yaml:"SAST"`
-	KICS  string `yaml:"KICS"`
-	/*vCxOne *Cx1ClientGo.VersionTriad `yaml:"-"`
-	vSAST  *Cx1ClientGo.VersionTriad `yaml:"-"`
-	vKICS  *Cx1ClientGo.VersionTriad `yaml:"-"`*/
+	CxOne ProductVersionMinMax `yaml:"CxOne"`
+	SAST  ProductVersionMinMax `yaml:"SAST"`
+	KICS  ProductVersionMinMax `yaml:"KICS"`
+}
+
+type ProductVersionMinMax struct {
+	Min string `yaml:"AtLeast"`
+	Max string `yaml:"Below"`
+}
+
+func (v ProductVersionMinMax) String() string {
+	if v.Min == v.Max {
+		if v.Min == "" {
+			return "unset"
+		}
+
+		return fmt.Sprintf("exactly %v", v.Min)
+	} else {
+		if v.Min == "" {
+			return fmt.Sprintf("below %v", v.Max)
+		}
+		if v.Max == "" {
+			return fmt.Sprintf("at least %v", v.Min)
+		}
+		return fmt.Sprintf("at least %v and below %v", v.Min, v.Max)
+	}
+}
+
+func (v ProductVersionMinMax) IsSet() bool {
+	return v.Min != "" || v.Max != ""
 }
 
 type AccessAssignmentCRUD struct {

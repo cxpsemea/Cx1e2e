@@ -17,7 +17,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
-          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
@@ -28,7 +29,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
-          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           Severity: HIGH
@@ -39,7 +41,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
-          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
@@ -51,7 +54,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
-          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           SimilarityID: 1318375675
@@ -63,7 +67,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
-          CxOne: "!3.31.0" # 
+          CxOne: 
+            Below: "3.31.0" # 
         SASTFilter:
           ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: U
@@ -72,7 +77,8 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
-          CxOne: "3.31.0" 
+          CxOne: 
+            AtLeast: "3.31.0" 
         SASTFilter:
           ResultHash: "j2c7AUjdAQeBoe5LY7Kvap1kyT4="
         Test: U

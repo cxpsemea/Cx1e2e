@@ -41,7 +41,8 @@ Tests:
       - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
-          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
@@ -52,7 +53,8 @@ Tests:
       - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
-          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           Severity: HIGH
@@ -65,7 +67,8 @@ Tests:
       - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%  # Only one of the reflected xss findings is "confirmed" now
         Type: SAST
         Version: 
-          SAST: "!9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           State: URGENT
@@ -73,7 +76,8 @@ Tests:
       - Project: e2e-test-runas-project%E2E_RUN_SUFFIX% # Only one of the reflected xss findings is "confirmed" now
         Type: SAST
         Version: 
-          SAST: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+          SAST: 
+            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           State: URGENT
