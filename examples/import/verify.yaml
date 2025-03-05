@@ -28,7 +28,7 @@ Tests:
         Type: SAST
         Version: 
           CxOne: 
-            Below: "3.32.0" 
+            Below: "3.30.0" 
         SASTFilter:
           ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="
         Test: R
@@ -36,7 +36,7 @@ Tests:
         Type: SAST
         Version: 
           SAST: 
-            AtLeast: "3.32.0"
+            AtLeast: "3.30.0"
             Below: "3.33.0"
         SASTFilter:
           ResultHash: "BCAQgoeGeO58tg81+LCMZxK/NI8="
