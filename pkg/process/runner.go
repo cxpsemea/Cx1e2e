@@ -27,7 +27,8 @@ type TestRunner interface {
 	GetSource() string
 	GetModule() string
 	GetFlags() []string
-	GetVersion() string
+	GetVersion() types.ProductVersion
+	GetVersionStr() string
 	OnFail() types.FailAction
 
 	RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
@@ -48,7 +49,7 @@ func MakeResult(test TestRunner) TestResult {
 	}
 }
 
-func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) float32 {
+func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) uint {
 	all_results := []TestResult{}
 
 	for id := range Config.Tests {
@@ -295,9 +296,9 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, test
 				err = fmt.Errorf("test requires feature flag(s): %v ", strings.Join(test.GetFlags(), ","))
 			}
 
-			if err == nil && test.GetVersion() != "" && !CheckVersion(cx1client, logger, test) {
+			if err == nil && !CheckVersion(cx1client, logger, test) {
 				v, _ := cx1client.GetVersion()
-				err = fmt.Errorf("test expects Cx1 version %v, current version is %v", test.GetVersion(), v.String())
+				err = fmt.Errorf("test expects %v, current version is %v", test.GetVersionStr(), v.String())
 			}
 
 			if err != nil && !test.IsForced() {
@@ -429,15 +430,74 @@ func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test Te
 }
 
 func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test TestRunner) bool {
-	version := test.GetVersion()
 	cur, _ := cx1client.GetVersion()
 
-	if version[0] == '!' {
-		version = version[1:]
+	pv := test.GetVersion()
 
-		return cur.CheckCxOne(version) < 0
+	if pv.CxOne.IsSet() {
+		if pv.CxOne.Min != "" {
+			check, err := cur.CheckCxOne(pv.CxOne.Min)
+			if err != nil {
+				logger.Errorf("Failed to check version: %s", err)
+			}
+			if check < 0 {
+				return false
+			}
+		}
+		if pv.CxOne.Max != "" {
+			check, err := cur.CheckCxOne(pv.CxOne.Max)
+			if err != nil {
+				logger.Errorf("Failed to check version: %s", err)
+			}
+			if check >= 0 {
+				return false
+			}
+		}
 	}
-	return cur.CheckCxOne(version) >= 0
+
+	if pv.SAST.IsSet() {
+		if pv.SAST.Min != "" {
+			check, err := cur.CheckSAST(pv.SAST.Min)
+			if err != nil {
+				logger.Errorf("Failed to check version: %s", err)
+			}
+			if check < 0 {
+				return false
+			}
+		}
+		if pv.SAST.Max != "" {
+			check, err := cur.CheckSAST(pv.SAST.Max)
+			if err != nil {
+				logger.Errorf("Failed to check version: %s", err)
+			}
+			if check >= 0 {
+				return false
+			}
+		}
+	}
+
+	if pv.KICS.IsSet() {
+		if pv.KICS.Min != "" {
+			check, err := cur.CheckKICS(pv.KICS.Min)
+			if err != nil {
+				logger.Errorf("Failed to check version: %s", err)
+			}
+			if check < 0 {
+				return false
+			}
+		}
+		if pv.KICS.Max != "" {
+			check, err := cur.CheckKICS(pv.KICS.Max)
+			if err != nil {
+				logger.Errorf("Failed to check version: %s", err)
+			}
+			if check >= 0 {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func LogStart(logger *logrus.Logger, test TestRunner, CRUD, testName string) {

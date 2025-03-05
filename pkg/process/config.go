@@ -84,6 +84,9 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 		}
 		for id2 := range conf.Tests[id].Results {
 			conf.Tests[id].Results[id2].TestSource = configPath
+			if conf.Tests[id].Results[id2].Number == 0 {
+				conf.Tests[id].Results[id2].Number = 1
+			}
 		}
 		for id2 := range conf.Tests[id].Roles {
 			conf.Tests[id].Roles[id2].TestSource = configPath

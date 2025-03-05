@@ -33,7 +33,6 @@ Tests:
         Test: C
     Results:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
-        FindingNumber: 1 # this finding should be gone again
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Type: SAST
         SASTFilter:

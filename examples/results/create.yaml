@@ -20,18 +20,20 @@ Tests:
         Test: C
         OnFail:
           FailTestSet: true
+  - Name: check that the expected results are found
     Results:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 1 # there will be one stored_xss finding
         Type: SAST
         SASTFilter:
           Query: Stored_XSS
           Severity: HIGH
         Test: R
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 3 # there will be three reflected_xss_all_clients finding
+        FindingNumber: 3 # there will be three reflected_xss finding
         Type: SAST
-        Version: "3.31.0"
+        Version: 
+          SAST: 
+            AtLeast: "9.7.1"
         SASTFilter:
           Query: Reflected_XSS
           Severity: HIGH
@@ -39,39 +41,40 @@ Tests:
       - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 # there will be three reflected_xss_all_clients finding
         Type: SAST
-        Version: "!3.31.0" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
+        Version: 
+          SAST: 
+            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 1 # there will be a Parameter_Tampering finding with this result hash
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # there will be a Parameter_Tampering finding with this result hash
         Type: SAST
-        Version: "!3.31.0"
+        Version: 
+          CxOne: 
+            Below: "3.30.45"
         SASTFilter:
           ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 1 # there will be a Parameter_Tampering finding with this result hash
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # there will be a Parameter_Tampering finding with this result hash
         Type: SAST
-        Version: "3.31.0"
+        Version: 
+          CxOne: 
+            AtLeast: "3.30.45"
         SASTFilter:
           ResultHash: "j2c7AUjdAQeBoe5LY7Kvap1kyT4="
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 1 # there is also a use_of_hardcoded_password vulnerability
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # there is also a use_of_hardcoded_password vulnerability
         Type: SAST
         SASTFilter:
           SimilarityID: 715549665
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 1 # there is also a Healthcheck Instruction Missing finding from KICS
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # there is also a Healthcheck Instruction Missing finding from KICS
         Type: KICS
         KICSFilter:
           SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 1 # there is also a SCA finding for Maven-org.apache.tomcat.embed:tomcat-embed-core CVE-2021-43980
+      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # there is also a SCA finding for Maven-org.apache.tomcat.embed:tomcat-embed-core CVE-2021-43980
         Type: SCA
         SCAFilter:
           SimilarityID: "CVE-2021-43980"

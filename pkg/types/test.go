@@ -1,6 +1,9 @@
 package types
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 func (c CRUDTest) IsNegative() bool {
 	return c.FailTest
@@ -28,7 +31,21 @@ func (c CRUDTest) GetFlags() []string {
 	return c.Flags
 }
 
-func (c CRUDTest) GetVersion() string {
+func (c CRUDTest) GetVersionStr() string {
+	versions := []string{}
+	if c.Version.CxOne.IsSet() {
+		versions = append(versions, fmt.Sprintf("Cx1 version %v", c.Version.CxOne.String()))
+	}
+	if c.Version.SAST.IsSet() {
+		versions = append(versions, fmt.Sprintf("SAST version %v", c.Version.SAST.String()))
+	}
+	if c.Version.KICS.IsSet() {
+		versions = append(versions, fmt.Sprintf("KICS version %v", c.Version.KICS.String()))
+	}
+	return strings.Join(versions, ", ")
+}
+
+func (c CRUDTest) GetVersion() ProductVersion {
 	return c.Version
 }
 

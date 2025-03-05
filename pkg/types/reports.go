@@ -89,10 +89,14 @@ func (t *ReportCRUD) createScanReport(cx1client *Cx1ClientGo.Cx1Client, logger *
 	}
 
 	if t.ReportVersion == 1 {
-		if version, err := cx1client.GetVersion(); err == nil && version.CheckCxOne("3.20.0") >= 0 && version.CheckCxOne("3.21.0") == -1 {
-			// version is somewhere in 3.20.x - regular PDF report-gen is broken
-			logger.Debugf("Switching from report v1 to report v2 due to Cx1 version %v", version.CxOne)
-			t.ReportVersion = 2
+		if version, err := cx1client.GetVersion(); err == nil {
+			check1, _ := version.CheckCxOne("3.20.0")
+			check2, _ := version.CheckCxOne("3.21.0")
+			if check1 >= 0 && check2 == -1 {
+				// version is somewhere in 3.20.x - regular PDF report-gen is broken
+				logger.Debugf("Switching from report v1 to report v2 due to Cx1 version %v", version.CxOne)
+				t.ReportVersion = 2
+			}
 		}
 	}
 

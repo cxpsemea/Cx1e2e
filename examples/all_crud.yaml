@@ -94,7 +94,6 @@ Tests:
         Test: R
     Results:
       - Project: e2e-test-project1
-        FindingNumber: 1
         State: CONFIRMED
         Severity: HIGH
         Test: U

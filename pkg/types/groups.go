@@ -178,8 +178,6 @@ func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.L
 		}
 	}
 
-	logger.Errorf("Group is %v", t.Group.String())
-
 	err := updateGroup(cx1client, t)
 	if err != nil {
 		return err

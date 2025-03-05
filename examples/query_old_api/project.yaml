@@ -34,7 +34,6 @@ Tests:
         Test: C
     Results:
       - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
-        FindingNumber: 1 # this finding should be gone again
         Type: SAST
         SASTFilter:
           Query: Client_DOM_XSS

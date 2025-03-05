@@ -57,13 +57,13 @@ func (e EnabledEngines) IsEnabled(engine string) bool {
 }
 
 type CRUDTest struct {
-	Test         string     `yaml:"Test"`         // CRUD [create, read, update, delete]
-	FailTest     bool       `yaml:"FailTest"`     // is it a negative test
-	Flags        []string   `yaml:"FeatureFlags"` // are there specific feature flags needed for this test, with ! for negative-flag-test
-	Version      string     `yaml:"Version"`      // is there a specific minimum version for this test, with a ! for "less than this version"
-	TestSource   string     // filename
-	ForceRun     bool       `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
-	OnFailAction FailAction `yaml:"OnFail"`   // actions to take if this command fails
+	Test         string         `yaml:"Test"`         // CRUD [create, read, update, delete]
+	FailTest     bool           `yaml:"FailTest"`     // is it a negative test
+	Flags        []string       `yaml:"FeatureFlags"` // are there specific feature flags needed for this test, with ! for negative-flag-test
+	Version      ProductVersion `yaml:"Version"`      // is there a specific minimum version for this test, with a ! for "less than this version"
+	TestSource   string         // filename
+	ForceRun     bool           `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
+	OnFailAction FailAction     `yaml:"OnFail"`   // actions to take if this command fails
 }
 
 type FailAction struct {
@@ -71,6 +71,39 @@ type FailAction struct {
 	RetryDelay uint     `yaml:"RetryDelay"`  // delay (in seconds) between retries
 	FailSet    bool     `yaml:"FailTestSet"` // whole test set fails if this test fails (skip remaining tests)
 	Commands   []string `yaml:"Commands"`    // command to run when the test fails
+}
+
+type ProductVersion struct {
+	CxOne ProductVersionMinMax `yaml:"CxOne"`
+	SAST  ProductVersionMinMax `yaml:"SAST"`
+	KICS  ProductVersionMinMax `yaml:"KICS"`
+}
+
+type ProductVersionMinMax struct {
+	Min string `yaml:"AtLeast"`
+	Max string `yaml:"Below"`
+}
+
+func (v ProductVersionMinMax) String() string {
+	if v.Min == v.Max {
+		if v.Min == "" {
+			return "unset"
+		}
+
+		return fmt.Sprintf("exactly %v", v.Min)
+	} else {
+		if v.Min == "" {
+			return fmt.Sprintf("below %v", v.Max)
+		}
+		if v.Max == "" {
+			return fmt.Sprintf("at least %v", v.Min)
+		}
+		return fmt.Sprintf("at least %v and below %v", v.Min, v.Max)
+	}
+}
+
+func (v ProductVersionMinMax) IsSet() bool {
+	return v.Min != "" || v.Max != ""
 }
 
 type AccessAssignmentCRUD struct {

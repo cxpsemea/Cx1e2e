@@ -13,20 +13,10 @@ import (
 )
 
 func main() {
-	retval := run()
-
-	if retval == 0 {
-		os.Exit(1) // all tests failed
-	}
-
-	if retval == 1 {
-		os.Exit(0) // all tests passed
-	}
-
-	os.Exit(2) // partial success
+	os.Exit(int(run())) // returns the number of tests that failed
 }
 
-func run() float32 {
+func run() uint {
 	logger := logrus.New()
 	logger.SetLevel(logrus.InfoLevel)
 	myformatter := &easy.Formatter{}
