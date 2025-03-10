@@ -14,6 +14,7 @@ type TestSet struct {
 		ClientSecret string `yaml:"ClientSecret"`
 		OIDCClient   string `yaml:"OIDCClient"`
 	} `yaml:"RunAs"`
+
 	AccessAssignments []types.AccessAssignmentCRUD `yaml:"AccessAssignments"`
 	Applications      []types.ApplicationCRUD      `yaml:"Applications"`
 	Clients           []types.OIDCClientCRUD       `yaml:"OIDCClients"`
@@ -28,9 +29,10 @@ type TestSet struct {
 	Roles             []types.RoleCRUD             `yaml:"Roles"`
 	Scans             []types.ScanCRUD             `yaml:"Scans"`
 	Users             []types.UserCRUD             `yaml:"Users"`
+	Wait              uint                         `yaml:"Wait"`
 
-	SubTests []TestSet `yaml:"-"`
-	Wait     uint      `yaml:"Wait"`
+	SubTests   []TestSet `yaml:"-"`
+	TestSource string    `yaml:"-"`
 }
 
 type TestConfig struct {

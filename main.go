@@ -163,5 +163,7 @@ func run() uint {
 		}
 	}
 
+	Config.InitTestIDs()
+
 	return process.RunTests(cx1client, logger, &Config)
 }
