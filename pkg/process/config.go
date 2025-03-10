@@ -11,10 +11,13 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/cxpsemea/cx1e2e/pkg/types"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
+
+var LastTestID uint = 0
 
 func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	var conf TestConfig
@@ -52,51 +55,7 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	// propagate the filename to sub-tests
 	// TODO: refactor this to use generics?
 	for id := range conf.Tests {
-		for id2 := range conf.Tests[id].AccessAssignments {
-			conf.Tests[id].AccessAssignments[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Applications {
-			conf.Tests[id].Applications[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Clients {
-			conf.Tests[id].Clients[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Flags {
-			conf.Tests[id].Flags[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Groups {
-			conf.Tests[id].Groups[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Imports {
-			conf.Tests[id].Imports[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Presets {
-			conf.Tests[id].Presets[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Projects {
-			conf.Tests[id].Projects[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Queries {
-			conf.Tests[id].Queries[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Reports {
-			conf.Tests[id].Reports[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Results {
-			conf.Tests[id].Results[id2].TestSource = configPath
-			if conf.Tests[id].Results[id2].Number == 0 {
-				conf.Tests[id].Results[id2].Number = 1
-			}
-		}
-		for id2 := range conf.Tests[id].Roles {
-			conf.Tests[id].Roles[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Scans {
-			conf.Tests[id].Scans[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Users {
-			conf.Tests[id].Users[id2].TestSource = configPath
-		}
+		conf.Tests[id].Init(configPath)
 	}
 
 	for tid := range conf.Tests {
@@ -147,8 +106,217 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 		}
 	}
 	//conf.Tests = testSet
-
+	conf.InitTestIDs()
 	return conf, nil
+}
+
+func (t *TestConfig) InitTestIDs() {
+	t.TestCount = t.GetTestCount()
+
+	// IDs are set in the same order as execution in Runner
+	// 1st: subtests
+	// 2nd: CRU ops in order
+	// last: D ops in reverse order
+	for id := range t.Tests {
+		t.Tests[id].InitTestIDs()
+	}
+}
+
+func (t *TestSet) InitTestIDs() {
+	// 1st: subtests
+	// 2nd: CRU ops in order
+	// last: D ops in reverse order
+	for id := range t.SubTests {
+		t.SubTests[id].InitTestIDs()
+	}
+
+	t.InitTestIDsCRUD(types.OP_CREATE)
+	t.InitTestIDsCRUD(types.OP_READ)
+	t.InitTestIDsCRUD(types.OP_UPDATE)
+	t.InitTestIDsCRUD(types.OP_DELETE)
+}
+
+func (t *TestSet) Init(sourcePath string) {
+	for id2 := range t.AccessAssignments {
+		t.AccessAssignments[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Applications {
+		t.Applications[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Clients {
+		t.Clients[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Flags {
+		t.Flags[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Groups {
+		t.Groups[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Imports {
+		t.Imports[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Presets {
+		t.Presets[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Projects {
+		t.Projects[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Queries {
+		t.Queries[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Reports {
+		t.Reports[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Results {
+		t.Results[id2].TestSource = sourcePath
+		if t.Results[id2].Number == 0 {
+			t.Results[id2].Number = 1
+		}
+	}
+	for id2 := range t.Roles {
+		t.Roles[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Scans {
+		t.Scans[id2].TestSource = sourcePath
+	}
+	for id2 := range t.Users {
+		t.Users[id2].TestSource = sourcePath
+	}
+}
+
+func (t *TestSet) InitTestIDsCRUD(CRUD string) {
+	if CRUD != types.OP_DELETE {
+		for id := range t.Flags {
+			LastTestID++
+			t.Flags[id].TestID = LastTestID
+		}
+		for id := range t.Imports {
+			LastTestID++
+			t.Imports[id].TestID = LastTestID
+		}
+		for id := range t.Groups {
+			LastTestID++
+			t.Groups[id].TestID = LastTestID
+		}
+		for id := range t.Applications {
+			LastTestID++
+			t.Applications[id].TestID = LastTestID
+		}
+		for id := range t.Projects {
+			LastTestID++
+			t.Projects[id].TestID = LastTestID
+		}
+		for id := range t.Roles {
+			LastTestID++
+			t.Roles[id].TestID = LastTestID
+		}
+		for id := range t.Users {
+			LastTestID++
+			t.Users[id].TestID = LastTestID
+		}
+		for id := range t.Clients {
+			LastTestID++
+			t.Clients[id].TestID = LastTestID
+		}
+		for id := range t.AccessAssignments {
+			LastTestID++
+			t.AccessAssignments[id].TestID = LastTestID
+		}
+		for id := range t.Queries {
+			LastTestID++
+			t.Queries[id].TestID = LastTestID
+		}
+		for id := range t.Presets {
+			LastTestID++
+			t.Presets[id].TestID = LastTestID
+		}
+		for id := range t.Scans {
+			LastTestID++
+			t.Scans[id].TestID = LastTestID
+		}
+		for id := range t.Results {
+			LastTestID++
+			t.Results[id].TestID = LastTestID
+		}
+		for id := range t.Reports {
+			LastTestID++
+			t.Reports[id].TestID = LastTestID
+		}
+	} else { // in reverse order for DELETE
+		for id := range t.Scans {
+			LastTestID++
+			t.Scans[id].TestID = LastTestID
+		}
+		for id := range t.Presets {
+			LastTestID++
+			t.Presets[id].TestID = LastTestID
+		}
+		for id := range t.Queries {
+			LastTestID++
+			t.Queries[id].TestID = LastTestID
+		}
+		for id := range t.AccessAssignments {
+			LastTestID++
+			t.AccessAssignments[id].TestID = LastTestID
+		}
+		for id := range t.Clients {
+			LastTestID++
+			t.Clients[id].TestID = LastTestID
+		}
+		for id := range t.Users {
+			LastTestID++
+			t.Users[id].TestID = LastTestID
+		}
+		for id := range t.Roles {
+			LastTestID++
+			t.Roles[id].TestID = LastTestID
+		}
+		for id := range t.Projects {
+			LastTestID++
+			t.Projects[id].TestID = LastTestID
+		}
+		for id := range t.Applications {
+			LastTestID++
+			t.Applications[id].TestID = LastTestID
+		}
+		for id := range t.Groups {
+			LastTestID++
+			t.Groups[id].TestID = LastTestID
+		}
+	}
+}
+
+func (t TestSet) GetTestCount() int {
+	var count int = 0
+
+	count += len(t.AccessAssignments)
+	count += len(t.Applications)
+	count += len(t.Clients)
+	count += len(t.Flags)
+	count += len(t.Groups)
+	count += len(t.Imports)
+	count += len(t.Presets)
+	count += len(t.Projects)
+	count += len(t.Queries)
+	count += len(t.Reports)
+	count += len(t.Results)
+	count += len(t.Roles)
+	count += len(t.Scans)
+	count += len(t.Users)
+
+	for id := range t.SubTests {
+		count += t.SubTests[id].GetTestCount()
+	}
+
+	return count
+}
+
+func (o TestConfig) GetTestCount() int {
+	var count int = 0
+	for id := range o.Tests {
+		count += o.Tests[id].GetTestCount()
+	}
+	return count
 }
 
 func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error) {

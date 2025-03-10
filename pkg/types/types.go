@@ -64,6 +64,7 @@ type CRUDTest struct {
 	TestSource   string         // filename
 	ForceRun     bool           `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
 	OnFailAction FailAction     `yaml:"OnFail"`   // actions to take if this command fails
+	TestID       uint           `yaml:"-"`        // internal ID for the test
 }
 
 type FailAction struct {

@@ -48,6 +48,7 @@ type TestConfig struct {
 	ReportName         string                  `yaml:"ReportName"`
 	Engines            types.EnabledEngines    `yaml:"-"`
 	EnvironmentVersion Cx1ClientGo.VersionInfo `yaml:"-"`
+	TestCount          int                     `yaml:"-"`
 }
 
 type TestResult struct {
@@ -57,7 +58,7 @@ type TestResult struct {
 	Module     string
 	Duration   float64
 	Name       string
-	Id         int
+	Id         uint
 	TestObject string
 	Reason     []string
 	TestSource string

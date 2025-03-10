@@ -25,6 +25,7 @@ type TestRunner interface {
 	IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testType string, Engines *types.EnabledEngines) error
 	IsNegative() bool
 	GetSource() string
+	GetID() uint
 	GetModule() string
 	GetFlags() []string
 	GetVersion() types.ProductVersion
@@ -43,7 +44,7 @@ func MakeResult(test TestRunner) TestResult {
 		Result:     TST_SKIP,
 		Module:     test.GetModule(),
 		Duration:   0,
-		Id:         -1,
+		Id:         test.GetID(),
 		TestObject: test.String(),
 		TestSource: test.GetSource(),
 	}
