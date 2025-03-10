@@ -30,6 +30,7 @@ type TestSet struct {
 	Scans             []types.ScanCRUD             `yaml:"Scans"`
 	Users             []types.UserCRUD             `yaml:"Users"`
 	Wait              uint                         `yaml:"Wait"`
+	Thread            uint                         `yaml:"Thread"`
 
 	SubTests   []TestSet `yaml:"-"`
 	TestSource string    `yaml:"-"`

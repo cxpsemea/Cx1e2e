@@ -6,50 +6,63 @@ Tenant: your_tenant_here
 Tests:
   - Name: Flags
     File: flag/all.yaml
+    Thread: 1
   - Name: Application
     File: application/all.yaml
+    Thread: 2
   - Name: 10 second pause
     Wait: 10
   - Name: Group
     File: group/all.yaml
+    Thread: 3
   - Name: 10 second pause
     Wait: 10
   - Name: Project
     File: project/all.yaml
+    Thread: 4
   - Name: 10 second pause
     Wait: 10
   - Name: Scan
     File: scan/all.yaml
+    Thread: 5
   - Name: 10 second pause
     Wait: 10
   - Name: Query
     File: query/all.yaml
+    Thread: 6
   - Name: 10 second pause
     Wait: 10
   - Name: Results
     File: results/all.yaml
+    Thread: 7
   - Name: 10 second pause
     Wait: 10
   - Name: Reports
     File: report/all.yaml
+    Thread: 8
   - Name: 10 second pause
     Wait: 10
   - Name: Role
     File: role/all.yaml
+    Thread: 9
   - Name: 10 second pause
     Wait: 10
   - Name: User
     File: user/all.yaml
+    Thread: 10
   - Name: 10 second pause
     Wait: 10
   - Name: RunAs
     File: runas/all.yaml
+    Thread: 11
   - Name: 10 second pause
     Wait: 10
   - Name: Import
     File: import/all.yaml
+    Thread: 12
   - Name: 10 second pause
     Wait: 10
   - Name: New Access Management
     File: access/all.yaml
+    Thread: 13
   - Name: 10 second pause

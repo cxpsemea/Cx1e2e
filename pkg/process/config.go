@@ -56,7 +56,6 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	// TODO: refactor this to use generics?
 	for id := range conf.Tests {
 		conf.Tests[id].TestSource = configPath
-		conf.Tests[id].Init()
 	}
 
 	for tid := range conf.Tests {
@@ -75,6 +74,8 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 			logger.Debugf("Loaded sub-config from %v", conf2.ConfigPath)
 			//testSet = append(testSet, conf2.Tests...)
 			conf.Tests[tid].SubTests = conf2.Tests
+			conf.Tests[tid].Thread = set.Thread
+
 		} else {
 			for id, scan := range set.Scans {
 				logger.Tracef(" - Checking Scan TestSet %v for file references", set.Name)
@@ -119,6 +120,7 @@ func (t *TestConfig) InitTestIDs() {
 	// last: D ops in reverse order
 	for id := range t.Tests {
 		t.Tests[id].InitTestIDs()
+		t.Tests[id].Init()
 	}
 }
 
@@ -139,48 +141,69 @@ func (t *TestSet) InitTestIDs() {
 func (t *TestSet) Init() {
 	for id2 := range t.AccessAssignments {
 		t.AccessAssignments[id2].TestSource = t.TestSource
+		t.AccessAssignments[id2].Thread = t.Thread
 	}
 	for id2 := range t.Applications {
 		t.Applications[id2].TestSource = t.TestSource
+		t.Applications[id2].Thread = t.Thread
 	}
 	for id2 := range t.Clients {
 		t.Clients[id2].TestSource = t.TestSource
+		t.Clients[id2].Thread = t.Thread
 	}
 	for id2 := range t.Flags {
 		t.Flags[id2].TestSource = t.TestSource
+		t.Flags[id2].Thread = t.Thread
 	}
 	for id2 := range t.Groups {
 		t.Groups[id2].TestSource = t.TestSource
+		t.Groups[id2].Thread = t.Thread
 	}
 	for id2 := range t.Imports {
 		t.Imports[id2].TestSource = t.TestSource
+		t.Imports[id2].Thread = t.Thread
 	}
 	for id2 := range t.Presets {
 		t.Presets[id2].TestSource = t.TestSource
+		t.Presets[id2].Thread = t.Thread
 	}
 	for id2 := range t.Projects {
 		t.Projects[id2].TestSource = t.TestSource
+		t.Projects[id2].Thread = t.Thread
 	}
 	for id2 := range t.Queries {
 		t.Queries[id2].TestSource = t.TestSource
+		t.Queries[id2].Thread = t.Thread
 	}
 	for id2 := range t.Reports {
 		t.Reports[id2].TestSource = t.TestSource
+		t.Reports[id2].Thread = t.Thread
 	}
 	for id2 := range t.Results {
 		t.Results[id2].TestSource = t.TestSource
+		t.Results[id2].Thread = t.Thread
 		if t.Results[id2].Number == 0 {
 			t.Results[id2].Number = 1
 		}
 	}
 	for id2 := range t.Roles {
 		t.Roles[id2].TestSource = t.TestSource
+		t.Roles[id2].Thread = t.Thread
 	}
 	for id2 := range t.Scans {
 		t.Scans[id2].TestSource = t.TestSource
+		t.Scans[id2].Thread = t.Thread
 	}
 	for id2 := range t.Users {
 		t.Users[id2].TestSource = t.TestSource
+		t.Users[id2].Thread = t.Thread
+	}
+
+	for id2 := range t.SubTests {
+		if t.Thread != 0 {
+			t.SubTests[id2].Thread = t.Thread
+		}
+		t.SubTests[id2].Init()
 	}
 }
 
@@ -192,7 +215,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Flags[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Flags[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Flags[id].String())
 				}
 			}
 		}
@@ -201,7 +224,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Imports[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Imports[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Imports[id].String())
 				}
 			}
 		}
@@ -210,7 +233,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Groups[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Groups[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Groups[id].String())
 				}
 			}
 		}
@@ -219,7 +242,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Applications[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Applications[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Applications[id].String())
 				}
 			}
 		}
@@ -228,7 +251,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Projects[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Projects[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Projects[id].String())
 				}
 			}
 		}
@@ -237,7 +260,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Roles[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Roles[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Roles[id].String())
 				}
 			}
 		}
@@ -246,7 +269,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Users[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Users[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Users[id].String())
 				}
 			}
 		}
@@ -255,7 +278,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Clients[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Clients[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Clients[id].String())
 				}
 			}
 		}
@@ -264,7 +287,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.AccessAssignments[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.AccessAssignments[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.AccessAssignments[id].String())
 				}
 			}
 		}
@@ -273,7 +296,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Queries[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Queries[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Queries[id].String())
 				}
 			}
 		}
@@ -282,7 +305,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Presets[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Presets[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Presets[id].String())
 				}
 			}
 		}
@@ -291,7 +314,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Scans[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Scans[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Scans[id].String())
 				}
 			}
 		}
@@ -300,7 +323,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Results[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Results[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Results[id].String())
 				}
 			}
 		}
@@ -309,7 +332,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Reports[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Reports[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Reports[id].String())
 				}
 			}
 		}
@@ -319,7 +342,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Scans[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Scans[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Scans[id].String())
 				}
 			}
 		}
@@ -328,7 +351,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Presets[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Presets[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Presets[id].String())
 				}
 			}
 		}
@@ -337,7 +360,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Queries[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Queries[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Queries[id].String())
 				}
 			}
 		}
@@ -346,7 +369,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.AccessAssignments[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.AccessAssignments[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.AccessAssignments[id].String())
 				}
 			}
 		}
@@ -355,7 +378,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Clients[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Clients[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Clients[id].String())
 				}
 			}
 		}
@@ -364,7 +387,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Users[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Users[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Users[id].String())
 				}
 			}
 		}
@@ -373,7 +396,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Roles[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Roles[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Roles[id].String())
 				}
 			}
 		}
@@ -382,7 +405,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Projects[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Projects[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Projects[id].String())
 				}
 			}
 		}
@@ -391,7 +414,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Applications[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Applications[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Applications[id].String())
 				}
 			}
 		}
@@ -400,7 +423,7 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				LastTestID++
 				t.Groups[id].TestID = LastTestID
 				if debug {
-					fmt.Printf("%d: %v %v\n", LastTestID, CRUD, t.Groups[id].String())
+					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Groups[id].String())
 				}
 			}
 		}
