@@ -3,6 +3,7 @@ package process
 import (
 	"fmt"
 	"os/exec"
+	"slices"
 	"strings"
 	"time"
 
@@ -51,15 +52,8 @@ func MakeResult(test TestRunner) TestResult {
 }
 
 func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig, threads int) uint {
+	startTime := time.Now()
 	all_results := []TestResult{}
-
-	/*
-
-		for id := range Config.Tests {
-			all_results = append(all_results, Config.Tests[id].RunTests(cx1client, logger, Config, nil)...)
-		}
-	*/
-
 	dir := NewDirector(Config)
 
 	out_channels := make(chan *[]TestResult, threads)
@@ -73,26 +67,21 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	}
 
 	close(out_channels)
+	endTime := time.Now()
 
-	logger.Infof("Results: ")
-	for i := range all_results {
-		logger.Infof("%d: test %d - %v %v [%v]", i, all_results[i].Id, all_results[i].CRUD, all_results[i].TestObject, all_results[i].TestSource)
+	// the test-results may be unsorted due to threading, sort them
+	if threads > 1 {
+		slices.SortFunc(all_results, func(a, b TestResult) int {
+			return int(a.Id - b.Id)
+		})
 	}
 
-	/*for id := range Config.Tests {
-		logger.Infof("Would run: %v", Config.Tests[id].Name)
-	}*/
-
-	status, err := GenerateReport(&all_results, logger, Config)
+	status, err := GenerateReport(&all_results, logger, Config, startTime, endTime, threads)
 	if err != nil {
 		logger.Errorf("Failed to generate the report: %s", err)
 	}
 
 	return status
-}
-
-func (c *TestConfig) GetNextTestSet() {
-
 }
 
 func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig, testSetFail error) []TestResult {

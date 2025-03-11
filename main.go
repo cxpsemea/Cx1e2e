@@ -189,7 +189,6 @@ func run() uint {
 	}
 
 	Config.InitTestIDs()
-	Config.PrintTests()
 
 	return process.RunTests(cx1client, logger, &Config, *Threads)
 }

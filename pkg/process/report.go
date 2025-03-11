@@ -11,14 +11,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func prepareReportData(tests *[]TestResult, Config *TestConfig) Report {
+func prepareReportData(tests *[]TestResult, Config *TestConfig, startTime, endTime time.Time, threads int) Report {
 	var report Report
 	report.Settings.Target = fmt.Sprintf("%v tenant %v", Config.Cx1URL, Config.Tenant)
 	report.Settings.Auth = fmt.Sprintf("%v user %v", Config.AuthType, Config.AuthUser)
 	report.Settings.Config = Config.ConfigPath
-	report.Settings.Timestamp = time.Now().String()
+	report.Settings.StartTime = startTime.String()
+	report.Settings.EndTime = endTime.String()
+	report.Settings.Duration = endTime.Sub(startTime).String()
 	report.Settings.E2ESuffix = os.Getenv("E2E_RUN_SUFFIX")
 	report.Settings.Version = Config.EnvironmentVersion
+	report.Settings.Threads = threads
 
 	for _, r := range *tests {
 		report.AddTest(&r)
@@ -114,23 +117,24 @@ func (r *Report) AddTest(t *TestResult) {
 		details.Result = "PASS"
 	case TST_FAIL:
 		details.Result = fmt.Sprintf("FAIL: %v", t.Reason[0])
-		details.FailOutputs = t.Reason[1:]
+		details.FailOutputs = t.Reason
 	case TST_SKIP:
 		details.Result = fmt.Sprintf("SKIP: %v", t.Reason[0])
-		details.FailOutputs = t.Reason[1:]
+		details.FailOutputs = t.Reason
 	}
 
+	details.ID = t.Id
 	r.Details = append(r.Details, details)
 }
 
 func (d ReportTestDetails) String() string {
 	switch d.ResultType {
 	case TST_FAIL:
-		return fmt.Sprintf("FAIL %v - %v (%v)", d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
+		return fmt.Sprintf("FAIL %d %v - %v (%v)", d.ID, d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
 	case TST_SKIP:
-		return fmt.Sprintf("SKIP %v - %v (%v)", d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
+		return fmt.Sprintf("SKIP %d %v - %v (%v)", d.ID, d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
 	}
-	return fmt.Sprintf("PASS %v - %v", d.Name, d.Test)
+	return fmt.Sprintf("PASS %d %v - %v", d.ID, d.Name, d.Test)
 }
 
 func OutputSummaryConsole(reportData *Report, logger *logrus.Logger) {
@@ -140,7 +144,7 @@ func OutputSummaryConsole(reportData *Report, logger *logrus.Logger) {
 	}
 
 	fmt.Println("")
-	fmt.Printf("Ran %d tests\n", (reportData.Summary.Total.Fail + reportData.Summary.Total.Pass + reportData.Summary.Total.Skip))
+	fmt.Printf("Ran %d tests over %v (%d threads)\n", (reportData.Summary.Total.Fail + reportData.Summary.Total.Pass + reportData.Summary.Total.Skip), reportData.Settings.Duration, reportData.Settings.Threads)
 	if reportData.Summary.Total.Fail > 0 {
 		fmt.Printf("FAILED %d tests\n", reportData.Summary.Total.Fail)
 	}
@@ -170,7 +174,8 @@ func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig)
 	report.WriteString(fmt.Sprintf("Target versions are: %v", reportData.Settings.Version.String()))
 	report.WriteString(fmt.Sprintf("Authenticated using %v<br>", reportData.Settings.Auth))
 	report.WriteString(fmt.Sprintf("Test set defined in configuration %v<br>", reportData.Settings.Config))
-	report.WriteString(fmt.Sprintf("Execution timestamp: %v.<br>", reportData.Settings.Timestamp))
+	report.WriteString(fmt.Sprintf("Test Execution: from %v until %v (total: %v).<br>", reportData.Settings.StartTime, reportData.Settings.EndTime, reportData.Settings.Duration))
+	report.WriteString(fmt.Sprintf("Tests executed using %d threads", reportData.Settings.Threads))
 	if os.Getenv("E2E_RUN_SUFFIX") == "" {
 		report.WriteString(fmt.Sprintf("Default object name suffix %%E2E_RUN_SUFFIX%% environment variable is blank. Objects created by cx1e2e will use default names.<br>"))
 	} else {
@@ -209,7 +214,7 @@ func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig)
 		case TST_SKIP:
 			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:orange'>%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result))
 		case TST_FAIL:
-			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:red'>%v\n%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result, strings.Join(t.FailOutputs, "<br>\n")))
+			report.WriteString(fmt.Sprintf("<tr><td>%v<br>(%v)</td><td>%v</td><td>%.2f</td><td><span style='color:red'>%v\n%v</span></td></tr>\n", t.Name, t.Source, t.Test, t.Duration, t.Result, strings.Join(t.FailOutputs[1:], "<br>\n")))
 		}
 	}
 
@@ -243,8 +248,8 @@ func OutputReportJSON(reportName string, reportData *Report) error {
 	return report.Sync()
 }
 
-func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConfig) (uint, error) {
-	reportData := prepareReportData(tests, Config)
+func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConfig, startTime, endTime time.Time, threads int) (uint, error) {
+	reportData := prepareReportData(tests, Config, startTime, endTime, threads)
 	OutputSummaryConsole(&reportData, logger)
 
 	if strings.Contains(Config.ReportType, "html") {

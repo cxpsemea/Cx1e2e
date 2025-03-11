@@ -73,6 +73,7 @@ type Counter struct {
 	Fail uint
 	Skip uint
 }
+
 type CounterSet struct {
 	Create Counter
 	Read   Counter
@@ -84,8 +85,11 @@ type ReportSettings struct {
 	Target    string                  `json:"TestTarget"`
 	Auth      string                  `json:"Authentication"`
 	Config    string                  `json:"TestConfig"`
-	Timestamp string                  `json:"ExecutionTime"`
+	StartTime string                  `json:"StartTime"`
+	EndTime   string                  `json:"EndTime"`
+	Duration  string                  `json:"Duration"`
 	E2ESuffix string                  `json:"E2ESuffix"`
+	Threads   int                     `json:"Threads"`
 	Version   Cx1ClientGo.VersionInfo `json:"TargetVersions"`
 }
 
@@ -116,6 +120,7 @@ type ReportTestDetails struct {
 	Duration    float64
 	ResultType  int `json:"-"`
 	Result      string
+	ID          uint
 	FailOutputs []string `json:"FailOutputs,omitempty"`
 }
 
