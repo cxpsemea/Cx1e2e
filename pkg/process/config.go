@@ -75,6 +75,10 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 			//testSet = append(testSet, conf2.Tests...)
 			conf.Tests[tid].SubTests = conf2.Tests
 			conf.Tests[tid].Thread = set.Thread
+			if set.Thread > 0 {
+				logger.Tracef("Test set %v will run on thread %d", conf2.ConfigPath, set.Thread)
+				conf.Tests[tid].Init()
+			}
 
 		} else {
 			for id, scan := range set.Scans {
@@ -120,7 +124,6 @@ func (t *TestConfig) InitTestIDs() {
 	// last: D ops in reverse order
 	for id := range t.Tests {
 		t.Tests[id].InitTestIDs()
-		t.Tests[id].Init()
 	}
 }
 
@@ -136,6 +139,64 @@ func (t *TestSet) InitTestIDs() {
 	t.InitTestIDsCRUD(types.OP_READ)
 	t.InitTestIDsCRUD(types.OP_UPDATE)
 	t.InitTestIDsCRUD(types.OP_DELETE)
+}
+
+func (c TestConfig) PrintTests() {
+	for id := range c.Tests {
+		c.Tests[id].PrintTests()
+	}
+}
+
+func (t TestSet) PrintTests() {
+	for id := range t.SubTests {
+		t.SubTests[id].PrintTests()
+	}
+
+	for id2 := range t.AccessAssignments {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.AccessAssignments[id2].TestID, t.AccessAssignments[id2].String())
+	}
+	for id2 := range t.Applications {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Applications[id2].TestID, t.Applications[id2].String())
+	}
+	for id2 := range t.Clients {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Clients[id2].TestID, t.Clients[id2].String())
+	}
+	for id2 := range t.Flags {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Flags[id2].TestID, t.Flags[id2].String())
+	}
+	for id2 := range t.Groups {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Groups[id2].TestID, t.Groups[id2].String())
+	}
+	for id2 := range t.Imports {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Imports[id2].TestID, t.Imports[id2].String())
+	}
+	for id2 := range t.Presets {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Presets[id2].TestID, t.Presets[id2].String())
+	}
+	for id2 := range t.Projects {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Projects[id2].TestID, t.Projects[id2].String())
+	}
+	for id2 := range t.Queries {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Queries[id2].TestID, t.Queries[id2].String())
+	}
+	for id2 := range t.Reports {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Reports[id2].TestID, t.Reports[id2].String())
+	}
+	for id2 := range t.Results {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Results[id2].TestID, t.Results[id2].String())
+		if t.Results[id2].Number == 0 {
+			t.Results[id2].Number = 1
+		}
+	}
+	for id2 := range t.Roles {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Roles[id2].TestID, t.Roles[id2].String())
+	}
+	for id2 := range t.Scans {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Scans[id2].TestID, t.Scans[id2].String())
+	}
+	for id2 := range t.Users {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Users[id2].TestID, t.Users[id2].String())
+	}
 }
 
 func (t *TestSet) Init() {
@@ -208,132 +269,89 @@ func (t *TestSet) Init() {
 }
 
 func (t *TestSet) InitTestIDsCRUD(CRUD string) {
-	debug := true
 	if CRUD != types.OP_DELETE {
 		for id := range t.Flags {
 			if t.Flags[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Flags[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Flags[id].String())
-				}
 			}
 		}
 		for id := range t.Imports {
 			if t.Imports[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Imports[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Imports[id].String())
-				}
 			}
 		}
 		for id := range t.Groups {
 			if t.Groups[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Groups[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Groups[id].String())
-				}
 			}
 		}
 		for id := range t.Applications {
 			if t.Applications[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Applications[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Applications[id].String())
-				}
 			}
 		}
 		for id := range t.Projects {
 			if t.Projects[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Projects[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Projects[id].String())
-				}
 			}
 		}
 		for id := range t.Roles {
 			if t.Roles[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Roles[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Roles[id].String())
-				}
 			}
 		}
 		for id := range t.Users {
 			if t.Users[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Users[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Users[id].String())
-				}
 			}
 		}
 		for id := range t.Clients {
 			if t.Clients[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Clients[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Clients[id].String())
-				}
 			}
 		}
 		for id := range t.AccessAssignments {
 			if t.AccessAssignments[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.AccessAssignments[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.AccessAssignments[id].String())
-				}
 			}
 		}
 		for id := range t.Queries {
 			if t.Queries[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Queries[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Queries[id].String())
-				}
 			}
 		}
 		for id := range t.Presets {
 			if t.Presets[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Presets[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Presets[id].String())
-				}
 			}
 		}
 		for id := range t.Scans {
 			if t.Scans[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Scans[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Scans[id].String())
-				}
 			}
 		}
 		for id := range t.Results {
 			if t.Results[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Results[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Results[id].String())
-				}
 			}
 		}
 		for id := range t.Reports {
 			if t.Reports[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Reports[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Reports[id].String())
-				}
 			}
 		}
 	} else { // in reverse order for DELETE
@@ -341,90 +359,60 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 			if t.Scans[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Scans[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Scans[id].String())
-				}
 			}
 		}
 		for id := range t.Presets {
 			if t.Presets[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Presets[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Presets[id].String())
-				}
 			}
 		}
 		for id := range t.Queries {
 			if t.Queries[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Queries[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Queries[id].String())
-				}
 			}
 		}
 		for id := range t.AccessAssignments {
 			if t.AccessAssignments[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.AccessAssignments[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.AccessAssignments[id].String())
-				}
 			}
 		}
 		for id := range t.Clients {
 			if t.Clients[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Clients[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Clients[id].String())
-				}
 			}
 		}
 		for id := range t.Users {
 			if t.Users[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Users[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Users[id].String())
-				}
 			}
 		}
 		for id := range t.Roles {
 			if t.Roles[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Roles[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Roles[id].String())
-				}
 			}
 		}
 		for id := range t.Projects {
 			if t.Projects[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Projects[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Projects[id].String())
-				}
 			}
 		}
 		for id := range t.Applications {
 			if t.Applications[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Applications[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Applications[id].String())
-				}
 			}
 		}
 		for id := range t.Groups {
 			if t.Groups[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Groups[id].TestID = LastTestID
-				if debug {
-					fmt.Printf("[%d] %d: %v %v\n", t.Thread, LastTestID, CRUD, t.Groups[id].String())
-				}
 			}
 		}
 	}

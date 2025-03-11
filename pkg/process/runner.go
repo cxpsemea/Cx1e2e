@@ -50,12 +50,38 @@ func MakeResult(test TestRunner) TestResult {
 	}
 }
 
-func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig) uint {
+func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig, threads int) uint {
 	all_results := []TestResult{}
 
-	for id := range Config.Tests {
-		all_results = append(all_results, Config.Tests[id].RunTests(cx1client, logger, Config, nil)...)
+	/*
+
+		for id := range Config.Tests {
+			all_results = append(all_results, Config.Tests[id].RunTests(cx1client, logger, Config, nil)...)
+		}
+	*/
+
+	dir := NewDirector(Config)
+
+	out_channels := make(chan *[]TestResult, threads)
+	for i := range threads {
+		go NewRunner(i+1, &dir, cx1client, logger, Config, out_channels)
 	}
+
+	for range threads {
+		results := <-out_channels
+		all_results = append(all_results, *results...)
+	}
+
+	close(out_channels)
+
+	logger.Infof("Results: ")
+	for i := range all_results {
+		logger.Infof("%d: test %d - %v %v [%v]", i, all_results[i].Id, all_results[i].CRUD, all_results[i].TestObject, all_results[i].TestSource)
+	}
+
+	/*for id := range Config.Tests {
+		logger.Infof("Would run: %v", Config.Tests[id].Name)
+	}*/
 
 	status, err := GenerateReport(&all_results, logger, Config)
 	if err != nil {
@@ -63,6 +89,10 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	}
 
 	return status
+}
+
+func (c *TestConfig) GetNextTestSet() {
+
 }
 
 func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig, testSetFail error) []TestResult {
