@@ -158,7 +158,6 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCR
 		logger.Errorf("Failed to get audit session: %s", err)
 		return nil, nil
 	}
-	defer t.TerminateSession(cx1client, logger)
 
 	queries, err := cx1client.GetQueries()
 	if err != nil {
@@ -266,7 +265,6 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQ
 	if err != nil {
 		return nil
 	}
-	defer t.TerminateSession(cx1client, logger)
 
 	t.Query.Severity = t.Severity
 
@@ -293,8 +291,11 @@ func updateQuery_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 	return cx1client.UpdateQuery_v310(query)
 }
 
-func (t *CxQLCRUD) TerminateSession(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
-	if t.DeleteSession {
+func (t *CxQLCRUD) TerminateSession(session_source string, cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
+	// a session can be created by the automatic Read operation inserted prior to an Update or Delete operation.
+	// in that case, the session would be created & deleted during the RunRead part, and no longer exist when the Update/Delete executes
+	// so we only want to terminate the session if it was created during the same operation as the test
+	if t.DeleteSession && t.CRUDTest.IsType(session_source) {
 		auditSession, err := ASM.GetSession(t.Scope, t.QueryLanguage, t.LastScan, cx1client, logger)
 		if err != nil {
 			logger.Errorf("Failed to get audit session: %s", err)
@@ -302,7 +303,7 @@ func (t *CxQLCRUD) TerminateSession(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 		}
 
 		if auditSession != nil {
-			err = cx1client.AuditDeleteSession(auditSession)
+			err = ASM.DeleteSession(auditSession, cx1client, logger)
 			if err != nil {
 				logger.Errorf("Failed to delete Audit session %v: %s", auditSession.ID, err)
 			}
@@ -316,7 +317,6 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *CxQLCRUD
 		logger.Errorf("Failed to get audit session: %s", err)
 		return nil
 	}
-	defer t.TerminateSession(cx1client, logger)
 
 	var baseQuery *Cx1ClientGo.Query
 	t.Query, baseQuery = getQuery(cx1client, logger, t)
@@ -428,6 +428,7 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	if t.OldAPI {
 		return create_old(cx1client, logger, t)
 	} else {
+		defer t.TerminateSession(OP_CREATE, cx1client, logger)
 		return create(cx1client, logger, t)
 	}
 }
@@ -439,6 +440,8 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	} else {
 		query, _ = getQuery(cx1client, logger, t)
 	}
+
+	defer t.TerminateSession(OP_READ, cx1client, logger)
 
 	if query == nil {
 		return fmt.Errorf("no such query %v: %v -> %v -> %v exists", t.Scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
@@ -477,7 +480,7 @@ func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	if t.OldAPI {
 		return updateQuery_old(cx1client, t)
 	} else {
-		defer t.TerminateSession(cx1client, logger)
+		defer t.TerminateSession(OP_UPDATE, cx1client, logger)
 		err := updateQuery(cx1client, logger, t)
 		return err
 	}
@@ -503,7 +506,7 @@ func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	if err != nil {
 		return nil
 	}
-	defer t.TerminateSession(cx1client, logger)
+	defer t.TerminateSession(OP_DELETE, cx1client, logger)
 
 	if t.Query.EditorKey == "" {
 		logger.Warnf("Editor key for query %v is empty - attempting to calculate", t.Query.StringDetailed())

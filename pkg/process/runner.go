@@ -69,6 +69,11 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	close(out_channels)
 	endTime := time.Now()
 
+	// tests are finished running, so do some cleanup
+	if types.ASM != nil {
+		types.ASM.Clear(cx1client, logger)
+	}
+
 	// the test-results may be unsorted due to threading, sort them
 	if threads > 1 {
 		slices.SortFunc(all_results, func(a, b TestResult) int {

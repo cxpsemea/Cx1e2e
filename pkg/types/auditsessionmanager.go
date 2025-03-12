@@ -44,6 +44,8 @@ func (m *AuditSessionManager) GetSession(scope CxQLScope, language string, lastS
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
 
+	m.PrintSessions(logger)
+
 	for id := range m.Sessions {
 		if (m.Sessions[id].ProjectID == scope.ProjectID || scope.Corp) && m.Sessions[id].HasLanguage(language) {
 			if err := cx1client.AuditSessionKeepAlive(&m.Sessions[id]); err != nil {
@@ -68,6 +70,7 @@ func (m *AuditSessionManager) GetSession(scope CxQLScope, language string, lastS
 }
 
 func (m *AuditSessionManager) Clear(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
+	logger.Debug("Audit Session Manager: clearing sessions")
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
 
@@ -78,4 +81,33 @@ func (m *AuditSessionManager) Clear(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 		}
 	}
 	m.Sessions = []Cx1ClientGo.AuditSession{}
+}
+
+func (m *AuditSessionManager) DeleteSession(session *Cx1ClientGo.AuditSession, cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+	logger.Debugf("Audit Session Manager: delete session %v", session.ID)
+
+	m.Lock.Lock()
+	defer m.Lock.Unlock()
+
+	m.PrintSessions(logger)
+
+	for id := range m.Sessions {
+		if m.Sessions[id].ID == session.ID {
+			m.Sessions = append(m.Sessions[:id], m.Sessions[id+1:]...)
+			break
+		}
+	}
+
+	err := cx1client.AuditDeleteSession(session)
+
+	m.PrintSessions(logger)
+
+	return err
+}
+
+func (m *AuditSessionManager) PrintSessions(logger *logrus.Logger) {
+	logger.Tracef("Listing AuditSessionManager's %d active sessions", len(m.Sessions))
+	for id, s := range m.Sessions {
+		logger.Tracef(" - %d: %v", id, s.String())
+	}
 }
