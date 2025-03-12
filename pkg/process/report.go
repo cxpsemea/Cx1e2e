@@ -130,11 +130,11 @@ func (r *Report) AddTest(t *TestResult) {
 func (d ReportTestDetails) String() string {
 	switch d.ResultType {
 	case TST_FAIL:
-		return fmt.Sprintf("FAIL %d %v - %v (%v)", d.ID, d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
+		return fmt.Sprintf("FAIL %v - %v (%v)", d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
 	case TST_SKIP:
-		return fmt.Sprintf("SKIP %d %v - %v (%v)", d.ID, d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
+		return fmt.Sprintf("SKIP %v - %v (%v)", d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
 	}
-	return fmt.Sprintf("PASS %d %v - %v", d.ID, d.Name, d.Test)
+	return fmt.Sprintf("PASS %v - %v", d.Name, d.Test)
 }
 
 func OutputSummaryConsole(reportData *Report, logger *logrus.Logger) {
