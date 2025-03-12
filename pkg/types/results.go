@@ -20,6 +20,9 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 	if CRUD != OP_READ && t.Number != 1 {
 		return fmt.Errorf("specifying the finding number for any operation other than Read is not supported (results are not always in consistent order)")
 	}
+	if t.Number == 0 {
+		t.Number = 1
+	}
 
 	return nil
 }
