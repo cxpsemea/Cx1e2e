@@ -28,7 +28,7 @@ func NewRunner(id int, dir *TestDirector, cx1client *Cx1ClientGo.Cx1Client, logg
 			break
 		}
 		logger.Infof("Thread %d picks up job set: %v [%v]", id, testSet.Name, testSet.File)
-		results := testSet.RunTests(cx1client, logger, Config, nil)
+		results := testSet.RunTests(cx1client, logger, Config, nil, id)
 		all_results = append(all_results, results...)
 	}
 

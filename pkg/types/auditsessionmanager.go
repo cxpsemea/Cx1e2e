@@ -1,25 +1,29 @@
 package types
 
 import (
-	"fmt"
+	"slices"
 	"sync"
+	"time"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 	"github.com/sirupsen/logrus"
 )
 
+const AuditSessionTimeoutMinutes = 5
+
 type AuditSessionManager struct {
 	Lock     sync.Mutex
-	Sessions []Cx1ClientGo.AuditSession
+	Sessions []*Cx1ClientGo.AuditSession
 }
 
 func NewAuditSessionManager() *AuditSessionManager {
 	return &AuditSessionManager{
-		Sessions: []Cx1ClientGo.AuditSession{},
+		Sessions: []*Cx1ClientGo.AuditSession{},
 	}
 }
 
 func (m *AuditSessionManager) GetOrCreateSession(scope CxQLScope, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) (*Cx1ClientGo.AuditSession, error) {
+	logger.Debugf("Audit Session Manager: get or create session for scope %v, language %v, project %v", scope.String(), language, lastScan.ProjectID)
 	session, err := m.GetSession(scope, language, lastScan, cx1client, logger)
 	if err != nil {
 		return nil, err
@@ -29,6 +33,7 @@ func (m *AuditSessionManager) GetOrCreateSession(scope CxQLScope, language strin
 	}
 
 	// no session found so we need to create a new one
+	logger.Debugf("Audit Session Manager: create session for scope %v, language %v, project %v", scope, language, lastScan.ProjectID)
 	new_session, err := cx1client.GetAuditSessionByID("sast", lastScan.ProjectID, lastScan.ScanID)
 	if err != nil {
 		return nil, err
@@ -36,11 +41,13 @@ func (m *AuditSessionManager) GetOrCreateSession(scope CxQLScope, language strin
 
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
-	m.Sessions = append(m.Sessions, new_session)
-	return &m.Sessions[len(m.Sessions)-1], nil
+	m.Sessions = append(m.Sessions, &new_session)
+	logger.Debugf("Audit Session Manager: created session %v", new_session.String())
+	return m.Sessions[len(m.Sessions)-1], nil
 }
 
 func (m *AuditSessionManager) GetSession(scope CxQLScope, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) (*Cx1ClientGo.AuditSession, error) {
+	logger.Debugf("Audit Session Manager: get session for scope %v, language %v, project %v", scope.String(), language, lastScan.ProjectID)
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
 
@@ -48,20 +55,21 @@ func (m *AuditSessionManager) GetSession(scope CxQLScope, language string, lastS
 
 	for id := range m.Sessions {
 		if (m.Sessions[id].ProjectID == scope.ProjectID || scope.Corp) && m.Sessions[id].HasLanguage(language) {
-			if err := cx1client.AuditSessionKeepAlive(&m.Sessions[id]); err != nil {
-				logger.Warningf("Tried to reuse existing audit session but it couldn't be refreshed")
-				break
-			} else {
-				scopeStr := "Tenant"
-				if !scope.Corp {
-					if scope.Application != "" {
-						scopeStr = fmt.Sprintf("application %v", scope.Application)
-					} else {
-						scopeStr = fmt.Sprintf("project %v", scope.Project)
-					}
+			if time.Since(m.Sessions[id].LastHearbeat) < AuditSessionTimeoutMinutes*time.Minute {
+				if err := cx1client.AuditSessionKeepAlive(m.Sessions[id]); err != nil {
+					logger.Warningf("Tried to refresh existing audit session %v but failed: %s", m.Sessions[id].String(), err)
+					_ = cx1client.AuditDeleteSession(m.Sessions[id])
+					m.Sessions = slices.Delete(m.Sessions, id, id+1)
+					return nil, nil
+				} else {
+					logger.Warningf("Found existing audit session %v (scope: %v, language: %v)", m.Sessions[id].String(), scope.String(), language)
+					return m.Sessions[id], nil
 				}
-				logger.Warningf("Reusing existing %v (scope: %v, project ID: %v, language: %v)", m.Sessions[id].String(), scopeStr, scope.ProjectID, language)
-				return &m.Sessions[id], nil
+			} else {
+				logger.Warningf("Found existing audit session %v but it was created more than %d minutes ago (%v) and may have expired", m.Sessions[id].String(), AuditSessionTimeoutMinutes, m.Sessions[id].CreatedAt.String())
+				_ = cx1client.AuditDeleteSession(m.Sessions[id])
+				m.Sessions = slices.Delete(m.Sessions, id, id+1)
+				return nil, nil
 			}
 		}
 	}
@@ -70,35 +78,42 @@ func (m *AuditSessionManager) GetSession(scope CxQLScope, language string, lastS
 }
 
 func (m *AuditSessionManager) Clear(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) {
+	if len(m.Sessions) == 0 {
+		return
+	}
 	logger.Debug("Audit Session Manager: clearing sessions")
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
 
 	for _, s := range m.Sessions {
-		err := cx1client.AuditDeleteSession(&s)
+		err := cx1client.AuditDeleteSession(s)
 		if err != nil {
 			logger.Errorf("Failed to terminate audit session: %s", err)
+		} else {
+			logger.Warningf("Terminated left-over audit session %v (created: %v)", s.String(), s.CreatedAt.String())
 		}
 	}
-	m.Sessions = []Cx1ClientGo.AuditSession{}
+	m.Sessions = []*Cx1ClientGo.AuditSession{}
 }
 
 func (m *AuditSessionManager) DeleteSession(session *Cx1ClientGo.AuditSession, cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
-	logger.Debugf("Audit Session Manager: delete session %v", session.ID)
+	logger.Debugf("Audit Session Manager: delete session %v", session.String())
 
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
 
 	m.PrintSessions(logger)
 
+	theSession := *session
+
 	for id := range m.Sessions {
 		if m.Sessions[id].ID == session.ID {
-			m.Sessions = append(m.Sessions[:id], m.Sessions[id+1:]...)
+			m.Sessions = slices.Delete(m.Sessions, id, id+1)
 			break
 		}
 	}
 
-	err := cx1client.AuditDeleteSession(session)
+	err := cx1client.AuditDeleteSession(&theSession)
 
 	m.PrintSessions(logger)
 

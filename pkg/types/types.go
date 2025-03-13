@@ -163,18 +163,6 @@ type CxQLCRUD struct {
 	LastScan      *Cx1ClientGo.Scan
 }
 
-func (s CxQLScope) String() string {
-	if s.Corp {
-		return "Corp"
-	} else {
-		if s.Application != "" {
-			return fmt.Sprintf("App: %v", s.Application)
-		} else {
-			return fmt.Sprintf("Proj: %v", s.Project)
-		}
-	}
-}
-
 func (o CxQLCRUD) String() string {
 	//if o.QueryName != "" {
 	return fmt.Sprintf("%v: %v -> %v -> %v", o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
@@ -188,6 +176,20 @@ type CxQLScope struct {
 	Project     string `yaml:"Project"`
 	Application string `yaml:"Application"`
 	ProjectID   string `yaml:"-"`
+}
+
+func (s CxQLScope) String() string {
+	if s.Corp {
+		if s.ProjectID != "" {
+			return fmt.Sprintf("Tenant-level on project [%v] %v", s.ProjectID, s.Project)
+		} else {
+			return "Tenant-level"
+		}
+	}
+	if s.Application != "" {
+		return fmt.Sprintf("Application %v via project [%v] %v", s.Application, s.ProjectID, s.Project)
+	}
+	return fmt.Sprintf("Project [%v] %v", s.ProjectID, s.Project)
 }
 
 type FlagCRUD struct {

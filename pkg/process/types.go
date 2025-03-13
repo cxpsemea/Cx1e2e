@@ -44,6 +44,7 @@ type TestConfig struct {
 	NoTLS              bool                    `yaml:"NoTLS"`
 	Tests              []TestSet               `yaml:"Tests"`
 	LogLevel           string                  `yaml:"LogLevel"`
+	MultiThreadable    bool                    `yaml:"MultiThreadable"`
 	ConfigPath         string                  `yaml:"-"`
 	AuthType           string                  `yaml:"-"`
 	AuthUser           string                  `yaml:"-"`

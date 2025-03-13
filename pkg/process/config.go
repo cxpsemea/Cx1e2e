@@ -52,13 +52,8 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 
 	//testSet := make([]TestSet, 0)
 
-	// propagate the filename to sub-tests
-	// TODO: refactor this to use generics?
-	for id := range conf.Tests {
-		conf.Tests[id].TestSource = configPath
-	}
-
 	for tid := range conf.Tests {
+		conf.Tests[tid].TestSource = configPath
 		set := &conf.Tests[tid]
 		logger.Tracef("Checking TestSet %v for file references", set.Name)
 		if set.File != "" {
@@ -75,11 +70,6 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 			//testSet = append(testSet, conf2.Tests...)
 			conf.Tests[tid].SubTests = conf2.Tests
 			conf.Tests[tid].Thread = set.Thread
-			if set.Thread > 0 {
-				logger.Tracef("Test set %v will run on thread %d", conf2.ConfigPath, set.Thread)
-				conf.Tests[tid].Init()
-			}
-
 		} else {
 			for id, scan := range set.Scans {
 				logger.Tracef(" - Checking Scan TestSet %v for file references", set.Name)
@@ -110,7 +100,10 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 			}
 			//testSet = append(testSet, set)
 		}
+
+		conf.Tests[tid].Init()
 	}
+
 	//conf.Tests = testSet
 	return conf, nil
 }
