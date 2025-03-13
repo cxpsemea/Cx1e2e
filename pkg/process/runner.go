@@ -95,7 +95,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 }
 
 func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Config *TestConfig, testSetFail error, thread int) []TestResult {
-	logger.Tracef("Running test set: %v", t.Name)
+	logger.Tracef("Running test set: %v [%v]", t.Name, t.TestSource)
 
 	var err error = testSetFail
 	var testClient *Cx1ClientGo.Cx1Client
