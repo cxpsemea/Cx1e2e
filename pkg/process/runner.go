@@ -57,7 +57,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	all_results := []TestResult{}
 	dir := NewDirector(Config)
 
-	if !Config.MultiThreadable {
+	if !Config.MultiThreadable && threads > 1 {
 		logger.Warnf("Configuration does not allow multi-threading tests while cx1e2e was run with threads=%d - resetting to 1", threads)
 		threads = 1
 	}
