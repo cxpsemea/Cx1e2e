@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -39,8 +40,19 @@ func run() uint {
 	Proxy := flag.String("proxy", "", "Optional: Proxy to use when connecting to CheckmarxOne")
 	NoTLS := flag.Bool("notls", false, "Optional: Disable TLS verification")
 	Threads := flag.Int("threads", 1, "How many concurrent tests to run")
+	LogFile := flag.String("logfile", "", "Optional: output log to file")
 
 	flag.Parse()
+
+	if *LogFile != "" {
+		file, err := os.OpenFile(*LogFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		if err != nil {
+			logger.Errorf("Failed to create log file '%v': %v", *LogFile, err)
+		}
+		mw := io.MultiWriter(os.Stdout, file)
+		logger.SetOutput(mw)
+		logger.Infof("Logging to file %v", *LogFile)
+	}
 
 	switch strings.ToUpper(*LogLevel) {
 	case "TRACE":

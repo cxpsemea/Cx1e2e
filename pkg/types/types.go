@@ -181,15 +181,15 @@ type CxQLScope struct {
 func (s CxQLScope) String() string {
 	if s.Corp {
 		if s.ProjectID != "" {
-			return fmt.Sprintf("Tenant-level on project [%v] %v", s.ProjectID, s.Project)
+			return fmt.Sprintf("Tenant-level on project %v", s.Project)
 		} else {
 			return "Tenant-level"
 		}
 	}
 	if s.Application != "" {
-		return fmt.Sprintf("Application %v via project [%v] %v", s.Application, s.ProjectID, s.Project)
+		return fmt.Sprintf("Application %v via project %v", s.Application, s.Project)
 	}
-	return fmt.Sprintf("Project [%v] %v", s.ProjectID, s.Project)
+	return fmt.Sprintf("Project %v", s.Project)
 }
 
 type FlagCRUD struct {
