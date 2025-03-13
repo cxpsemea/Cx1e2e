@@ -31,6 +31,7 @@ type TestSet struct {
 	Users             []types.UserCRUD             `yaml:"Users"`
 	Wait              uint                         `yaml:"Wait"`
 	Thread            uint                         `yaml:"Thread"`
+	ActiveThread      int                          `yaml:"-"`
 
 	SubTests   []TestSet `yaml:"-"`
 	TestSource string    `yaml:"-"`

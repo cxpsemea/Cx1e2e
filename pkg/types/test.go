@@ -60,3 +60,7 @@ func (c CRUDTest) IsForced() bool {
 func (c CRUDTest) OnFail() FailAction {
 	return c.OnFailAction
 }
+
+func (c CRUDTest) GetCurrentThread() int {
+	return c.ActiveThread
+}

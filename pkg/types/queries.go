@@ -61,7 +61,7 @@ func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *
 		t.LastScan = &lastscans[0]
 	}
 
-	return ASM.GetOrCreateSession(t.Scope, t.QueryLanguage, t.LastScan, cx1client, logger)
+	return ASM.GetOrCreateSession(t.ActiveThread, t.Scope, t.QueryLanguage, t.LastScan, cx1client, logger)
 }
 
 /*
@@ -295,7 +295,7 @@ func (t *CxQLCRUD) TerminateSession(session_source string, cx1client *Cx1ClientG
 	// in that case, the session would be created & deleted during the RunRead part, and no longer exist when the Update/Delete executes
 	// so we only want to terminate the session if it was created during the same operation as the test
 	if t.DeleteSession && t.CRUDTest.IsType(session_source) {
-		auditSession, err := ASM.GetSession(t.Scope, t.QueryLanguage, t.LastScan, cx1client, logger)
+		auditSession, err := ASM.GetSession(t.ActiveThread, t.Scope, t.QueryLanguage, t.LastScan, cx1client, logger)
 		if err != nil {
 			logger.Errorf("Failed to get audit session: %s", err)
 			return

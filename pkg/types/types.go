@@ -66,6 +66,7 @@ type CRUDTest struct {
 	OnFailAction FailAction     `yaml:"OnFail"`   // actions to take if this command fails
 	TestID       uint           `yaml:"-"`        // internal ID for the test
 	Thread       uint           `yaml:"Thread"`
+	ActiveThread int            `yaml:"-"` // when a runner picks up a test, the test is updated with the owning thread
 }
 
 type FailAction struct {

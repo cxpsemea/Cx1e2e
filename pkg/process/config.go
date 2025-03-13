@@ -411,6 +411,56 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 	}
 }
 
+func (t *TestSet) SetActiveThread(thread int) {
+	t.ActiveThread = thread
+	for id2 := range t.AccessAssignments {
+		t.AccessAssignments[id2].ActiveThread = thread
+	}
+	for id2 := range t.Applications {
+		t.Applications[id2].ActiveThread = thread
+	}
+	for id2 := range t.Clients {
+		t.Clients[id2].ActiveThread = thread
+	}
+	for id2 := range t.Flags {
+		t.Flags[id2].ActiveThread = thread
+	}
+	for id2 := range t.Groups {
+		t.Groups[id2].ActiveThread = thread
+	}
+	for id2 := range t.Imports {
+		t.Imports[id2].ActiveThread = thread
+	}
+	for id2 := range t.Presets {
+		t.Presets[id2].ActiveThread = thread
+	}
+	for id2 := range t.Projects {
+		t.Projects[id2].ActiveThread = thread
+	}
+	for id2 := range t.Queries {
+		t.Queries[id2].ActiveThread = thread
+	}
+	for id2 := range t.Reports {
+		t.Reports[id2].ActiveThread = thread
+	}
+	for id2 := range t.Results {
+		t.Results[id2].ActiveThread = thread
+	}
+	for id2 := range t.Roles {
+		t.Roles[id2].ActiveThread = thread
+	}
+	for id2 := range t.Scans {
+		t.Scans[id2].ActiveThread = thread
+	}
+	for id2 := range t.Users {
+		t.Users[id2].ActiveThread = thread
+	}
+
+	for id2 := range t.SubTests {
+		t.SubTests[id2].SetActiveThread(thread)
+	}
+}
+
 func (t TestSet) GetTestCount() int {
 	var count int = 0
 

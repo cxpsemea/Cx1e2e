@@ -31,6 +31,7 @@ type TestRunner interface {
 	GetFlags() []string
 	GetVersion() types.ProductVersion
 	GetVersionStr() string
+	GetCurrentThread() int
 	OnFail() types.FailAction
 
 	RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Engines *types.EnabledEngines) error
@@ -94,7 +95,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	return status
 }
 
-func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Config *TestConfig, testSetFail error, thread int) []TestResult {
+func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Config *TestConfig, testSetFail error) []TestResult {
 	logger.Tracef("Running test set: %v [%v]", t.Name, t.TestSource)
 
 	var err error = testSetFail
@@ -132,24 +133,24 @@ func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *types.Threa
 
 	if len(t.SubTests) > 0 {
 		for id := range t.SubTests {
-			results = t.SubTests[id].RunTests(testClient, logger, Config, err, thread)
+			results = t.SubTests[id].RunTests(testClient, logger, Config, err)
 			all_results = append(all_results, results...)
 		}
 	} else {
-		results, err = t.Run(testClient, logger, types.OP_CREATE, Config, err, thread)
+		results, err = t.Run(testClient, logger, types.OP_CREATE, Config, err)
 		all_results = append(all_results, results...)
-		results, err = t.Run(testClient, logger, types.OP_READ, Config, err, thread)
+		results, err = t.Run(testClient, logger, types.OP_READ, Config, err)
 		all_results = append(all_results, results...)
-		results, err = t.Run(testClient, logger, types.OP_UPDATE, Config, err, thread)
+		results, err = t.Run(testClient, logger, types.OP_UPDATE, Config, err)
 		all_results = append(all_results, results...)
-		results, _ = t.Run(testClient, logger, types.OP_DELETE, Config, err, thread)
+		results, _ = t.Run(testClient, logger, types.OP_DELETE, Config, err)
 		all_results = append(all_results, results...)
 	}
 
 	return all_results
 }
 
-func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD string, Config *TestConfig, TestSetFail error, thread int) ([]TestResult, error) {
+func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD string, Config *TestConfig, TestSetFail error) ([]TestResult, error) {
 	results := []TestResult{}
 	var TestSetFailError error
 	TestSetFailError = TestSetFail
@@ -157,146 +158,146 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogg
 	// for CRU operations, follow this order, but for Delete do the reverse
 	if CRUD != types.OP_DELETE {
 		for id := range t.Flags {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Flags[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Flags[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Imports {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Imports[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Imports[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Groups {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Groups[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Groups[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Applications {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Applications[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Applications[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Projects {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Projects[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Projects[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Roles {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Roles[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Roles[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Users {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Users[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Users[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Clients {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Clients[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Clients[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.AccessAssignments {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.AccessAssignments[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.AccessAssignments[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Queries {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Queries[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Queries[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Presets {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Presets[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Presets[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Scans {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Scans[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Scans[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Results {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Results[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Results[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Reports {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Reports[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Reports[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 	} else { // in reverse order for DELETE
 		for id := range t.Scans {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Scans[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Scans[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Presets {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Presets[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Presets[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Queries {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Queries[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Queries[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.AccessAssignments {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.AccessAssignments[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.AccessAssignments[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Clients {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Clients[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Clients[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Users {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Users[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Users[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Roles {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Roles[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Roles[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Projects {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Projects[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Projects[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Applications {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Applications[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Applications[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
 		}
 		for id := range t.Groups {
-			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Groups[id]), &results, Config, TestSetFailError, thread)
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Groups[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
@@ -306,7 +307,7 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogg
 	return results, TestSetFailError
 }
 
-func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, testName string, test TestRunner, results *[]TestResult, Config *TestConfig, failSet error, thread int) error {
+func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, testName string, test TestRunner, results *[]TestResult, Config *TestConfig, failSet error) error {
 	if test.IsType(CRUD) {
 		var result TestResult
 		failAction := test.OnFail()
@@ -322,11 +323,11 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD,
 		} else {
 			err := test.IsSupported(cx1client, logger, CRUD, &Config.Engines)
 
-			if err == nil && !CheckFlags(cx1client, logger, test, thread) {
+			if err == nil && !CheckFlags(cx1client, logger, test) {
 				err = fmt.Errorf("test requires feature flag(s): %v ", strings.Join(test.GetFlags(), ","))
 			}
 
-			if err == nil && !CheckVersion(cx1client, logger, test, thread) {
+			if err == nil && !CheckVersion(cx1client, logger, test) {
 				v, _ := cx1client.GetVersion()
 				err = fmt.Errorf("test expects %v, current version is %v", test.GetVersionStr(), v.String())
 			}
@@ -340,18 +341,18 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD,
 				result.Result = TST_SKIP
 				logger.Warnf("Test for %v %v will be skipped. Reason: %s", CRUD, test.String(), err)
 			} else {
-				result = Run(cx1client, logger, CRUD, testName, test, Config, thread)
+				result = Run(cx1client, logger, CRUD, testName, test, Config)
 				if failAction.RetryCount > 0 && result.Result == TST_FAIL {
 					for count := 1; count <= (int)(failAction.RetryCount); count++ {
 						logger.Infof("Test for %v %v failed due to %v, waiting %d seconds for retry %d of %d", CRUD, test.String(), result.Reason[0], failAction.RetryDelay, count, failAction.RetryCount)
 						time.Sleep(time.Duration(failAction.RetryDelay) * time.Second)
-						result = Run(cx1client, logger, CRUD, testName, test, Config, thread)
+						result = Run(cx1client, logger, CRUD, testName, test, Config)
 					}
 				}
 			}
 		}
 
-		LogResult(logger, result, thread)
+		LogResult(logger, result)
 		*results = append(*results, result)
 
 		if result.Result == TST_FAIL {
@@ -383,9 +384,9 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD,
 	return nil
 }
 
-func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, testName string, test TestRunner, Config *TestConfig, thread int) TestResult {
+func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, testName string, test TestRunner, Config *TestConfig) TestResult {
 	//logger.Infof("Running test: %v %v", CRUD, test.String())
-	LogStart(logger, test, CRUD, testName, thread)
+	LogStart(logger, test, CRUD, testName)
 	result := MakeResult(test)
 	result.CRUD = CRUD
 	result.Name = testName
@@ -432,7 +433,7 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, tes
 	}
 }
 
-func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, test TestRunner, thread int) bool {
+func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, test TestRunner) bool {
 	for _, flag := range test.GetFlags() {
 		negative := false
 		if flag[0] == '!' {
@@ -459,7 +460,7 @@ func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, te
 	return true
 }
 
-func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, test TestRunner, thread int) bool {
+func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, test TestRunner) bool {
 	cur, _ := cx1client.GetVersion()
 
 	pv := test.GetVersion()
@@ -530,7 +531,7 @@ func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, 
 	return true
 }
 
-func LogStart(logger *types.ThreadLogger, test TestRunner, CRUD, testName string, thread int) {
+func LogStart(logger *types.ThreadLogger, test TestRunner, CRUD, testName string) {
 	logger.Infof("")
 	testType := "Test"
 	if test.IsNegative() {
@@ -540,7 +541,7 @@ func LogStart(logger *types.ThreadLogger, test TestRunner, CRUD, testName string
 	logger.Infof("Starting test #%d - %v %v %v '%v' - %v [%v]", test.GetID(), CRUD, test.GetModule(), testType, testName, test.String(), test.GetSource())
 }
 
-func LogResult(logger *types.ThreadLogger, result TestResult, thread int) {
+func LogResult(logger *types.ThreadLogger, result TestResult) {
 	testType := "Test"
 	if result.FailTest {
 		testType = "Negative-Test"
