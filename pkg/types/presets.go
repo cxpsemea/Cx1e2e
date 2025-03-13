@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/cxpsemea/Cx1ClientGo"
-	"github.com/sirupsen/logrus"
 )
 
 func (t *PresetCRUD) Validate(CRUD string) error {
@@ -15,7 +14,7 @@ func (t *PresetCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *PresetCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+func (t *PresetCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
 	return nil
 }
 
@@ -23,7 +22,7 @@ func (t *PresetCRUD) GetModule() string {
 	return MOD_PRESET
 }
 
-func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, t *PresetCRUD) ([]uint64, error) {
+func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, t *PresetCRUD) ([]uint64, error) {
 	query_ids := make([]uint64, len(t.Queries))
 
 	qc, err := cx1client.GetQueries()
@@ -41,7 +40,7 @@ func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, t *PresetCR
 	return query_ids, nil
 }
 
-func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	query_ids, err := getQueryIDs(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -55,7 +54,7 @@ func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	return nil
 }
 
-func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	test_Preset, err := cx1client.GetPresetByName(t.Name)
 	if err != nil {
 		return err
@@ -64,7 +63,7 @@ func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return nil
 }
 
-func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	if t.Preset == nil {
 		if t.CRUDTest.IsType(OP_READ) { // already tried to read
 			return fmt.Errorf("read operation failed")
@@ -85,7 +84,7 @@ func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	return err
 }
 
-func (t *PresetCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *PresetCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	if t.Preset == nil {
 		if t.CRUDTest.IsType(OP_READ) { // already tried to read
 			return fmt.Errorf("read operation failed")

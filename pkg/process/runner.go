@@ -23,7 +23,7 @@ type TestRunner interface {
 	String() string
 	IsType(testType string) bool
 	IsForced() bool
-	IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, testType string, Engines *types.EnabledEngines) error
+	IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, testType string, Engines *types.EnabledEngines) error
 	IsNegative() bool
 	GetSource() string
 	GetID() uint
@@ -33,10 +33,10 @@ type TestRunner interface {
 	GetVersionStr() string
 	OnFail() types.FailAction
 
-	RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
-	RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
-	RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
-	RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *types.EnabledEngines) error
+	RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Engines *types.EnabledEngines) error
+	RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Engines *types.EnabledEngines) error
+	RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Engines *types.EnabledEngines) error
+	RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Engines *types.EnabledEngines) error
 }
 
 func MakeResult(test TestRunner) TestResult {
@@ -57,7 +57,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	dir := NewDirector(Config)
 
 	if !Config.MultiThreadable {
-		logger.Warningf("Configuration does not allow multi-threading tests while cx1e2e was run with threads=%d - resetting to 1", threads)
+		logger.Warnf("Configuration does not allow multi-threading tests while cx1e2e was run with threads=%d - resetting to 1", threads)
 		threads = 1
 	}
 
@@ -94,7 +94,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	return status
 }
 
-func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *TestConfig, testSetFail error, thread int) []TestResult {
+func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, Config *TestConfig, testSetFail error, thread int) []TestResult {
 	logger.Tracef("Running test set: %v", t.Name)
 
 	var err error = testSetFail
@@ -149,7 +149,7 @@ func (t *TestSet) RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return all_results
 }
 
-func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Config *TestConfig, TestSetFail error, thread int) ([]TestResult, error) {
+func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD string, Config *TestConfig, TestSetFail error, thread int) ([]TestResult, error) {
 	results := []TestResult{}
 	var TestSetFailError error
 	TestSetFailError = TestSetFail
@@ -306,7 +306,7 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, C
 	return results, TestSetFailError
 }
 
-func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName string, test TestRunner, results *[]TestResult, Config *TestConfig, failSet error, thread int) error {
+func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, testName string, test TestRunner, results *[]TestResult, Config *TestConfig, failSet error, thread int) error {
 	if test.IsType(CRUD) {
 		var result TestResult
 		failAction := test.OnFail()
@@ -383,7 +383,7 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, test
 	return nil
 }
 
-func Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName string, test TestRunner, Config *TestConfig, thread int) TestResult {
+func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, testName string, test TestRunner, Config *TestConfig, thread int) TestResult {
 	//logger.Infof("Running test: %v %v", CRUD, test.String())
 	LogStart(logger, test, CRUD, testName, thread)
 	result := MakeResult(test)
@@ -432,7 +432,7 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD, testName
 	}
 }
 
-func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test TestRunner, thread int) bool {
+func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, test TestRunner, thread int) bool {
 	for _, flag := range test.GetFlags() {
 		negative := false
 		if flag[0] == '!' {
@@ -459,7 +459,7 @@ func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test Te
 	return true
 }
 
-func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test TestRunner, thread int) bool {
+func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, test TestRunner, thread int) bool {
 	cur, _ := cx1client.GetVersion()
 
 	pv := test.GetVersion()
@@ -530,7 +530,7 @@ func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, test 
 	return true
 }
 
-func LogStart(logger *logrus.Logger, test TestRunner, CRUD, testName string, thread int) {
+func LogStart(logger *types.ThreadLogger, test TestRunner, CRUD, testName string, thread int) {
 	logger.Infof("")
 	testType := "Test"
 	if test.IsNegative() {
@@ -540,7 +540,7 @@ func LogStart(logger *logrus.Logger, test TestRunner, CRUD, testName string, thr
 	logger.Infof("Starting test #%d - %v %v %v '%v' - %v [%v]", test.GetID(), CRUD, test.GetModule(), testType, testName, test.String(), test.GetSource())
 }
 
-func LogResult(logger *logrus.Logger, result TestResult, thread int) {
+func LogResult(logger *types.ThreadLogger, result TestResult, thread int) {
 	testType := "Test"
 	if result.FailTest {
 		testType = "Negative-Test"
@@ -569,18 +569,18 @@ func (t TestSet) OtherUser() bool {
 	return t.RunAs.APIKey != "" || (t.RunAs.ClientID != "" && t.RunAs.ClientSecret != "") || t.RunAs.OIDCClient != ""
 }
 
-func (t TestSet) GetOtherClient(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, config *TestConfig) (*Cx1ClientGo.Cx1Client, error) {
-	httpClient, err := config.CreateHTTPClient(logger)
+func (t TestSet) GetOtherClient(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, config *TestConfig) (*Cx1ClientGo.Cx1Client, error) {
+	httpClient, err := config.CreateHTTPClient(logger.GetLogger())
 	if err != nil {
 		return nil, err
 	}
 
 	if t.RunAs.APIKey != "" {
-		return Cx1ClientGo.NewAPIKeyClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, t.RunAs.APIKey, logger)
+		return Cx1ClientGo.NewAPIKeyClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, t.RunAs.APIKey, logger.GetLogger())
 	}
 
 	if t.RunAs.ClientID != "" && t.RunAs.ClientSecret != "" {
-		return Cx1ClientGo.NewOAuthClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, t.RunAs.ClientID, t.RunAs.ClientSecret, logger)
+		return Cx1ClientGo.NewOAuthClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, t.RunAs.ClientID, t.RunAs.ClientSecret, logger.GetLogger())
 	}
 
 	if t.RunAs.OIDCClient != "" {
@@ -594,7 +594,7 @@ func (t TestSet) GetOtherClient(cx1client *Cx1ClientGo.Cx1Client, logger *logrus
 			return nil, err
 		}
 
-		return Cx1ClientGo.NewOAuthClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, client.ClientID, secret, logger)
+		return Cx1ClientGo.NewOAuthClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, client.ClientID, secret, logger.GetLogger())
 	}
 
 	return nil, fmt.Errorf("no credentials provided in test %v step, file %v", t.Name, t.File)

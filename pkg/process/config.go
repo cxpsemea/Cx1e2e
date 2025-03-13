@@ -445,7 +445,7 @@ func (o TestConfig) GetTestCount() int {
 }
 
 func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error) {
-	leveledlogger := LeveledLogger{logger: logger}
+	leveledlogger := types.NewLeveledLogger(logger)
 	cx1retryclient := retryablehttp.NewClient()
 	cx1retryclient.RetryMax = 3
 	cx1retryclient.Logger = leveledlogger

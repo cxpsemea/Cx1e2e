@@ -22,7 +22,7 @@ func NewAuditSessionManager() *AuditSessionManager {
 	}
 }
 
-func (m *AuditSessionManager) GetOrCreateSession(scope CxQLScope, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) (*Cx1ClientGo.AuditSession, error) {
+func (m *AuditSessionManager) GetOrCreateSession(scope CxQLScope, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) (*Cx1ClientGo.AuditSession, error) {
 	logger.Debugf("Audit Session Manager: get or create session for scope %v, language %v, project %v", scope.String(), language, lastScan.ProjectID)
 	session, err := m.GetSession(scope, language, lastScan, cx1client, logger)
 	if err != nil {
@@ -46,7 +46,7 @@ func (m *AuditSessionManager) GetOrCreateSession(scope CxQLScope, language strin
 	return m.Sessions[len(m.Sessions)-1], nil
 }
 
-func (m *AuditSessionManager) GetSession(scope CxQLScope, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) (*Cx1ClientGo.AuditSession, error) {
+func (m *AuditSessionManager) GetSession(scope CxQLScope, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) (*Cx1ClientGo.AuditSession, error) {
 	logger.Debugf("Audit Session Manager: get session for scope %v, language %v, project %v", scope.String(), language, lastScan.ProjectID)
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
@@ -55,18 +55,18 @@ func (m *AuditSessionManager) GetSession(scope CxQLScope, language string, lastS
 
 	for id := range m.Sessions {
 		if (m.Sessions[id].ProjectID == scope.ProjectID || scope.Corp) && m.Sessions[id].HasLanguage(language) {
-			if time.Since(m.Sessions[id].LastHearbeat) < AuditSessionTimeoutMinutes*time.Minute {
+			if time.Since(m.Sessions[id].LastHeartbeat) < AuditSessionTimeoutMinutes*time.Minute {
 				if err := cx1client.AuditSessionKeepAlive(m.Sessions[id]); err != nil {
-					logger.Warningf("Tried to refresh existing audit session %v but failed: %s", m.Sessions[id].String(), err)
+					logger.Warnf("Tried to refresh existing audit session %v but failed: %s", m.Sessions[id].String(), err)
 					_ = cx1client.AuditDeleteSession(m.Sessions[id])
 					m.Sessions = slices.Delete(m.Sessions, id, id+1)
 					return nil, nil
 				} else {
-					logger.Warningf("Found existing audit session %v (scope: %v, language: %v)", m.Sessions[id].String(), scope.String(), language)
+					logger.Warnf("Found existing audit session %v (scope: %v, language: %v)", m.Sessions[id].String(), scope.String(), language)
 					return m.Sessions[id], nil
 				}
 			} else {
-				logger.Warningf("Found existing audit session %v but it was created more than %d minutes ago (%v) and may have expired", m.Sessions[id].String(), AuditSessionTimeoutMinutes, m.Sessions[id].CreatedAt.String())
+				logger.Warnf("Found existing audit session %v but it was created more than %d minutes ago (%v) and may have expired", m.Sessions[id].String(), AuditSessionTimeoutMinutes, m.Sessions[id].CreatedAt.String())
 				_ = cx1client.AuditDeleteSession(m.Sessions[id])
 				m.Sessions = slices.Delete(m.Sessions, id, id+1)
 				return nil, nil
@@ -96,7 +96,7 @@ func (m *AuditSessionManager) Clear(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 	m.Sessions = []*Cx1ClientGo.AuditSession{}
 }
 
-func (m *AuditSessionManager) DeleteSession(session *Cx1ClientGo.AuditSession, cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) error {
+func (m *AuditSessionManager) DeleteSession(session *Cx1ClientGo.AuditSession, cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) error {
 	logger.Debugf("Audit Session Manager: delete session %v", session.String())
 
 	m.Lock.Lock()
@@ -120,7 +120,7 @@ func (m *AuditSessionManager) DeleteSession(session *Cx1ClientGo.AuditSession, c
 	return err
 }
 
-func (m *AuditSessionManager) PrintSessions(logger *logrus.Logger) {
+func (m *AuditSessionManager) PrintSessions(logger *ThreadLogger) {
 	logger.Tracef("Listing AuditSessionManager's %d active sessions", len(m.Sessions))
 	for id, s := range m.Sessions {
 		logger.Tracef(" - %d: %v", id, s.String())

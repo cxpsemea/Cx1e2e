@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/cxpsemea/Cx1ClientGo"
-	"github.com/sirupsen/logrus"
 )
 
 func CheckAMFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
@@ -15,7 +14,7 @@ func CheckAMFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
 	return flag
 }
 
-func (t *AccessAssignmentCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+func (t *AccessAssignmentCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
 	return nil
 }
 
@@ -35,7 +34,7 @@ func (t *AccessAssignmentCRUD) GetModule() string {
 	return MOD_ACCESS
 }
 
-func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *AccessAssignmentCRUD) (Cx1ClientGo.AccessAssignment, error) {
+func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *AccessAssignmentCRUD) (Cx1ClientGo.AccessAssignment, error) {
 	access := Cx1ClientGo.AccessAssignment{
 		TenantID:     cx1client.GetTenantID(),
 		EntityType:   t.EntityType,
@@ -97,7 +96,7 @@ func prepareAccessAssignment(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return access, nil
 }
 
-func (t *AccessAssignmentCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *AccessAssignmentCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	access, err := prepareAccessAssignment(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -111,7 +110,7 @@ func (t *AccessAssignmentCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logge
 	return nil
 }
 
-func (t *AccessAssignmentCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *AccessAssignmentCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	access, err := prepareAccessAssignment(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -138,7 +137,7 @@ func (t *AccessAssignmentCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger 
 	return nil
 }
 
-func (t *AccessAssignmentCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *AccessAssignmentCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	access, err := prepareAccessAssignment(cx1client, logger, t)
 	if err != nil {
 		return err
@@ -158,7 +157,7 @@ func (t *AccessAssignmentCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logge
 	return nil
 }
 
-func (t *AccessAssignmentCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *AccessAssignmentCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	access, err := prepareAccessAssignment(cx1client, logger, t)
 	if err != nil {
 		return err
