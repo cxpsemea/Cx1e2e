@@ -11,7 +11,7 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: true
-          Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+          Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         Source: "result = Find_Strings().FindByName(\"cheeseburger\");"
         Severity: HIGH
         IsExecutable: true
@@ -23,7 +23,7 @@ Tests:
         OnFail:
           FailTestSet: true
     Presets:
-      - Name: e2e-test-query-preset%E2E_RUN_SUFFIX%
+      - Name: e2e-test-query-old-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        
         Queries:
           - Language: JavaScript
@@ -36,10 +36,10 @@ Tests:
         Test: U
   - Name: run a scan with the new preset
     Scans:
-      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
+        Preset: e2e-test-query-old-preset%E2E_RUN_SUFFIX%
         Engine: sast
         WaitForEnd: true
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
@@ -47,14 +47,14 @@ Tests:
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
     Results:
-      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         Type: SAST
         SASTFilter:
           Query: Client_DOM_XSS
           Severity: HIGH
         Test: R
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
-      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         Type: SAST
         SASTFilter:
           Query: EtoE_Test_Cheeseburgers
@@ -68,7 +68,7 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: true
-          Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+          Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         Test: D
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         OldAPI: true

@@ -6,11 +6,11 @@ Tenant: your_tenant_here
 Tests:
   - Name: delete preset, project, and app
     Presets:
-      - Name: e2e-test-query-preset%E2E_RUN_SUFFIX%
+      - Name: e2e-test-query-old-preset%E2E_RUN_SUFFIX%
         Test: D      
     Projects:
-      - Name: e2e-test-query-project%E2E_RUN_SUFFIX%
+      - Name: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         Test: D     
     Applications:
-      - Name: e2e-test-query-app%E2E_RUN_SUFFIX%
+      - Name: e2e-test-query-old-app%E2E_RUN_SUFFIX%
         Test: D

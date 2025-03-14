@@ -11,7 +11,7 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: false
-          Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+          Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         Source: "result = All.NewCxList();"
         Severity: LOW
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
@@ -22,10 +22,10 @@ Tests:
         OnFail:
           FailTestSet: true
     Scans:
-      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
+        Preset: e2e-test-query-old-preset%E2E_RUN_SUFFIX%
         Engine: sast
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         WaitForEnd: true
@@ -33,7 +33,7 @@ Tests:
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
     Results:
-      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         Type: SAST
         SASTFilter:
           Query: Client_DOM_XSS
@@ -49,6 +49,6 @@ Tests:
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         Scope: 
           Tenant: false
-          Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+          Project: e2e-test-query-old-project%E2E_RUN_SUFFIX%
         Test: D
         OldAPI: true
