@@ -6,9 +6,9 @@ Tenant: your_tenant_here
 Tests:
   - Name: Update Project fail-test
     Projects:
-      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+      - Name: e2e-runas-project%E2E_RUN_SUFFIX%
         Test: R
-      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+      - Name: e2e-runas-project%E2E_RUN_SUFFIX%
         Test: U
         FailTest: true
         Tags: 
@@ -16,7 +16,7 @@ Tests:
             Value: tag2
   - Name: Run scan
     Scans:
-      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+      - Project: e2e-runas-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All
@@ -29,7 +29,7 @@ Tests:
     Reports:
       - Type: scan
         ReportVersion: 1
-        Projects: [ e2e-test-runas-project%E2E_RUN_SUFFIX% ]
+        Projects: [ e2e-runas-project%E2E_RUN_SUFFIX% ]
         Branch: zip
         Status: Completed
         Number: 1
@@ -38,7 +38,7 @@ Tests:
         Test: C
   - Name: Update a scan result
     Results:
-      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+      - Project: e2e-runas-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
           SAST: 
@@ -50,7 +50,7 @@ Tests:
         State: URGENT
         Severity: MEDIUM
         Comment: "This Reflected XSS is urgent, but medium"
-      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+      - Project: e2e-runas-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
           SAST: 
@@ -64,7 +64,7 @@ Tests:
         Comment: "This Reflected XSS is urgent, but medium"
   - Name: Check that the scan result is updated
     Results:
-      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%  # Only one of the reflected xss findings is "confirmed" now
+      - Project: e2e-runas-project%E2E_RUN_SUFFIX%  # Only one of the reflected xss findings is "confirmed" now
         Type: SAST
         Version: 
           SAST: 
@@ -73,7 +73,7 @@ Tests:
           Query: Reflected_XSS_All_Clients
           State: URGENT
         Test: R
-      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX% # Only one of the reflected xss findings is "confirmed" now
+      - Project: e2e-runas-project%E2E_RUN_SUFFIX% # Only one of the reflected xss findings is "confirmed" now
         Type: SAST
         Version: 
           SAST: 
@@ -86,7 +86,7 @@ Tests:
     Reports:
       - Type: scan
         ReportVersion: 2
-        Projects: [ e2e-test-runas-project%E2E_RUN_SUFFIX% ]
+        Projects: [ e2e-runas-project%E2E_RUN_SUFFIX% ]
         Branch: zip
         Status: Completed
         Number: 1
@@ -97,13 +97,13 @@ Tests:
     Reports:
       - Type: project
         ReportVersion: 2
-        Projects: [ e2e-test-runas-project%E2E_RUN_SUFFIX% ]
+        Projects: [ e2e-runas-project%E2E_RUN_SUFFIX% ]
         Format: pdf
         Scanners: [ sast ]
         Test: C
   - Name: Delete scan fail-test
     Scans:
-      - Project: e2e-test-runas-project%E2E_RUN_SUFFIX%
+      - Project: e2e-runas-project%E2E_RUN_SUFFIX%
         Filter:
           Index: 1 # there should be the scan we just ran
           Statuses: [ "Completed", "Canceled" ]
@@ -111,6 +111,6 @@ Tests:
         FailTest: true
   - Name: Delete Project fail-test
     Projects:
-      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+      - Name: e2e-runas-project%E2E_RUN_SUFFIX%
         Test: D
         FailTest: true

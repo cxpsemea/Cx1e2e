@@ -6,6 +6,6 @@ Tenant: your_tenant_here
 Tests:
   - Name: Role Create
     Roles:
-      - Name: e2e-test-role-role%E2E_RUN_SUFFIX%
+      - Name: e2e-role-role%E2E_RUN_SUFFIX%
         Permissions: [ view-scans ]
         Test: C

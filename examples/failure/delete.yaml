@@ -6,5 +6,5 @@ Tenant: your_tenant_here
 Tests:
   - Name: Delete Project
     Projects:
-      - Name: e2e-test-failure-project%E2E_RUN_SUFFIX%
+      - Name: e2e-failure-project%E2E_RUN_SUFFIX%
         Test: D

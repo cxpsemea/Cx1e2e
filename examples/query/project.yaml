@@ -11,7 +11,7 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: false
-          Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+          Project: e2e-query-project%E2E_RUN_SUFFIX%
         Source: "result = All.NewCxList(); //project override"
         Severity: LOW
         Compile: true        
@@ -19,17 +19,17 @@ Tests:
         OnFail:
           FailTestSet: true
     Scans:
-      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-query-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-test-query-preset%E2E_RUN_SUFFIX%
+        Preset: e2e-query-preset%E2E_RUN_SUFFIX%
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
     Results:
-      - Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-query-project%E2E_RUN_SUFFIX%
         Type: SAST
         SASTFilter:
           Query: Client_DOM_XSS
@@ -43,6 +43,6 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: false
-          Project: e2e-test-query-project%E2E_RUN_SUFFIX%
+          Project: e2e-query-project%E2E_RUN_SUFFIX%
         Test: D
         DeleteAuditSession: true

@@ -6,23 +6,23 @@ Tenant: your_tenant_here
 Tests:
   - Name: Create Project, App, and User
     Projects:
-      - Name: e2e-test-access-project%E2E_RUN_SUFFIX%
+      - Name: e2e-access-project%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: C
     Applications:
-      - Name: e2e-test-access-app%E2E_RUN_SUFFIX%
+      - Name: e2e-access-app%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Rules: 
           - Type: "project.name.in"
-            Value: "e2e-test-access-project%E2E_RUN_SUFFIX%"
+            Value: "e2e-access-project%E2E_RUN_SUFFIX%"
         Test: C
     Groups:
-      - Name: e2e-test-access-group%E2E_RUN_SUFFIX%
+      - Name: e2e-access-group%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Roles: [ ast-scanner ]
         Test: C
     Users:
-      - Name: e2e-test-access-user%E2E_RUN_SUFFIX%
+      - Name: e2e-access-user%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Email: e2e_test_access_user1@cx.local
         Roles: [ ast-scanner ]
@@ -30,18 +30,18 @@ Tests:
   - Name: Grant user access to project        
     AccessAssignments:
       - EntityType: user
-        EntityName: e2e-test-access-user%E2E_RUN_SUFFIX%
+        EntityName: e2e-access-user%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         ResourceType: project
-        ResourceName: e2e-test-access-project%E2E_RUN_SUFFIX%
+        ResourceName: e2e-access-project%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
         Test: C
   - Name: Verify access
     AccessAssignments:
       - EntityType: user
-        EntityName: e2e-test-access-user%E2E_RUN_SUFFIX%
+        EntityName: e2e-access-user%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         ResourceType: project
-        ResourceName: e2e-test-access-project%E2E_RUN_SUFFIX%
+        ResourceName: e2e-access-project%E2E_RUN_SUFFIX%
         Roles: [ ast-scanner ]
         Test: R

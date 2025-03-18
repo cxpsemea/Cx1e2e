@@ -11,7 +11,7 @@ Tenant: your_tenant_here
 Tests:
   - Name: Run a scan that will fail because the engine didn't run
     Scans:
-      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+      - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All

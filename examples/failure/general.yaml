@@ -6,7 +6,7 @@ Tenant: your_tenant_here
 Tests:
   - Name: Run a scan that will fail on the General step (bad branch)
     Scans:
-      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+      - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         Repository: https://github.com/michaelkubiaczyk/ssba
         Branch: cecinestpasunebranche
         Preset: All

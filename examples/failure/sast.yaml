@@ -6,7 +6,7 @@ Tenant: your_tenant_here
 Tests:
   - Name: Run a SAST valid scan to allow creating custom queries
     Scans:
-      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+      - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All
@@ -22,14 +22,14 @@ Tests:
         Language: Java
         Scope: 
           Tenant: false
-          Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+          Project: e2e-failure-project%E2E_RUN_SUFFIX%
         Source: "result = hello this is not valid code ;)"
         Compile: false
         DeleteAuditSession: true
         Test: C
   - Name: Run a SAST scan that will fail due to broken queries
     Scans:
-      - Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+      - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All
@@ -46,6 +46,6 @@ Tests:
         Language: Java
         Scope: 
           Tenant: false
-          Project: e2e-test-failure-project%E2E_RUN_SUFFIX%
+          Project: e2e-failure-project%E2E_RUN_SUFFIX%
         Test: D
         DeleteAuditSession: true

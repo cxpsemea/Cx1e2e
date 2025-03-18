@@ -6,15 +6,15 @@ Tenant: your_tenant_here
 Tests:
   - Name: Check that the imported project exists in the new application
     Applications:
-      - Name: e2e-test-import-app
+      - Name: e2e-import-app
         Test: R
     Projects:
-      - Name: e2e-test-import-project
-        Application: e2e-test-import-app
+      - Name: e2e-import-project
+        Application: e2e-import-app
         Test: R
   - Name: Run scan and check for results
     Scans:
-      - Project: e2e-test-import-project
+      - Project: e2e-import-project
         ZipFile: ../files/xss-burger.zip
         Branch: zip
         Preset: e2e-test-import-preset
@@ -24,7 +24,7 @@ Tests:
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
     Results:
-      - Project: e2e-test-import-project
+      - Project: e2e-import-project
         Type: SAST
         Version: 
           CxOne: 
@@ -32,7 +32,7 @@ Tests:
         SASTFilter:
           ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="
         Test: R
-      - Project: e2e-test-import-project
+      - Project: e2e-import-project
         Type: SAST
         Version: 
           SAST: 
@@ -41,7 +41,7 @@ Tests:
         SASTFilter:
           ResultHash: "BCAQgoeGeO58tg81+LCMZxK/NI8="
         Test: R
-      - Project: e2e-test-import-project
+      - Project: e2e-import-project
         Type: SAST
         Version: 
           CxOne: 

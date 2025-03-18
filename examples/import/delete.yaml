@@ -11,16 +11,16 @@ Tests:
         Language: JavaScript
         Scope: 
           Tenant: true
-          Project: e2e-test-import-project
+          Project: e2e-import-project
         Test: D
         DeleteAuditSession: true
     Projects:
-      - Name: e2e-test-import-project
+      - Name: e2e-import-project
         Test: D
     Applications:
-      - Name: e2e-test-import-app
+      - Name: e2e-import-app
         Test: D
   - Name: Delete imported preset
     Presets:
-      - Name: e2e-test-import-preset
+      - Name: e2e-import-preset
         Test: D
