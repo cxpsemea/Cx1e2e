@@ -22,5 +22,5 @@ Tests:
         Test: D
   - Name: Delete imported preset
     Presets:
-      - Name: e2e-import-preset
+      - Name: e2e-test-import-preset
         Test: D
