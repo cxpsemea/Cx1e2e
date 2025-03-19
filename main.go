@@ -175,11 +175,34 @@ func run() uint {
 	}
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
-	currentUser, err := cx1client.GetCurrentUser()
-	if err != nil {
-		logger.Fatalf("Failed to get cx1 client current user: %s", err)
+	if cx1client.IsUser {
+		currentUser, err := cx1client.GetCurrentUser()
+		if err != nil {
+			logger.Errorf("Failed to get cx1 client current user: %s", err)
+		} else {
+			Config.AuthUser = currentUser.String()
+		}
+	} else {
+		currentClient, err := cx1client.GetCurrentClient()
+		if err != nil {
+			logger.Errorf("Failed to get cx1 client current OIDC client: %s", err)
+		} else {
+			Config.AuthUser = currentClient.String()
+		}
 	}
-	Config.AuthUser = currentUser.String()
+
+	// both currentUser/currentClient checks may fail in which case:
+	if Config.AuthUser == "" {
+		claim := cx1client.GetClaims()
+		if claim.Username != "" {
+			Config.AuthUser = fmt.Sprintf("%v (%v)", claim.Username, claim.Email)
+		} else if claim.ClientID != "" {
+			Config.AuthUser = fmt.Sprintf("%v (%v)", claim.ClientID, claim.Email)
+		} else {
+			Config.AuthUser = claim.Email
+		}
+	}
+
 	Config.EnvironmentVersion, err = cx1client.GetVersion()
 	if err != nil {
 		logger.Errorf("Failed to get version info: %s", err)
