@@ -52,7 +52,7 @@ Tests:
         Type: SAST
         Version: 
           CxOne: 
-            Below: "3.30.45"
+            Below: "3.31.0"
         SASTFilter:
           ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: R
@@ -60,7 +60,7 @@ Tests:
         Type: SAST
         Version: 
           CxOne: 
-            AtLeast: "3.30.45"
+            AtLeast: "3.31.0"
             Below: "3.33.14"
         SASTFilter:
           ResultHash: "j2c7AUjdAQeBoe5LY7Kvap1kyT4="

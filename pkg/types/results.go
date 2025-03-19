@@ -203,15 +203,15 @@ func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 	switch t.Type {
 	case "SAST":
 		if len(t.Results.SAST) == 0 {
-			return fmt.Errorf("failed to find SAST finding matching filter %v", t.SASTFilter)
+			return fmt.Errorf("failed to find SAST finding matching filter %v", t.SASTFilter.String())
 		}
 	case "SCA":
 		if len(t.Results.SCA) == 0 {
-			return fmt.Errorf("failed to find SCA finding matching filter %v", t.SCAFilter)
+			return fmt.Errorf("failed to find SCA finding matching filter %v", t.SCAFilter.String())
 		}
 	case "KICS":
 		if len(t.Results.KICS) == 0 {
-			return fmt.Errorf("failed to find KICS finding matching filter %v", t.KICSFilter)
+			return fmt.Errorf("failed to find KICS finding matching filter %v", t.KICSFilter.String())
 		}
 	}
 
