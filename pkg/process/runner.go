@@ -91,6 +91,7 @@ func RunTests(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Config *T
 	if err != nil {
 		logger.Errorf("Failed to generate the report: %s", err)
 	}
+	logger.Infof("Test complete")
 
 	return status
 }
