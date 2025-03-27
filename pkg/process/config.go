@@ -11,10 +11,13 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/cxpsemea/cx1e2e/pkg/types"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
+
+var LastTestID uint = 0
 
 func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	var conf TestConfig
@@ -49,57 +52,8 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 
 	//testSet := make([]TestSet, 0)
 
-	// propagate the filename to sub-tests
-	// TODO: refactor this to use generics?
-	for id := range conf.Tests {
-		for id2 := range conf.Tests[id].AccessAssignments {
-			conf.Tests[id].AccessAssignments[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Applications {
-			conf.Tests[id].Applications[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Clients {
-			conf.Tests[id].Clients[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Flags {
-			conf.Tests[id].Flags[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Groups {
-			conf.Tests[id].Groups[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Imports {
-			conf.Tests[id].Imports[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Presets {
-			conf.Tests[id].Presets[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Projects {
-			conf.Tests[id].Projects[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Queries {
-			conf.Tests[id].Queries[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Reports {
-			conf.Tests[id].Reports[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Results {
-			conf.Tests[id].Results[id2].TestSource = configPath
-			if conf.Tests[id].Results[id2].Number == 0 {
-				conf.Tests[id].Results[id2].Number = 1
-			}
-		}
-		for id2 := range conf.Tests[id].Roles {
-			conf.Tests[id].Roles[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Scans {
-			conf.Tests[id].Scans[id2].TestSource = configPath
-		}
-		for id2 := range conf.Tests[id].Users {
-			conf.Tests[id].Users[id2].TestSource = configPath
-		}
-	}
-
 	for tid := range conf.Tests {
+		conf.Tests[tid].TestSource = configPath
 		set := &conf.Tests[tid]
 		logger.Tracef("Checking TestSet %v for file references", set.Name)
 		if set.File != "" {
@@ -115,6 +69,7 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 			logger.Debugf("Loaded sub-config from %v", conf2.ConfigPath)
 			//testSet = append(testSet, conf2.Tests...)
 			conf.Tests[tid].SubTests = conf2.Tests
+			conf.Tests[tid].Thread = set.Thread
 		} else {
 			for id, scan := range set.Scans {
 				logger.Tracef(" - Checking Scan TestSet %v for file references", set.Name)
@@ -145,14 +100,402 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 			}
 			//testSet = append(testSet, set)
 		}
-	}
-	//conf.Tests = testSet
 
+		conf.Tests[tid].Init()
+	}
+
+	//conf.Tests = testSet
 	return conf, nil
 }
 
+func (t *TestConfig) InitTestIDs() {
+	t.TestCount = t.GetTestCount()
+
+	// IDs are set in the same order as execution in Runner
+	// 1st: subtests
+	// 2nd: CRU ops in order
+	// last: D ops in reverse order
+	for id := range t.Tests {
+		t.Tests[id].InitTestIDs()
+	}
+}
+
+func (t *TestSet) InitTestIDs() {
+	// 1st: subtests
+	// 2nd: CRU ops in order
+	// last: D ops in reverse order
+	for id := range t.SubTests {
+		t.SubTests[id].InitTestIDs()
+	}
+
+	t.InitTestIDsCRUD(types.OP_CREATE)
+	t.InitTestIDsCRUD(types.OP_READ)
+	t.InitTestIDsCRUD(types.OP_UPDATE)
+	t.InitTestIDsCRUD(types.OP_DELETE)
+}
+
+func (c TestConfig) PrintTests() {
+	for id := range c.Tests {
+		c.Tests[id].PrintTests()
+	}
+}
+
+func (t TestSet) PrintTests() {
+	for id := range t.SubTests {
+		t.SubTests[id].PrintTests()
+	}
+
+	for id2 := range t.AccessAssignments {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.AccessAssignments[id2].TestID, t.AccessAssignments[id2].String())
+	}
+	for id2 := range t.Applications {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Applications[id2].TestID, t.Applications[id2].String())
+	}
+	for id2 := range t.Clients {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Clients[id2].TestID, t.Clients[id2].String())
+	}
+	for id2 := range t.Flags {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Flags[id2].TestID, t.Flags[id2].String())
+	}
+	for id2 := range t.Groups {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Groups[id2].TestID, t.Groups[id2].String())
+	}
+	for id2 := range t.Imports {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Imports[id2].TestID, t.Imports[id2].String())
+	}
+	for id2 := range t.Presets {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Presets[id2].TestID, t.Presets[id2].String())
+	}
+	for id2 := range t.Projects {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Projects[id2].TestID, t.Projects[id2].String())
+	}
+	for id2 := range t.Queries {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Queries[id2].TestID, t.Queries[id2].String())
+	}
+	for id2 := range t.Reports {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Reports[id2].TestID, t.Reports[id2].String())
+	}
+	for id2 := range t.Results {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Results[id2].TestID, t.Results[id2].String())
+		if t.Results[id2].Number == 0 {
+			t.Results[id2].Number = 1
+		}
+	}
+	for id2 := range t.Roles {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Roles[id2].TestID, t.Roles[id2].String())
+	}
+	for id2 := range t.Scans {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Scans[id2].TestID, t.Scans[id2].String())
+	}
+	for id2 := range t.Users {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Users[id2].TestID, t.Users[id2].String())
+	}
+}
+
+func (t *TestSet) Init() {
+	for id2 := range t.AccessAssignments {
+		t.AccessAssignments[id2].TestSource = t.TestSource
+		t.AccessAssignments[id2].Thread = t.Thread
+	}
+	for id2 := range t.Applications {
+		t.Applications[id2].TestSource = t.TestSource
+		t.Applications[id2].Thread = t.Thread
+	}
+	for id2 := range t.Clients {
+		t.Clients[id2].TestSource = t.TestSource
+		t.Clients[id2].Thread = t.Thread
+	}
+	for id2 := range t.Flags {
+		t.Flags[id2].TestSource = t.TestSource
+		t.Flags[id2].Thread = t.Thread
+	}
+	for id2 := range t.Groups {
+		t.Groups[id2].TestSource = t.TestSource
+		t.Groups[id2].Thread = t.Thread
+	}
+	for id2 := range t.Imports {
+		t.Imports[id2].TestSource = t.TestSource
+		t.Imports[id2].Thread = t.Thread
+	}
+	for id2 := range t.Presets {
+		t.Presets[id2].TestSource = t.TestSource
+		t.Presets[id2].Thread = t.Thread
+	}
+	for id2 := range t.Projects {
+		t.Projects[id2].TestSource = t.TestSource
+		t.Projects[id2].Thread = t.Thread
+	}
+	for id2 := range t.Queries {
+		t.Queries[id2].TestSource = t.TestSource
+		t.Queries[id2].Thread = t.Thread
+	}
+	for id2 := range t.Reports {
+		t.Reports[id2].TestSource = t.TestSource
+		t.Reports[id2].Thread = t.Thread
+	}
+	for id2 := range t.Results {
+		t.Results[id2].TestSource = t.TestSource
+		t.Results[id2].Thread = t.Thread
+		if t.Results[id2].Number == 0 {
+			t.Results[id2].Number = 1
+		}
+	}
+	for id2 := range t.Roles {
+		t.Roles[id2].TestSource = t.TestSource
+		t.Roles[id2].Thread = t.Thread
+	}
+	for id2 := range t.Scans {
+		t.Scans[id2].TestSource = t.TestSource
+		t.Scans[id2].Thread = t.Thread
+	}
+	for id2 := range t.Users {
+		t.Users[id2].TestSource = t.TestSource
+		t.Users[id2].Thread = t.Thread
+	}
+
+	for id2 := range t.SubTests {
+		if t.Thread != 0 {
+			t.SubTests[id2].Thread = t.Thread
+		}
+		t.SubTests[id2].Init()
+	}
+}
+
+func (t *TestSet) InitTestIDsCRUD(CRUD string) {
+	if CRUD != types.OP_DELETE {
+		for id := range t.Flags {
+			if t.Flags[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Flags[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Imports {
+			if t.Imports[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Imports[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Groups {
+			if t.Groups[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Groups[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Applications {
+			if t.Applications[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Applications[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Projects {
+			if t.Projects[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Projects[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Roles {
+			if t.Roles[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Roles[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Users {
+			if t.Users[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Users[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Clients {
+			if t.Clients[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Clients[id].TestID = LastTestID
+			}
+		}
+		for id := range t.AccessAssignments {
+			if t.AccessAssignments[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.AccessAssignments[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Queries {
+			if t.Queries[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Queries[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Presets {
+			if t.Presets[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Presets[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Scans {
+			if t.Scans[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Scans[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Results {
+			if t.Results[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Results[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Reports {
+			if t.Reports[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Reports[id].TestID = LastTestID
+			}
+		}
+	} else { // in reverse order for DELETE
+		for id := range t.Scans {
+			if t.Scans[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Scans[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Presets {
+			if t.Presets[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Presets[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Queries {
+			if t.Queries[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Queries[id].TestID = LastTestID
+			}
+		}
+		for id := range t.AccessAssignments {
+			if t.AccessAssignments[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.AccessAssignments[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Clients {
+			if t.Clients[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Clients[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Users {
+			if t.Users[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Users[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Roles {
+			if t.Roles[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Roles[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Projects {
+			if t.Projects[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Projects[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Applications {
+			if t.Applications[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Applications[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Groups {
+			if t.Groups[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Groups[id].TestID = LastTestID
+			}
+		}
+	}
+}
+
+func (t *TestSet) SetActiveThread(thread int) {
+	t.ActiveThread = thread
+	for id2 := range t.AccessAssignments {
+		t.AccessAssignments[id2].ActiveThread = thread
+	}
+	for id2 := range t.Applications {
+		t.Applications[id2].ActiveThread = thread
+	}
+	for id2 := range t.Clients {
+		t.Clients[id2].ActiveThread = thread
+	}
+	for id2 := range t.Flags {
+		t.Flags[id2].ActiveThread = thread
+	}
+	for id2 := range t.Groups {
+		t.Groups[id2].ActiveThread = thread
+	}
+	for id2 := range t.Imports {
+		t.Imports[id2].ActiveThread = thread
+	}
+	for id2 := range t.Presets {
+		t.Presets[id2].ActiveThread = thread
+	}
+	for id2 := range t.Projects {
+		t.Projects[id2].ActiveThread = thread
+	}
+	for id2 := range t.Queries {
+		t.Queries[id2].ActiveThread = thread
+	}
+	for id2 := range t.Reports {
+		t.Reports[id2].ActiveThread = thread
+	}
+	for id2 := range t.Results {
+		t.Results[id2].ActiveThread = thread
+	}
+	for id2 := range t.Roles {
+		t.Roles[id2].ActiveThread = thread
+	}
+	for id2 := range t.Scans {
+		t.Scans[id2].ActiveThread = thread
+	}
+	for id2 := range t.Users {
+		t.Users[id2].ActiveThread = thread
+	}
+
+	for id2 := range t.SubTests {
+		t.SubTests[id2].SetActiveThread(thread)
+	}
+}
+
+func (t TestSet) GetTestCount() int {
+	var count int = 0
+
+	count += len(t.AccessAssignments)
+	count += len(t.Applications)
+	count += len(t.Clients)
+	count += len(t.Flags)
+	count += len(t.Groups)
+	count += len(t.Imports)
+	count += len(t.Presets)
+	count += len(t.Projects)
+	count += len(t.Queries)
+	count += len(t.Reports)
+	count += len(t.Results)
+	count += len(t.Roles)
+	count += len(t.Scans)
+	count += len(t.Users)
+
+	for id := range t.SubTests {
+		count += t.SubTests[id].GetTestCount()
+	}
+
+	return count
+}
+
+func (o TestConfig) GetTestCount() int {
+	var count int = 0
+	for id := range o.Tests {
+		count += o.Tests[id].GetTestCount()
+	}
+	return count
+}
+
 func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error) {
-	leveledlogger := LeveledLogger{logger: logger}
+	leveledlogger := types.NewLeveledLogger(logger)
 	cx1retryclient := retryablehttp.NewClient()
 	cx1retryclient.RetryMax = 3
 	cx1retryclient.Logger = leveledlogger

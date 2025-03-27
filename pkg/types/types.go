@@ -64,6 +64,9 @@ type CRUDTest struct {
 	TestSource   string         // filename
 	ForceRun     bool           `yaml:"ForceRun"` // should this test run even if it is unsupported by the backend (unlicensed engine, disabled flag). this is to force a failed test.
 	OnFailAction FailAction     `yaml:"OnFail"`   // actions to take if this command fails
+	TestID       uint           `yaml:"-"`        // internal ID for the test
+	Thread       uint           `yaml:"Thread"`
+	ActiveThread int            `yaml:"-"` // when a runner picks up a test, the test is updated with the owning thread
 }
 
 type FailAction struct {
@@ -161,18 +164,6 @@ type CxQLCRUD struct {
 	LastScan      *Cx1ClientGo.Scan
 }
 
-func (s CxQLScope) String() string {
-	if s.Corp {
-		return "Corp"
-	} else {
-		if s.Application != "" {
-			return fmt.Sprintf("App: %v", s.Application)
-		} else {
-			return fmt.Sprintf("Proj: %v", s.Project)
-		}
-	}
-}
-
 func (o CxQLCRUD) String() string {
 	//if o.QueryName != "" {
 	return fmt.Sprintf("%v: %v -> %v -> %v", o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
@@ -186,6 +177,20 @@ type CxQLScope struct {
 	Project     string `yaml:"Project"`
 	Application string `yaml:"Application"`
 	ProjectID   string `yaml:"-"`
+}
+
+func (s CxQLScope) String() string {
+	if s.Corp {
+		if s.ProjectID != "" {
+			return fmt.Sprintf("Tenant-level on project %v", s.Project)
+		} else {
+			return "Tenant-level"
+		}
+	}
+	if s.Application != "" {
+		return fmt.Sprintf("Application %v via project %v", s.Application, s.Project)
+	}
+	return fmt.Sprintf("Project %v", s.Project)
 }
 
 type FlagCRUD struct {

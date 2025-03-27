@@ -6,20 +6,20 @@ Tenant: your_tenant_here
 Tests:
   - Name: simple test Create all
     Roles:
-      - Name: e2e-test-role1
+      - Name: e2e-role1
         Test: C
     Groups:
-      - Name: e2e-test-group1
+      - Name: e2e-group1
         Test: C
     Users:
-      - Name: e2e-test-user1
+      - Name: e2e-user1
         Email: e2e_test_user1@cx.local
         Test: C
     Applications:
-      - Name: e2e-test-app1
+      - Name: e2e-app1
         Test: C
     Presets:
-      - Name: e2e-test-preset1
+      - Name: e2e-preset1
         Description: This is my test preset        
         Queries:
           - Language: Java
@@ -27,13 +27,13 @@ Tests:
             Name: "Reflected_XSS_All_Clients"
         Test: C
     Projects:
-      - Name: e2e-test-project1
+      - Name: e2e-project1
         Test: C
     Scans:
-      - Project: e2e-test-project1
+      - Project: e2e-project1
         Repository: https://github.com/michaelkubiaczyk/ssba
         Branch: master
-        Preset: e2e-test-preset1
+        Preset: e2e-preset1
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
@@ -46,7 +46,7 @@ Tests:
         Language: "Java"
         Scope: 
           Tenant: true
-          Project: e2e-test-project1
+          Project: e2e-project1
         Source: "// no result"
         Compile: true
         Severity: LOW
@@ -54,27 +54,27 @@ Tests:
         Test: C
   - Name: simple test U for all
     Roles:
-      - Name: e2e-test-role1
+      - Name: e2e-role1
         Permissions: [ view-scans-if-in-group ]
         Test: U
     Groups:
-      - Name: e2e-test-group1
-        Roles: [ e2e-test-role1 ]
+      - Name: e2e-group1
+        Roles: [ e2e-role1 ]
         Test: U
     Users:
-      - Name: e2e-test-user1
+      - Name: e2e-user1
         Email: e2e_test_user1@cx.local
-        Roles: [ e2e-test-role1 ]
-        Groups: [ e2e-test-group1 ]
+        Roles: [ e2e-role1 ]
+        Groups: [ e2e-group1 ]
         Test: U
     Applications:
-      - Name: e2e-test-app1
+      - Name: e2e-app1
         Tags: 
           - Test: tag1
             Test2: tag2
         Test: U
     Presets:
-      - Name: e2e-test-preset1
+      - Name: e2e-preset1
         Description: This is my test preset        
         Queries:
           - Language: Java
@@ -82,18 +82,18 @@ Tests:
             Name: "SQL_Injection"    
         Test: U
     Projects:
-      - Name: e2e-test-project1
-        Groups: [ e2e-test-group1 ]
-        Application: e2e-test-app1
+      - Name: e2e-project1
+        Groups: [ e2e-group1 ]
+        Application: e2e-app1
         Tags: 
           - Test: tag1
             Test2: tag2
         Test: U
     Scans:
-      - Project: e2e-test-project1
+      - Project: e2e-project1
         Test: R
     Results:
-      - Project: e2e-test-project1
+      - Project: e2e-project1
         State: CONFIRMED
         Severity: HIGH
         Test: U
@@ -103,33 +103,33 @@ Tests:
         Language: "Java"
         Scope: 
           Tenant: true
-          Project: e2e-test-project1
+          Project: e2e-project1
         Source: "// no result but updated"
         Severity: HIGH
         DeleteAuditSession: true
         Test: U
   - Name: simple delete for all
     Roles:
-      - Name: e2e-test-role1
+      - Name: e2e-role1
         Test: D
     Groups:
-      - Name: e2e-test-group1
+      - Name: e2e-group1
         Test: D
     Users:
-      - Name: e2e-test-user1
+      - Name: e2e-user1
         Email: e2e_test_user1@cx.local
         Test: D
     Applications:
-      - Name: e2e-test-app1
+      - Name: e2e-app1
         Test: D
     Presets:
-      - Name: e2e-test-preset1
+      - Name: e2e-preset1
         Test: D
     Projects:
-      - Name: e2e-test-project1
+      - Name: e2e-project1
         Test: D
     Scans:
-      - Project: e2e-test-project1
+      - Project: e2e-project1
         Test: D
     Queries:
       - Name: "e2e_test_query1"
@@ -137,6 +137,6 @@ Tests:
         Language: "Java"
         Scope: 
           Tenant: true
-          Project: e2e-test-project1
+          Project: e2e-project1
         Test: D
         DeleteAuditSession: true

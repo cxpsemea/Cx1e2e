@@ -6,7 +6,7 @@ Tenant: your_tenant_here
 Tests:
   - Name: Read project scan results and update some findings
     Results:
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         SASTFilter:
           Query: Stored_XSS # there is only one Stored_XSS finding
@@ -14,7 +14,7 @@ Tests:
         Test: U
         Severity: MEDIUM
         Comment: "This Stored XSS is medium, not high"
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
           SAST: 
@@ -26,7 +26,7 @@ Tests:
         Test: U
         State: CONFIRMED
         Comment: "This Reflected XSS is confirmed"
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
           SAST: 
@@ -38,7 +38,7 @@ Tests:
         Test: U
         State: CONFIRMED
         Comment: "This Reflected XSS is confirmed"
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
           SAST: 
@@ -51,7 +51,7 @@ Tests:
         State: URGENT
         Severity: MEDIUM
         Comment: "This Reflected XSS is urgent, but medium"
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
           SAST: 
@@ -64,34 +64,45 @@ Tests:
         State: URGENT
         Severity: MEDIUM
         Comment: "This Reflected XSS is urgent, but medium"
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
           CxOne: 
-            Below: "3.30.45" # 
+            Below: "3.31.0" # 
         SASTFilter:
           ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: U
         Comment: "This parameter tampering is actually high rish"
         Severity: HIGH
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
           CxOne: 
-            AtLeast: "3.30.45" 
+            AtLeast: "3.31.0" 
+            Below: "3.33.14"
         SASTFilter:
           ResultHash: "j2c7AUjdAQeBoe5LY7Kvap1kyT4="
         Test: U
         Comment: "This parameter tampering is actually high rish"
         Severity: HIGH
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
+        Type: SAST
+        Version: 
+          CxOne: 
+            AtLeast: "3.33.14" # 
+        SASTFilter:
+          ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
+        Test: U
+        Comment: "This parameter tampering is actually high rish"
+        Severity: HIGH
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         SASTFilter:
           SimilarityID: 715549665
         Test: U
         Comment: "This hardcoded password is my secret backdoor, not exploitable"
         State: NOT_EXPLOITABLE
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: KICS
         KICSFilter:
           SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"

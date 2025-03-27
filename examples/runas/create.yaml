@@ -6,13 +6,13 @@ Tenant: your_tenant_here
 Tests:
   - Name: Create a group
     Groups:
-      - Name: e2e-test-runas-group%E2E_RUN_SUFFIX%
+      - Name: e2e-runas-group%E2E_RUN_SUFFIX%
         Test: C
         FeatureFlags: [ "!ACCESS_MANAGEMENT_ENABLED" ]
         ClientRoles:
           - Client: ast-app
             Roles: [ view-projects-if-in-group, create-scan-if-in-group, view-scans-if-in-group, view-project-params-if-in-group, update-project-params-if-in-group, view-results-if-in-group, update-result-if-in-group, update-result-severity-if-in-group, update-result-states-if-in-group, view-queries, manage-reports ]
-      - Name: e2e-test-runas-group%E2E_RUN_SUFFIX%
+      - Name: e2e-runas-group%E2E_RUN_SUFFIX%
         Test: C
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         ClientRoles:
@@ -20,24 +20,24 @@ Tests:
             Roles: [ view-projects, create-scan, view-scans, view-project-params, update-project-params, view-results, update-result, update-result-severity, update-result-states, view-queries, manage-reports ]
   - Name: Create Project
     Projects:
-      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+      - Name: e2e-runas-project%E2E_RUN_SUFFIX%
         Test: C        
         FeatureFlags: [ "!ACCESS_MANAGEMENT_ENABLED" ]
-        Groups: [ e2e-test-runas-group%E2E_RUN_SUFFIX% ]      
-      - Name: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        Groups: [ e2e-runas-group%E2E_RUN_SUFFIX% ]      
+      - Name: e2e-runas-project%E2E_RUN_SUFFIX%
         Test: C        
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
   - Name: Create OIDC Client
     OIDCClients:
-      - Name: e2e-test-runas-client%E2E_RUN_SUFFIX%
+      - Name: e2e-runas-client%E2E_RUN_SUFFIX%
         Test: C
-        Groups: [ e2e-test-runas-group%E2E_RUN_SUFFIX% ]
+        Groups: [ e2e-runas-group%E2E_RUN_SUFFIX% ]
   - Name: Grant OIDC Client access to project        
     AccessAssignments:
       - EntityType: group
-        EntityName: e2e-test-runas-group%E2E_RUN_SUFFIX%
+        EntityName: e2e-runas-group%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         ResourceType: project
-        ResourceName: e2e-test-runas-project%E2E_RUN_SUFFIX%
+        ResourceName: e2e-runas-project%E2E_RUN_SUFFIX%
         Roles: [ view-projects, create-scan, view-scans, view-project-params, update-project-params, view-results, update-result, update-result-severity, update-result-states, view-queries, manage-reports ]
         Test: C

@@ -6,7 +6,7 @@ Tenant: your_tenant_here
 Tests:
   - Name: App Update
     Applications:
-      - Name: e2e-test-app-app%E2E_RUN_SUFFIX%
+      - Name: e2e-app-app%E2E_RUN_SUFFIX%
         Criticality: 3
         Tags: 
           - Key: tag1

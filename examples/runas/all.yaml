@@ -12,6 +12,6 @@ Tests:
       #ClientID: %E2E_CLIENT2_ID%
       #ClientSecret: %E2E_CLIENT2_SECRET%
       #APIKey: %E2E_CLIENT2_APIKEY%
-      OIDCClient: e2e-test-runas-client%E2E_RUN_SUFFIX%
+      OIDCClient: e2e-runas-client%E2E_RUN_SUFFIX%
   - Name: Delete
     File: delete.yaml

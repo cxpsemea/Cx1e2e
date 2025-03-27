@@ -6,10 +6,10 @@ Tenant: your_tenant_here
 Tests:
   - Name: create temporary project and scan
     Projects:
-      - Name: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Name: e2e-result-project%E2E_RUN_SUFFIX%
         Test: C
     Scans:
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.8.zip
         Branch: zip
         Preset: All
@@ -22,13 +22,13 @@ Tests:
           FailTestSet: true
   - Name: check that the expected results are found
     Results:
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         SASTFilter:
           Query: Stored_XSS
           Severity: HIGH
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 # there will be three reflected_xss finding
         Type: SAST
         Version: 
@@ -38,7 +38,7 @@ Tests:
           Query: Reflected_XSS
           Severity: HIGH
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 # there will be three reflected_xss_all_clients finding
         Type: SAST
         Version: 
@@ -48,33 +48,42 @@ Tests:
           Query: Reflected_XSS_All_Clients
           Severity: HIGH
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # there will be a Parameter_Tampering finding with this result hash
+      - Project: e2e-result-project%E2E_RUN_SUFFIX% # there will be a Parameter_Tampering finding with this result hash
         Type: SAST
         Version: 
           CxOne: 
-            Below: "3.30.45"
+            Below: "3.31.0"
         SASTFilter:
           ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # there will be a Parameter_Tampering finding with this result hash
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%  # there will be a Parameter_Tampering finding with this result hash
         Type: SAST
         Version: 
           CxOne: 
-            AtLeast: "3.30.45"
+            AtLeast: "3.31.0"
+            Below: "3.33.14"
         SASTFilter:
           ResultHash: "j2c7AUjdAQeBoe5LY7Kvap1kyT4="
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX%  # there is also a use_of_hardcoded_password vulnerability
+      - Project: e2e-result-project%E2E_RUN_SUFFIX% # there will be a Parameter_Tampering finding with this result hash
+        Type: SAST
+        Version: 
+          CxOne: 
+            AtLeast: "3.33.14"
+        SASTFilter:
+          ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
+        Test: R
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%  # there is also a use_of_hardcoded_password vulnerability
         Type: SAST
         SASTFilter:
           SimilarityID: 715549665
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # there is also a Healthcheck Instruction Missing finding from KICS
+      - Project: e2e-result-project%E2E_RUN_SUFFIX% # there is also a Healthcheck Instruction Missing finding from KICS
         Type: KICS
         KICSFilter:
           SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
         Test: R
-      - Project: e2e-test-result-project%E2E_RUN_SUFFIX% # there is also a SCA finding for Maven-org.apache.tomcat.embed:tomcat-embed-core CVE-2021-43980
+      - Project: e2e-result-project%E2E_RUN_SUFFIX% # there is also a SCA finding for Maven-org.apache.tomcat.embed:tomcat-embed-core CVE-2021-43980
         Type: SCA
         SCAFilter:
           SimilarityID: "CVE-2021-43980"

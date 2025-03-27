@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
-	"github.com/sirupsen/logrus"
 )
 
 func (t *GroupCRUD) Validate(CRUD string) error {
@@ -21,7 +20,7 @@ func (t *GroupCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *GroupCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+func (t *GroupCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
 	return nil
 }
 
@@ -74,7 +73,7 @@ func updateGroup(cx1client *Cx1ClientGo.Cx1Client, t *GroupCRUD) error {
 	return nil
 }
 
-func (t *GroupCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *GroupCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	var err error
 	var test_Group Cx1ClientGo.Group
 	if t.Parent == "" && (t.Path == "" || t.Path == ("/"+t.Name)) && (t.ParentPath == "" || t.ParentPath == "/") {
@@ -120,7 +119,7 @@ func (t *GroupCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.L
 	return nil
 }
 
-func (t *GroupCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *GroupCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	var err error
 	var test_Group Cx1ClientGo.Group
 
@@ -167,7 +166,7 @@ func (t *GroupCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Log
 	return nil
 }
 
-func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	if t.Group == nil {
 		if t.CRUDTest.IsType(OP_READ) { // already tried to read
 			return fmt.Errorf("read operation failed")
@@ -186,7 +185,7 @@ func (t *GroupCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.L
 	return nil
 }
 
-func (t *GroupCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *GroupCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	if t.Group == nil {
 		if t.CRUDTest.IsType(OP_READ) { // already tried to read
 			return fmt.Errorf("read operation failed")

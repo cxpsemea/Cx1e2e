@@ -14,6 +14,7 @@ type TestSet struct {
 		ClientSecret string `yaml:"ClientSecret"`
 		OIDCClient   string `yaml:"OIDCClient"`
 	} `yaml:"RunAs"`
+
 	AccessAssignments []types.AccessAssignmentCRUD `yaml:"AccessAssignments"`
 	Applications      []types.ApplicationCRUD      `yaml:"Applications"`
 	Clients           []types.OIDCClientCRUD       `yaml:"OIDCClients"`
@@ -28,9 +29,12 @@ type TestSet struct {
 	Roles             []types.RoleCRUD             `yaml:"Roles"`
 	Scans             []types.ScanCRUD             `yaml:"Scans"`
 	Users             []types.UserCRUD             `yaml:"Users"`
+	Wait              uint                         `yaml:"Wait"`
+	Thread            uint                         `yaml:"Thread"`
+	ActiveThread      int                          `yaml:"-"`
 
-	SubTests []TestSet `yaml:"-"`
-	Wait     uint      `yaml:"Wait"`
+	SubTests   []TestSet `yaml:"-"`
+	TestSource string    `yaml:"-"`
 }
 
 type TestConfig struct {
@@ -41,6 +45,7 @@ type TestConfig struct {
 	NoTLS              bool                    `yaml:"NoTLS"`
 	Tests              []TestSet               `yaml:"Tests"`
 	LogLevel           string                  `yaml:"LogLevel"`
+	MultiThreadable    bool                    `yaml:"MultiThreadable"`
 	ConfigPath         string                  `yaml:"-"`
 	AuthType           string                  `yaml:"-"`
 	AuthUser           string                  `yaml:"-"`
@@ -48,6 +53,7 @@ type TestConfig struct {
 	ReportName         string                  `yaml:"ReportName"`
 	Engines            types.EnabledEngines    `yaml:"-"`
 	EnvironmentVersion Cx1ClientGo.VersionInfo `yaml:"-"`
+	TestCount          int                     `yaml:"-"`
 }
 
 type TestResult struct {
@@ -57,7 +63,7 @@ type TestResult struct {
 	Module     string
 	Duration   float64
 	Name       string
-	Id         int
+	Id         uint
 	TestObject string
 	Reason     []string
 	TestSource string
@@ -69,6 +75,7 @@ type Counter struct {
 	Fail uint
 	Skip uint
 }
+
 type CounterSet struct {
 	Create Counter
 	Read   Counter
@@ -80,8 +87,11 @@ type ReportSettings struct {
 	Target    string                  `json:"TestTarget"`
 	Auth      string                  `json:"Authentication"`
 	Config    string                  `json:"TestConfig"`
-	Timestamp string                  `json:"ExecutionTime"`
+	StartTime string                  `json:"StartTime"`
+	EndTime   string                  `json:"EndTime"`
+	Duration  string                  `json:"Duration"`
 	E2ESuffix string                  `json:"E2ESuffix"`
+	Threads   int                     `json:"Threads"`
 	Version   Cx1ClientGo.VersionInfo `json:"TargetVersions"`
 }
 
@@ -112,6 +122,7 @@ type ReportTestDetails struct {
 	Duration    float64
 	ResultType  int `json:"-"`
 	Result      string
+	ID          uint
 	FailOutputs []string `json:"FailOutputs,omitempty"`
 }
 

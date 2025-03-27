@@ -6,12 +6,12 @@ Tenant: your_tenant_here
 Tests:
   - Name: Create Project 1 and run a scan
     Projects:
-      - Name: e2e-test-report-project-1%E2E_RUN_SUFFIX%
+      - Name: e2e-report-project-1%E2E_RUN_SUFFIX%
         Test: C
         Tags: 
           - Test: tag1
     Scans:
-      - Project: e2e-test-report-project-1%E2E_RUN_SUFFIX%
+      - Project: e2e-report-project-1%E2E_RUN_SUFFIX%
         Repository: https://github.com/michaelkubiaczyk/ssba
         Branch: master
         Preset: All
@@ -22,12 +22,12 @@ Tests:
         Test: C
   - Name: Create Project 2 and run a scan
     Projects:
-      - Name: e2e-test-report-project-2%E2E_RUN_SUFFIX%
+      - Name: e2e-report-project-2%E2E_RUN_SUFFIX%
         Test: C
         Tags: 
           - Test: tag1
     Scans:
-      - Project: e2e-test-report-project-2%E2E_RUN_SUFFIX%
+      - Project: e2e-report-project-2%E2E_RUN_SUFFIX%
         Repository: https://github.com/michaelkubiaczyk/simple-java-command-injection
         Branch: main
         Preset: All

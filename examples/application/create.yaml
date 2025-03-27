@@ -6,15 +6,15 @@ Tenant: your_tenant_here
 Tests:
   - Name: App Create
     Groups:
-      - Name: e2e-test-app-group%E2E_RUN_SUFFIX%
+      - Name: e2e-app-group%E2E_RUN_SUFFIX%
         Test: C
     Projects:
-      - Name: e2e-test-app-project%E2E_RUN_SUFFIX%
-        Groups: [ e2e-test-app-group%E2E_RUN_SUFFIX% ]
+      - Name: e2e-app-project%E2E_RUN_SUFFIX%
+        Groups: [ e2e-app-group%E2E_RUN_SUFFIX% ]
         Test: C
     Applications:
-      - Name: e2e-test-app-app%E2E_RUN_SUFFIX%
+      - Name: e2e-app-app%E2E_RUN_SUFFIX%
         Rules: 
           - Type: "project.name.in"
-            Value: "e2e-test-app-project%E2E_RUN_SUFFIX%"
+            Value: "e2e-app-project%E2E_RUN_SUFFIX%"
         Test: C

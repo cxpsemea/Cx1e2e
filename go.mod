@@ -3,7 +3,7 @@ module github.com/cxpsemea/cx1e2e
 go 1.22.0
 
 require (
-	github.com/cxpsemea/Cx1ClientGo v0.0.108
+	github.com/cxpsemea/Cx1ClientGo v0.1.0
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/sirupsen/logrus v1.9.3
 	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816
@@ -18,5 +18,3 @@ require (
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
 )
-
-//replace github.com/cxpsemea/Cx1ClientGo v0.0.107 => c:/work/code/cx1clientgo

@@ -5,21 +5,21 @@ Tenant: your_tenant_here
 #LogLevel: TRACE
 Tests:
   - Name: Delete imported project, app, query
-    Projects:
-      - Name: e2e-test-import-project
-        Test: D
-    Applications:
-      - Name: e2e-test-import-app
-        Test: D
     Queries:
       - Name: Cheeseburgers
         Group: JavaScript_Low_Visibility
         Language: JavaScript
         Scope: 
           Tenant: true
-          Project: e2e-test-import-project
+          Project: e2e-import-project
         Test: D
         DeleteAuditSession: true
+    Projects:
+      - Name: e2e-import-project
+        Test: D
+    Applications:
+      - Name: e2e-import-app
+        Test: D
   - Name: Delete imported preset
     Presets:
       - Name: e2e-test-import-preset

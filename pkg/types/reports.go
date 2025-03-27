@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/cxpsemea/Cx1ClientGo"
-	"github.com/sirupsen/logrus"
 )
 
 func (t *ReportCRUD) Validate(CRUD string) error {
@@ -46,7 +45,7 @@ func (t *ReportCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ReportCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+func (t *ReportCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
 	if CRUD != OP_CREATE {
 		return fmt.Errorf("can only create a report")
 	}
@@ -57,7 +56,7 @@ func (t *ReportCRUD) GetModule() string {
 	return MOD_REPORT
 }
 
-func (t *ReportCRUD) createScanReport(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger) (string, error) {
+func (t *ReportCRUD) createScanReport(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) (string, error) {
 	project, err := cx1client.GetProjectByName(t.ProjectNames[0])
 	if err != nil {
 		return "", err
@@ -122,7 +121,7 @@ func (t *ReportCRUD) createProjectReport(cx1client *Cx1ClientGo.Cx1Client) (stri
 	return cx1client.RequestNewReportByProjectIDv2(projectIDs, t.Scanners, []string{}, []string{}, t.Format)
 }
 
-func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	var reportID string
 	var err error
 
@@ -155,14 +154,14 @@ func (t *ReportCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.
 	return nil
 }
 
-func (t *ReportCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *ReportCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }
 
-func (t *ReportCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *ReportCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }
 
-func (t *ReportCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *ReportCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	return fmt.Errorf("not supported")
 }

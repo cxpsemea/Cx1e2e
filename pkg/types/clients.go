@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/cxpsemea/Cx1ClientGo"
-	"github.com/sirupsen/logrus"
 )
 
 func (t *OIDCClientCRUD) Validate(CRUD string) error {
@@ -14,7 +13,7 @@ func (t *OIDCClientCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *OIDCClientCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+func (t *OIDCClientCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
 	return nil
 }
 
@@ -111,7 +110,7 @@ func updateOIDCClientFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *OIDCClientC
 	return nil
 }
 
-func (t *OIDCClientCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *OIDCClientCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	client, err := cx1client.CreateClient(t.Name, []string{}, 30)
 	if err != nil {
 		return err
@@ -131,7 +130,7 @@ func (t *OIDCClientCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *log
 	return nil
 }
 
-func (t *OIDCClientCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *OIDCClientCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	test_OIDCClient, err := cx1client.GetClientByName(t.Name)
 	if err != nil {
 		return err
@@ -147,7 +146,7 @@ func (t *OIDCClientCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logru
 	return nil
 }
 
-func (t *OIDCClientCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *OIDCClientCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	if t.Client == nil {
 		if t.CRUDTest.IsType(OP_READ) { // already tried to read
 			return fmt.Errorf("read operation failed")
@@ -166,7 +165,7 @@ func (t *OIDCClientCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *log
 	return cx1client.UpdateUser(t.User)
 }
 
-func (t *OIDCClientCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *OIDCClientCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	if t.Client == nil {
 		if t.CRUDTest.IsType(OP_READ) { // already tried to read
 			return fmt.Errorf("read operation failed")

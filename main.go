@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -38,23 +39,19 @@ func run() uint {
 	Engines := flag.String("engines", "sast,sca,kics,apisec", "Run tests only for these engines")
 	Proxy := flag.String("proxy", "", "Optional: Proxy to use when connecting to CheckmarxOne")
 	NoTLS := flag.Bool("notls", false, "Optional: Disable TLS verification")
+	Threads := flag.Int("threads", 1, "How many concurrent tests to run")
+	LogFile := flag.String("logfile", "", "Optional: output log to file")
 
 	flag.Parse()
 
-	if *testConfig == "" || (*APIKey == "" && (*ClientID == "" || *ClientSecret == "")) {
-		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration. For help run: cx1e2e.exe -h")
-		logger.Fatalf("Test configuration yaml or authentication (API Key or client+secret) not provided.")
-	}
-
-	var err error
-	Config, err := process.LoadConfig(logger, *testConfig)
-	if err != nil {
-		logger.Fatalf("Failed to load configuration file %v: %s", *testConfig, err)
-		return 0
-	}
-
-	if *LogLevel == "" {
-		*LogLevel = Config.LogLevel
+	if *LogFile != "" {
+		file, err := os.OpenFile(*LogFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		if err != nil {
+			logger.Errorf("Failed to create log file '%v': %v", *LogFile, err)
+		}
+		mw := io.MultiWriter(os.Stdout, file)
+		logger.SetOutput(mw)
+		logger.Infof("Logging to file %v", *LogFile)
 	}
 
 	switch strings.ToUpper(*LogLevel) {
@@ -78,6 +75,46 @@ func run() uint {
 		logger.SetLevel(logrus.FatalLevel)
 	default:
 		logger.Info("Log level set to default: INFO")
+	}
+
+	if *testConfig == "" || (*APIKey == "" && (*ClientID == "" || *ClientSecret == "")) {
+		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration. For help run: cx1e2e.exe -h")
+		logger.Fatalf("Test configuration yaml or authentication (API Key or client+secret) not provided.")
+	}
+
+	var err error
+	Config, err := process.LoadConfig(logger, *testConfig)
+	if err != nil {
+		logger.Fatalf("Failed to load configuration file %v: %s", *testConfig, err)
+		return 0
+	}
+
+	if *LogLevel == "" && Config.LogLevel != "" {
+		switch strings.ToUpper(*LogLevel) {
+		case "TRACE":
+			logger.Info("Setting log level to TRACE")
+			logger.SetLevel(logrus.TraceLevel)
+		case "DEBUG":
+			logger.Info("Setting log level to DEBUG")
+			logger.SetLevel(logrus.DebugLevel)
+		case "INFO":
+			logger.Info("Setting log level to INFO")
+			logger.SetLevel(logrus.InfoLevel)
+		case "WARNING":
+			logger.Info("Setting log level to WARNING")
+			logger.SetLevel(logrus.WarnLevel)
+		case "ERROR":
+			logger.Info("Setting log level to ERROR")
+			logger.SetLevel(logrus.ErrorLevel)
+		case "FATAL":
+			logger.Info("Setting log level to FATAL")
+			logger.SetLevel(logrus.FatalLevel)
+		}
+		*LogLevel = Config.LogLevel
+	}
+
+	if *Threads <= 0 {
+		*Threads = 1
 	}
 
 	if *ReportName != "" {
@@ -138,11 +175,34 @@ func run() uint {
 	}
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
-	currentUser, err := cx1client.GetCurrentUser()
-	if err != nil {
-		logger.Fatalf("Failed to get cx1 client current user: %s", err)
+	if cx1client.IsUser {
+		currentUser, err := cx1client.GetCurrentUser()
+		if err != nil {
+			logger.Errorf("Failed to get cx1 client current user: %s", err)
+		} else {
+			Config.AuthUser = currentUser.String()
+		}
+	} else {
+		currentClient, err := cx1client.GetCurrentClient()
+		if err != nil {
+			logger.Errorf("Failed to get cx1 client current OIDC client: %s", err)
+		} else {
+			Config.AuthUser = currentClient.String()
+		}
 	}
-	Config.AuthUser = currentUser.String()
+
+	// both currentUser/currentClient checks may fail in which case:
+	if Config.AuthUser == "" {
+		claim := cx1client.GetClaims()
+		if claim.Username != "" {
+			Config.AuthUser = fmt.Sprintf("%v (%v)", claim.Username, claim.Email)
+		} else if claim.ClientID != "" {
+			Config.AuthUser = fmt.Sprintf("%v (%v)", claim.ClientID, claim.Email)
+		} else {
+			Config.AuthUser = claim.Email
+		}
+	}
+
 	Config.EnvironmentVersion, err = cx1client.GetVersion()
 	if err != nil {
 		logger.Errorf("Failed to get version info: %s", err)
@@ -163,5 +223,7 @@ func run() uint {
 		}
 	}
 
-	return process.RunTests(cx1client, logger, &Config)
+	Config.InitTestIDs()
+
+	return process.RunTests(cx1client, logger, &Config, *Threads)
 }

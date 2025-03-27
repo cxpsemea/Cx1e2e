@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
-	"github.com/sirupsen/logrus"
 )
 
 func (t *RoleCRUD) Validate(CRUD string) error {
@@ -16,7 +15,7 @@ func (t *RoleCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *RoleCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, CRUD string, Engines *EnabledEngines) error {
+func (t *RoleCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
 	return nil
 }
 
@@ -24,7 +23,7 @@ func (t *RoleCRUD) GetModule() string {
 	return MOD_ROLE
 }
 
-func getRole(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, roleID string) (*Cx1ClientGo.Role, error) {
+func getRole(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, roleID string) (*Cx1ClientGo.Role, error) {
 	role, err := cx1client.GetRoleByID(roleID)
 	if err != nil {
 		return nil, err
@@ -40,7 +39,7 @@ func getRole(cx1client *Cx1ClientGo.Cx1Client, _ *logrus.Logger, roleID string) 
 	return &role, nil
 }
 
-func updateRole(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *RoleCRUD) error {
+func updateRole(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *RoleCRUD) error {
 	role, err := getRole(cx1client, logger, t.Role.RoleID)
 	if err != nil {
 		return err
@@ -95,7 +94,7 @@ func updateRole(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, t *Role
 	return nil
 }
 
-func (t *RoleCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *RoleCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	test_Role, err := cx1client.CreateAppRole(t.Name, "cx1e2e test")
 	if err != nil {
 		return err
@@ -104,7 +103,7 @@ func (t *RoleCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return updateRole(cx1client, logger, t)
 }
 
-func (t *RoleCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *RoleCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	test_Role, err := cx1client.GetRoleByName(t.Name)
 	if err != nil {
 		return err
@@ -142,7 +141,7 @@ func (t *RoleCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logg
 	return nil
 }
 
-func (t *RoleCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *RoleCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	if t.Role == nil {
 		if t.CRUDTest.IsType(OP_READ) { // already tried to read
 			return fmt.Errorf("read operation failed")
@@ -156,7 +155,7 @@ func (t *RoleCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Lo
 	return updateRole(cx1client, logger, t)
 }
 
-func (t *RoleCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *logrus.Logger, Engines *EnabledEngines) error {
+func (t *RoleCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	if t.Role == nil {
 		if t.CRUDTest.IsType(OP_READ) { // already tried to read
 			return fmt.Errorf("read operation failed")

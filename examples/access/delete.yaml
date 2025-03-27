@@ -6,18 +6,18 @@ Tenant: your_tenant_here
 Tests:
   - Name: App, Project, and Group Delete
     Projects:
-      - Name: e2e-test-access-project%E2E_RUN_SUFFIX%
+      - Name: e2e-access-project%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: D
     Applications:
-      - Name: e2e-test-access-app%E2E_RUN_SUFFIX%
+      - Name: e2e-access-app%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: D
     Users:
-      - Name: e2e-test-access-user%E2E_RUN_SUFFIX%
+      - Name: e2e-access-user%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: D
     Groups:
-      - Name: e2e-test-access-group%E2E_RUN_SUFFIX%
+      - Name: e2e-access-group%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: D

@@ -27,6 +27,10 @@ func (c CRUDTest) GetSource() string {
 	return c.TestSource
 }
 
+func (c CRUDTest) GetID() uint {
+	return c.TestID
+}
+
 func (c CRUDTest) GetFlags() []string {
 	return c.Flags
 }
@@ -55,4 +59,8 @@ func (c CRUDTest) IsForced() bool {
 
 func (c CRUDTest) OnFail() FailAction {
 	return c.OnFailAction
+}
+
+func (c CRUDTest) GetCurrentThread() int {
+	return c.ActiveThread
 }
