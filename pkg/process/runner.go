@@ -319,8 +319,8 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD,
 			result.Name = testName
 			result.Duration = 0
 			result.Reason = []string{failSet.Error()}
-			result.Result = TST_SKIP
-			logger.Warnf("Test for %v %v will be skipped. Reason: %s", CRUD, test.String(), failSet)
+			result.Result = TST_FAIL
+			logger.Warnf("Test for %v %v prerequisite failed: %s", CRUD, test.String(), failSet)
 		} else {
 			err := test.IsSupported(cx1client, logger, CRUD, &Config.Engines)
 

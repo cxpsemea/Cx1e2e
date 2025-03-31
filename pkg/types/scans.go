@@ -31,6 +31,33 @@ func (t *ScanCRUD) GetModule() string {
 	return MOD_SCAN
 }
 
+func (t *ScanCRUD) GetLogs(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) error {
+	loggedEngines := []string{"sast", "kics"}
+
+	if t.Logs {
+		if t.Scan == nil {
+			return fmt.Errorf("unable to generate logs: no scan found")
+		}
+
+		for _, eng := range loggedEngines {
+			for _, run_engines := range t.Scan.StatusDetails {
+				if strings.EqualFold(run_engines.Name, eng) {
+
+					bytes, err := cx1client.GetScanLogsByID(t.Scan.ScanID, eng)
+					if err != nil {
+						return fmt.Errorf("failed to get %v scan logs: %s", eng, err)
+					}
+					if len(bytes) == 0 {
+						return fmt.Errorf("%v scan logs had no data", eng)
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	project, err := cx1client.GetProjectByName(t.Project)
 	if err != nil {
@@ -168,7 +195,7 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		}
 	}
 
-	return nil
+	return t.GetLogs(cx1client, logger)
 }
 
 func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
@@ -213,7 +240,28 @@ func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogge
 
 		t.Scan = &scans[0]
 	}
-	return nil
+
+	if t.Summary {
+		summary, err := cx1client.GetScanSummariesByID([]string{t.Scan.ScanID})
+		if err != nil {
+			return fmt.Errorf("failed to get scan summary: %s", err)
+		}
+		if len(summary) == 0 {
+			return fmt.Errorf("scan summary had no data")
+		}
+	}
+
+	if t.AggregateSummary {
+		summary, err := cx1client.GetScanSASTAggregateSummaryByID(t.Scan.ScanID)
+		if err != nil {
+			return fmt.Errorf("failed to get scan aggregate summary: %s", err)
+		}
+		if len(summary) == 0 {
+			return fmt.Errorf("scan aggregate summary had no data")
+		}
+	}
+
+	return t.GetLogs(cx1client, logger)
 }
 
 func (t *ScanCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {

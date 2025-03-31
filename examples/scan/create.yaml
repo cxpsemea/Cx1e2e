@@ -23,3 +23,10 @@ Tests:
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Status: Completed #Failed, Partial
         Test: C
+  - Name: Get scan summaries
+    Scans:
+      - Project: e2e-scan-project%E2E_RUN_SUFFIX%
+        Branch: master
+        Summary: true
+        AggregateSummary: true
+        Test: R

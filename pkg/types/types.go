@@ -500,21 +500,24 @@ func (o RoleCRUD) String() string {
 }
 
 type ScanCRUD struct {
-	CRUDTest      `yaml:",inline"`
-	Project       string      `yaml:"Project"`
-	Branch        string      `yaml:"Branch"`
-	Repository    string      `yaml:"Repository"`
-	Engine        string      `yaml:"Engine"`
-	Incremental   bool        `yaml:"Incremental"`
-	WaitForEnd    bool        `yaml:"WaitForEnd"`
-	ZipFile       string      `yaml:"ZipFile"`
-	Preset        string      `yaml:"Preset"`
-	Status        string      `yaml:"Status"`
-	Timeout       int         `yaml:"Timeout"`
-	Cancel        bool        `yaml:"CancelOnTimeout"`
-	Filter        *ScanFilter `yaml:"Filter"`
-	Cx1ScanFilter *Cx1ClientGo.ScanFilter
-	Scan          *Cx1ClientGo.Scan
+	CRUDTest         `yaml:",inline"`
+	Project          string      `yaml:"Project"`
+	Branch           string      `yaml:"Branch"`
+	Repository       string      `yaml:"Repository"`
+	Engine           string      `yaml:"Engine"`
+	Incremental      bool        `yaml:"Incremental"`
+	WaitForEnd       bool        `yaml:"WaitForEnd"`
+	ZipFile          string      `yaml:"ZipFile"`
+	Preset           string      `yaml:"Preset"`
+	Status           string      `yaml:"Status"`
+	Timeout          int         `yaml:"Timeout"`
+	Cancel           bool        `yaml:"CancelOnTimeout"`
+	Summary          bool        `yaml:"Summary"`
+	AggregateSummary bool        `yaml:"AggregateSummary"`
+	Logs             bool        `yaml:"GetLogs"`
+	Filter           *ScanFilter `yaml:"Filter"`
+	Cx1ScanFilter    *Cx1ClientGo.ScanFilter
+	Scan             *Cx1ClientGo.Scan
 }
 
 func (o ScanCRUD) String() string {
