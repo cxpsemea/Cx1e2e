@@ -8,16 +8,24 @@ Tests:
     Projects:
       - Name: e2e-scan-project%E2E_RUN_SUFFIX%
         Test: U
+        Preset: Base Preset
         Tags: 
           - Key: tag2
             Value: tag2
+  - Name: Run a new scan expecting less findings
     Scans:
       - Project: e2e-scan-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
-        Preset: All
         Engine: sast # sca kics apisec
         WaitForEnd: true
         CancelOnTimeout: true
+        GetLogs: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
+    Results:
+      - Project: e2e-scan-project%E2E_RUN_SUFFIX%
+        Type: SAST
+        SASTFilter:
+          Query: Reflected_XSS_All_Clients
+        FailTest: true

@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/cxpsemea/cx1e2e/pkg/types"
-	"github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -495,11 +494,7 @@ func (o TestConfig) GetTestCount() int {
 }
 
 func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error) {
-	leveledlogger := types.NewLeveledLogger(logger)
-	cx1retryclient := retryablehttp.NewClient()
-	cx1retryclient.RetryMax = 3
-	cx1retryclient.Logger = leveledlogger
-	httpClient := cx1retryclient.StandardClient()
+	httpClient := &http.Client{}
 
 	if o.ProxyURL != "" {
 		proxyURL, err := url.Parse(o.ProxyURL)
