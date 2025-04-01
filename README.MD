@@ -6,32 +6,35 @@ Usage:
     cx1e2e.exe --config tests.yaml --apikey APIKey
     cx1e2e.exe --config tests.yaml --cx1 Cx1URL --iam IAMURL --tenant Tenant --client ClientID --secret ClientSecret
 ```
+
 Multiple example test.yaml definitions can be found in the examples directory. To quickly try out an example configuration, you can do the following:
 
 ``` 
     git clone https://github.com/cxpsemea/cx1e2e
     cd cx1e2e
-    go run . --config examples/all.yaml --apikey <API Key> --cx1 <Cx1 URL> --iam <IAM Url> --tenant <Your Tenant>
+    go run . --config examples/all.yaml --apikey <API Key> --threads 4
 ```
+
+Run cx1e2e.exe -h for a list of command-line arguments.
 
 # Test configuration
 ## Credentials
 
-The beginning of each test.yaml file will include standard items needed to connect to a Cx1 environment:
+The IAMURL, Cx1URL, and Tenant parameters can be supplied through the command-line. This is the preferred approach when dealing with multiple Cx1 environments (eg: INT, DEV, Stage, Prod) so that the tests can be re-used easily. The proxy URL is optional and can be used for debugging.
+
+The beginning of each test.yaml file can include standard items needed to connect to a Cx1 environment:
 ```
     IAMURL: https://eu.iam.checkmarx.net
     Cx1URL: https://eu.ast.checkmarx.net
     Tenant: your_tenant_here
     #ProxyURL: http://127.0.0.1:8080
 ```
-The IAMURL, Cx1URL, and Tenant parameters can be supplied through the command-line. This is the preferred approach when dealing with multiple Cx1 environments (eg: INT, DEV, Stage, Prod) so that the tests can be re-used easily. The proxy URL is optional and can be used for debugging.
-
 
 ## Test Sets
 
 Tests are defined in Test Sets, each of which is named and can have a number of objects targeted for testing. Test Sets are executed in order, and tests within a set are executed such that all [C]reate operations are run first, then [R]ead, then [U]pdate, then [D]elete. Tests can have an optional Wait which causes the tests to pause for the specified number of seconds before continuing - this is to avoid getting blocked for spamming the API.
 
-Refer to the existing examples in the examples folder for a list of tests and their configuration options. The examples have been split according to the object being tested (eg: groups, roles) and each test set is structure with a "create.yaml" to create various objects, "update.yaml" to update the created objects, and findally a OP_DELETE, .yaml" to remove the created objects. Running the "all.yaml" test sets should clean up after itself so that there are no left-over artifacts.
+Refer to the existing examples in the examples folder for a list of tests and their configuration options. The examples have been split according to the object being tested (eg: groups, roles) and each test set is structure with a "create.yaml" to create various objects, "update.yaml" to update the created objects, and finally a "delete.yaml" to remove the created objects. Running the "all.yaml" test sets should clean up after itself so that there are no left-over artifacts.
 
 ### Simple test set example
 
@@ -90,22 +93,25 @@ This will load the indicated special/tests.yaml file and add the tests to the en
 ## Coverage
 
 Currently this testing tool covers the following objects:
+- Access Management (CRUD)
 - Applications (CRUD)
 - Groups (CRUD)
+- OIDC Clients (CRUD)
 - Presets (CRUD)
 - Projects (CRUD)
 - Queries (CRUD)
+- Reports (C)
 - Results (U)
 - Roles (CRUD)
 - Scans (CRD)
 - Users (CRUD)
 
-There are some limitations in this tool due to unimplemented functionality in the testing tool or in the underlying Cx1ClientGo library. Feel free to contribute (PR against dev branch please) or raise Issues.
+There are some limitations in this tool due to unimplemented functionality in the testing tool or in the underlying Cx1ClientGo library. Feel free to contribute or raise Issues.
 
 ## Example output
 
 ```
-[INFO][2023-03-14 16:42:18.758] Created Cx1 client cx_tam_appsec_canary_michael_kubiaczyk on https://deu.ast.checkmarx.net
+[INFO][2023-03-14 16:42:18.758] Created Cx1 client my_tenant on https://deu.ast.checkmarx.net
 [INFO][2023-03-14 16:42:18.892] PASS [0.133s]: Create Group Test 'simple test Create all' #1 (e2e-test-group1)
 [INFO][2023-03-14 16:42:19.298] PASS [0.406s]: Create Application Test 'simple test Create all' #1 (e2e-test-app1)
 [INFO][2023-03-14 16:42:19.406] PASS [0.108s]: Create Project Test 'simple test Create all' #1 (e2e-test-project1)

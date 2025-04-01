@@ -99,15 +99,15 @@ func (s *ReportSummary) AddTest(t *TestResult) {
 func (r *Report) AddTest(t *TestResult) {
 	r.Summary.AddTest(t)
 
-	testtype := "Test"
+	/*testtype := "Test"
 	if t.FailTest {
 		testtype = "Negative-Test"
-	}
+	}*/
 
 	details := ReportTestDetails{
 		Name:       t.Name,
 		Source:     t.TestSource,
-		Test:       fmt.Sprintf("%v %v %v: %v", t.CRUD, t.Module, testtype, t.TestObject),
+		Test:       fmt.Sprintf("%v %v: %v", t.CRUD, t.Module, t.TestObject),
 		Duration:   t.Duration,
 		ResultType: t.Result,
 	}
@@ -130,11 +130,11 @@ func (r *Report) AddTest(t *TestResult) {
 func (d ReportTestDetails) String() string {
 	switch d.ResultType {
 	case TST_FAIL:
-		return fmt.Sprintf("FAIL %v - %v (%v)", d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
+		return fmt.Sprintf("FAIL %v - %v [%v]", d.Test, strings.Join(d.FailOutputs, ", "), d.Source)
 	case TST_SKIP:
-		return fmt.Sprintf("SKIP %v - %v (%v)", d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
+		return fmt.Sprintf("SKIP %v - %v [%v]", d.Test, strings.Join(d.FailOutputs, ", "), d.Source)
 	}
-	return fmt.Sprintf("PASS %v - %v", d.Name, d.Test)
+	return fmt.Sprintf("PASS %v [%v]", d.Test, d.Source)
 }
 
 func OutputSummaryConsole(reportData *Report, logger *logrus.Logger) {
