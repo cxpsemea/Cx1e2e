@@ -77,4 +77,4 @@ Tests:
     Wait: 10
   - Name: Analytics
     File: analytics/all.yaml
-    Thread: 14
+    Thread: 15
