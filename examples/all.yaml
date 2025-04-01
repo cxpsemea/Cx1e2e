@@ -75,3 +75,6 @@ Tests:
     Thread: 14
   - Name: 10 second pause
     Wait: 10
+  - Name: Analytics
+    File: analytics/all.yaml
+    Thread: 14
