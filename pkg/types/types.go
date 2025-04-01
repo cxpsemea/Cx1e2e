@@ -10,6 +10,7 @@ import (
 
 const (
 	MOD_ACCESS      = "AccessAssignment"
+	MOD_ANALYTICS   = "Analytics"
 	MOD_APPLICATION = "Application"
 	MOD_FLAG        = "Flag"
 	MOD_GROUP       = "Group"
@@ -120,6 +121,30 @@ type AccessAssignmentCRUD struct {
 
 func (o AccessAssignmentCRUD) String() string {
 	return fmt.Sprintf("%v %v to access %v %v with roles: %v", o.EntityType, o.EntityName, o.ResourceType, o.ResourceName, strings.Join(o.Roles, ", "))
+}
+
+type AnalyticsFilter struct {
+	Projects []string `yaml:"Projects"`
+}
+
+func (f AnalyticsFilter) String() string {
+	filters := []string{}
+
+	if f.Projects != nil {
+		filters = append(filters, fmt.Sprintf("Projects: %v", strings.Join(f.Projects, ", ")))
+	}
+
+	return strings.Join(filters, ", ")
+}
+
+type AnalyticsCRUD struct {
+	CRUDTest `yaml:",inline"`
+	KPI      string          `yaml:"KPI"`
+	Filter   AnalyticsFilter `yaml:"Filter"`
+}
+
+func (o AnalyticsCRUD) String() string {
+	return fmt.Sprintf("Analytics KPI %v matching filter: %v", o.KPI, o.Filter.String())
 }
 
 type ApplicationCRUD struct {

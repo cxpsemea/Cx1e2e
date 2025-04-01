@@ -16,6 +16,7 @@ type TestSet struct {
 	} `yaml:"RunAs"`
 
 	AccessAssignments []types.AccessAssignmentCRUD `yaml:"AccessAssignments"`
+	Analytics         []types.AnalyticsCRUD        `yaml:"Analytics"`
 	Applications      []types.ApplicationCRUD      `yaml:"Applications"`
 	Clients           []types.OIDCClientCRUD       `yaml:"OIDCClients"`
 	Flags             []types.FlagCRUD             `yaml:"Flags"`
@@ -100,6 +101,7 @@ type ReportSummary struct {
 	Area  struct {
 		Access      CounterSet
 		Application CounterSet
+		Analytics   CounterSet
 		Client      CounterSet
 		Flag        CounterSet
 		Group       CounterSet

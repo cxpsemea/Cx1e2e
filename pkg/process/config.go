@@ -147,6 +147,9 @@ func (t TestSet) PrintTests() {
 	for id2 := range t.AccessAssignments {
 		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.AccessAssignments[id2].TestID, t.AccessAssignments[id2].String())
 	}
+	for id2 := range t.Analytics {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Analytics[id2].TestID, t.Analytics[id2].String())
+	}
 	for id2 := range t.Applications {
 		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Applications[id2].TestID, t.Applications[id2].String())
 	}
@@ -195,6 +198,10 @@ func (t *TestSet) Init() {
 	for id2 := range t.AccessAssignments {
 		t.AccessAssignments[id2].TestSource = t.TestSource
 		t.AccessAssignments[id2].Thread = t.Thread
+	}
+	for id2 := range t.Analytics {
+		t.Analytics[id2].TestSource = t.TestSource
+		t.Analytics[id2].Thread = t.Thread
 	}
 	for id2 := range t.Applications {
 		t.Applications[id2].TestSource = t.TestSource
@@ -266,6 +273,12 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 			if t.Flags[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
 				t.Flags[id].TestID = LastTestID
+			}
+		}
+		for id := range t.Analytics {
+			if t.Analytics[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Analytics[id].TestID = LastTestID
 			}
 		}
 		for id := range t.Imports {
@@ -414,6 +427,9 @@ func (t *TestSet) SetActiveThread(thread int) {
 	t.ActiveThread = thread
 	for id2 := range t.AccessAssignments {
 		t.AccessAssignments[id2].ActiveThread = thread
+	}
+	for id2 := range t.Analytics {
+		t.Analytics[id2].ActiveThread = thread
 	}
 	for id2 := range t.Applications {
 		t.Applications[id2].ActiveThread = thread

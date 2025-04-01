@@ -1,0 +1,27 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Read Analytics dashboard data
+    Analytics:
+      - KPI: vulnerabilitiesBySeverityTotal
+        Test: R
+      - KPI: vulnerabilitiesByStateTotal
+        Test: R
+      - KPI: vulnerabilitiesByStatusTotal
+        Test: R
+      - KPI: vulnerabilitiesBySeverityAndStateTotal
+        Test: R
+      - KPI: vulnerabilitiesBySeverityOvertime
+        Test: R
+      - KPI: fixedVulnerabilitiesBySeverityOvertime
+        Test: R
+      - KPI: meanTimeToResolution
+        Test: R
+      - KPI: mostCommonVulnerabilities
+        Test: R
+      - KPI: mostAgingVulnerabilities
+        Test: R
+    
