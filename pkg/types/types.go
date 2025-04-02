@@ -383,24 +383,16 @@ type ResultCRUD struct {
 }
 
 func (o *ResultCRUD) String() string {
+	var filter string
 	switch o.Type {
 	case "SAST":
-		filter := o.SASTFilter.String()
-		if filter != "" {
-			return fmt.Sprintf("%v: SAST finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
-		}
+		filter = " matching filter: " + o.SASTFilter.String()
 	case "SCA":
-		filter := o.SCAFilter.String()
-		if filter != "" {
-			return fmt.Sprintf("%v: SCA finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
-		}
+		filter = " matching filter: " + o.SCAFilter.String()
 	case "KICS":
-		filter := o.KICSFilter.String()
-		if filter != "" {
-			return fmt.Sprintf("%v: KICS finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
-		}
+		filter = " matching filter: " + o.KICSFilter.String()
 	}
-	return fmt.Sprintf("%v: finding #%d", o.ProjectName, o.Number)
+	return fmt.Sprintf("%v: %v finding #%d%v", o.ProjectName, o.Type, o.Number, filter)
 }
 
 type ResultFilter struct {
