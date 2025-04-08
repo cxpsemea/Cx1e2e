@@ -12,6 +12,17 @@ Tests:
       - Name: e2e-import-project
         Application: e2e-import-app
         Test: R
+  - Name: Update the imported preset to add Client DOM XSS
+    Presets:
+      - Name: e2e-test-import-preset
+        Test: U   
+        Queries:
+          - Language: JavaScript
+            Group: "JavaScript_High_Risk"
+            Name: "Client_DOM_XSS"    
+          - Language: JavaScript
+            Group: "JavaScript_Low_Visibility"
+            Name: "Cheeseburgers" 
   - Name: Run scan and check for results
     Scans:
       - Project: e2e-import-project
@@ -49,5 +60,8 @@ Tests:
         SASTFilter:
           ResultHash: "WDtURAy4uxGeQg3eH2lZAmp17r0="
         Test: R
-
-        
+      - Project: e2e-import-project
+        Type: SAST
+        SASTFilter:
+          ResultHash: "2+rmPTpWkuXRtbNgDNQM5CSKo3I="
+        Test: R

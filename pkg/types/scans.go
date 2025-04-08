@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
@@ -64,7 +63,9 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		return err
 	}
 
-	scanConfigs := []Cx1ClientGo.ScanConfiguration{}
+	scanConfigSet := Cx1ClientGo.ScanConfigurationSet{}
+
+	//scanConfigs := []Cx1ClientGo.ScanConfiguration{}
 
 	scanDelay := cx1client.GetClientVars().ScanPollingDelaySeconds
 
@@ -77,20 +78,28 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		} else if !Engines.IsEnabled(e) && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this was disabled for this test execution", e)
 		} else {
+
 			engines = append(engines, e)
-			scanConfig := Cx1ClientGo.ScanConfiguration{}
-			scanConfig.ScanType = e
+			//scanConfig := Cx1ClientGo.ScanConfiguration{}
+			//scanConfig.ScanType = e
+			scanConfigSet.AddConfig(e, "", "")
 			if e == "sast" {
-				scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
+				scanConfigSet.AddConfig("sast", "incremental", "false")
+				if t.Preset != "" {
+					scanConfigSet.AddConfig("sast", "presetName", t.Preset)
+				}
+				scanConfigSet.AddConfig("sast", "fast scan mode", "false")
+				scanConfigSet.AddConfig("sast", "light queries", "false")
+				//scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
 			}
-			scanConfigs = append(scanConfigs, scanConfig)
+			//scanConfigs = append(scanConfigs, scanConfig)
 		}
 	}
 
 	var test_Scan Cx1ClientGo.Scan
 
 	if t.ZipFile == "" {
-		test_Scan, err = cx1client.ScanProjectGitByID(project.ProjectID, t.Repository, t.Branch, scanConfigs, map[string]string{})
+		test_Scan, err = cx1client.ScanProjectGitByID(project.ProjectID, t.Repository, t.Branch, scanConfigSet.Configurations, map[string]string{})
 		if err != nil {
 			return err
 		}
@@ -105,7 +114,7 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 			return err
 		}
 
-		test_Scan, err = cx1client.ScanProjectZipByID(project.ProjectID, uploadURL, t.Branch, scanConfigs, map[string]string{})
+		test_Scan, err = cx1client.ScanProjectZipByID(project.ProjectID, uploadURL, t.Branch, scanConfigSet.Configurations, map[string]string{})
 		if err != nil {
 			return err
 		}
