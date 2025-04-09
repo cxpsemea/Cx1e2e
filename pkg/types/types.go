@@ -12,6 +12,7 @@ const (
 	MOD_ACCESS      = "AccessAssignment"
 	MOD_ANALYTICS   = "Analytics"
 	MOD_APPLICATION = "Application"
+	MOD_BRANCH      = "Branch"
 	MOD_FLAG        = "Flag"
 	MOD_GROUP       = "Group"
 	MOD_IMPORT      = "Import"
@@ -168,6 +169,17 @@ type ApplicationRule struct {
 
 func (o ApplicationRule) String() string {
 	return fmt.Sprintf("%v: %v", o.Type, o.Value)
+}
+
+type BranchCRUD struct {
+	CRUDTest      `yaml:",inline"`
+	Project       string `yaml:"Project"`
+	Branch        string `yaml:"Branch"`
+	ExpectedCount uint64 `yaml:"ExpectedCount"`
+}
+
+func (o BranchCRUD) String() string {
+	return fmt.Sprintf("Project '%v' branch '%v'", o.Project, o.Branch)
 }
 
 type CxQLCRUD struct {

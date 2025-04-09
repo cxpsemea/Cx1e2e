@@ -236,6 +236,12 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogg
 				TestSetFailError = err
 			}
 		}
+		for id := range t.Branches {
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Branches[id]), &results, Config, TestSetFailError)
+			if err != nil && TestSetFailError == nil {
+				TestSetFailError = err
+			}
+		}
 		for id := range t.Results {
 			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Results[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {

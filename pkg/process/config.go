@@ -139,6 +139,10 @@ func (c TestConfig) PrintTests() {
 	}
 }
 
+type AllCRUD interface {
+	types.AccessAssignmentCRUD | types.AnalyticsCRUD
+}
+
 func (t TestSet) PrintTests() {
 	for id := range t.SubTests {
 		t.SubTests[id].PrintTests()
@@ -152,6 +156,9 @@ func (t TestSet) PrintTests() {
 	}
 	for id2 := range t.Applications {
 		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Applications[id2].TestID, t.Applications[id2].String())
+	}
+	for id2 := range t.Branches {
+		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Branches[id2].TestID, t.Branches[id2].String())
 	}
 	for id2 := range t.Clients {
 		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Clients[id2].TestID, t.Clients[id2].String())
@@ -179,9 +186,6 @@ func (t TestSet) PrintTests() {
 	}
 	for id2 := range t.Results {
 		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Results[id2].TestID, t.Results[id2].String())
-		if t.Results[id2].Number == 0 {
-			t.Results[id2].Number = 1
-		}
 	}
 	for id2 := range t.Roles {
 		fmt.Printf("[%d] [%d] %v\n", t.Thread, t.Roles[id2].TestID, t.Roles[id2].String())
@@ -206,6 +210,10 @@ func (t *TestSet) Init() {
 	for id2 := range t.Applications {
 		t.Applications[id2].TestSource = t.TestSource
 		t.Applications[id2].Thread = t.Thread
+	}
+	for id2 := range t.Branches {
+		t.Branches[id2].TestSource = t.TestSource
+		t.Branches[id2].Thread = t.Thread
 	}
 	for id2 := range t.Clients {
 		t.Clients[id2].TestSource = t.TestSource
@@ -347,6 +355,12 @@ func (t *TestSet) InitTestIDsCRUD(CRUD string) {
 				t.Scans[id].TestID = LastTestID
 			}
 		}
+		for id := range t.Branches {
+			if t.Branches[id].CRUDTest.IsType(CRUD) {
+				LastTestID++
+				t.Branches[id].TestID = LastTestID
+			}
+		}
 		for id := range t.Results {
 			if t.Results[id].CRUDTest.IsType(CRUD) {
 				LastTestID++
@@ -434,6 +448,9 @@ func (t *TestSet) SetActiveThread(thread int) {
 	for id2 := range t.Applications {
 		t.Applications[id2].ActiveThread = thread
 	}
+	for id2 := range t.Branches {
+		t.Branches[id2].ActiveThread = thread
+	}
 	for id2 := range t.Clients {
 		t.Clients[id2].ActiveThread = thread
 	}
@@ -481,6 +498,7 @@ func (t TestSet) GetTestCount() int {
 
 	count += len(t.AccessAssignments)
 	count += len(t.Applications)
+	count += len(t.Branches)
 	count += len(t.Clients)
 	count += len(t.Flags)
 	count += len(t.Groups)
