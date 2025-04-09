@@ -10,7 +10,9 @@ import (
 
 const (
 	MOD_ACCESS      = "AccessAssignment"
+	MOD_ANALYTICS   = "Analytics"
 	MOD_APPLICATION = "Application"
+	MOD_BRANCH      = "Branch"
 	MOD_FLAG        = "Flag"
 	MOD_GROUP       = "Group"
 	MOD_IMPORT      = "Import"
@@ -122,6 +124,30 @@ func (o AccessAssignmentCRUD) String() string {
 	return fmt.Sprintf("%v %v to access %v %v with roles: %v", o.EntityType, o.EntityName, o.ResourceType, o.ResourceName, strings.Join(o.Roles, ", "))
 }
 
+type AnalyticsFilter struct {
+	Projects []string `yaml:"Projects"`
+}
+
+func (f AnalyticsFilter) String() string {
+	filters := []string{}
+
+	if f.Projects != nil {
+		filters = append(filters, fmt.Sprintf("Projects: %v", strings.Join(f.Projects, ", ")))
+	}
+
+	return strings.Join(filters, ", ")
+}
+
+type AnalyticsCRUD struct {
+	CRUDTest `yaml:",inline"`
+	KPI      string          `yaml:"KPI"`
+	Filter   AnalyticsFilter `yaml:"Filter"`
+}
+
+func (o AnalyticsCRUD) String() string {
+	return fmt.Sprintf("Analytics KPI %v matching filter: %v", o.KPI, o.Filter.String())
+}
+
 type ApplicationCRUD struct {
 	CRUDTest    `yaml:",inline"`
 	Name        string            `yaml:"Name"`
@@ -143,6 +169,17 @@ type ApplicationRule struct {
 
 func (o ApplicationRule) String() string {
 	return fmt.Sprintf("%v: %v", o.Type, o.Value)
+}
+
+type BranchCRUD struct {
+	CRUDTest      `yaml:",inline"`
+	Project       string `yaml:"Project"`
+	Branch        string `yaml:"Branch"`
+	ExpectedCount uint64 `yaml:"ExpectedCount"`
+}
+
+func (o BranchCRUD) String() string {
+	return fmt.Sprintf("Project '%v' branch '%v'", o.Project, o.Branch)
 }
 
 type CxQLCRUD struct {
@@ -358,24 +395,16 @@ type ResultCRUD struct {
 }
 
 func (o *ResultCRUD) String() string {
+	var filter string
 	switch o.Type {
 	case "SAST":
-		filter := o.SASTFilter.String()
-		if filter != "" {
-			return fmt.Sprintf("%v: SAST finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
-		}
+		filter = " matching filter: " + o.SASTFilter.String()
 	case "SCA":
-		filter := o.SCAFilter.String()
-		if filter != "" {
-			return fmt.Sprintf("%v: SCA finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
-		}
+		filter = " matching filter: " + o.SCAFilter.String()
 	case "KICS":
-		filter := o.KICSFilter.String()
-		if filter != "" {
-			return fmt.Sprintf("%v: KICS finding #%d matching filter: %v", o.ProjectName, o.Number, filter)
-		}
+		filter = " matching filter: " + o.KICSFilter.String()
 	}
-	return fmt.Sprintf("%v: finding #%d", o.ProjectName, o.Number)
+	return fmt.Sprintf("%v: %v finding #%d%v", o.ProjectName, o.Type, o.Number, filter)
 }
 
 type ResultFilter struct {

@@ -1,20 +1,19 @@
 module github.com/cxpsemea/cx1e2e
 
-go 1.22.0
+go 1.23.0
 
 require (
-	github.com/cxpsemea/Cx1ClientGo v0.1.1-0.20250328060306-d58295408ede
+	github.com/cxpsemea/Cx1ClientGo v0.1.1-0.20250408093420-5ee025b5ab2d
 	github.com/sirupsen/logrus v1.9.3
 	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816
 	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
-	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
-	golang.org/x/oauth2 v0.24.0 // indirect
-	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 )
 
-//replace github.com/cxpsemea/Cx1ClientGo v0.1.0 => c:/work/code/cx1clientgo
+//replace github.com/cxpsemea/Cx1ClientGo v0.1.1-0.20250402062917-2a35cc27d6b8 => c:/work/code/cx1clientgo

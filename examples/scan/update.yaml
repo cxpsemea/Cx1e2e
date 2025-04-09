@@ -29,3 +29,16 @@ Tests:
         SASTFilter:
           Query: Reflected_XSS_All_Clients
         FailTest: true
+  - Name: Delete the previous master-branch scan
+    Scans:
+      - Project: e2e-scan-project%E2E_RUN_SUFFIX%
+        Filter:
+          Branches: [ master ]
+        Test: D
+  - Name: Check that the master branch has disappeared after deleting the scan
+    Branches:
+      - Project: e2e-scan-project%E2E_RUN_SUFFIX%
+        Branch: master
+        ExpectedCount: 1
+        FailTest: true
+        Test: R

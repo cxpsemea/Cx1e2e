@@ -60,6 +60,10 @@ func (s *ReportSummary) AddTest(t *TestResult) {
 		s.Area.Access.AddTest(t)
 	case types.MOD_APPLICATION:
 		s.Area.Application.AddTest(t)
+	case types.MOD_ANALYTICS:
+		s.Area.Analytics.AddTest(t)
+	case types.MOD_BRANCH:
+		s.Area.Branch.AddTest(t)
 	case types.MOD_CLIENT:
 		s.Area.Client.AddTest(t)
 	case types.MOD_FLAG:
@@ -99,15 +103,15 @@ func (s *ReportSummary) AddTest(t *TestResult) {
 func (r *Report) AddTest(t *TestResult) {
 	r.Summary.AddTest(t)
 
-	testtype := "Test"
+	/*testtype := "Test"
 	if t.FailTest {
 		testtype = "Negative-Test"
-	}
+	}*/
 
 	details := ReportTestDetails{
 		Name:       t.Name,
 		Source:     t.TestSource,
-		Test:       fmt.Sprintf("%v %v %v: %v", t.CRUD, t.Module, testtype, t.TestObject),
+		Test:       fmt.Sprintf("%v %v: %v", t.CRUD, t.Module, t.TestObject),
 		Duration:   t.Duration,
 		ResultType: t.Result,
 	}
@@ -130,11 +134,11 @@ func (r *Report) AddTest(t *TestResult) {
 func (d ReportTestDetails) String() string {
 	switch d.ResultType {
 	case TST_FAIL:
-		return fmt.Sprintf("FAIL %v - %v (%v)", d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
+		return fmt.Sprintf("FAIL x %v - %v: %v", d.Source, d.Test, strings.Join(d.FailOutputs, ", "))
 	case TST_SKIP:
-		return fmt.Sprintf("SKIP %v - %v (%v)", d.Name, d.Test, strings.Join(d.FailOutputs, ", "))
+		return fmt.Sprintf("SKIP - %v - %v: %v", d.Source, d.Test, strings.Join(d.FailOutputs, ", "))
 	}
-	return fmt.Sprintf("PASS %v - %v", d.Name, d.Test)
+	return fmt.Sprintf("PASS   %v - %v", d.Source, d.Test)
 }
 
 func OutputSummaryConsole(reportData *Report, logger *logrus.Logger) {
@@ -170,11 +174,10 @@ func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig)
 	}
 
 	report.WriteString("<h2>Settings</h2>")
-	report.WriteString(fmt.Sprintf("Running end to end tests against %v<br>", reportData.Settings.Target))
-	report.WriteString(fmt.Sprintf("Target versions are: %v", reportData.Settings.Version.String()))
+	report.WriteString(fmt.Sprintf("Running end to end tests against %v (version: %v)<br>", reportData.Settings.Target, reportData.Settings.Version.String()))
 	report.WriteString(fmt.Sprintf("Authenticated using %v<br>", reportData.Settings.Auth))
 	report.WriteString(fmt.Sprintf("Test set defined in configuration %v<br>", reportData.Settings.Config))
-	report.WriteString(fmt.Sprintf("Test Execution: from %v until %v (total: %v).<br>", reportData.Settings.StartTime, reportData.Settings.EndTime, reportData.Settings.Duration))
+	report.WriteString(fmt.Sprintf("Test Execution %v took, from %v until %v.<br>", reportData.Settings.Duration, reportData.Settings.StartTime, reportData.Settings.EndTime))
 	report.WriteString(fmt.Sprintf("Tests executed using %d threads.<br>", reportData.Settings.Threads))
 	if os.Getenv("E2E_RUN_SUFFIX") == "" {
 		report.WriteString(fmt.Sprintf("Default object name suffix %%E2E_RUN_SUFFIX%% environment variable is blank. Objects created by cx1e2e will use default names.<br>"))
@@ -190,6 +193,8 @@ func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig)
 	report.WriteString("<tr><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th><th>Pass</th><th>Fail</th><th>Skip</th></tr>\n")
 	writeCounterSet(report, "Access Assignment", &reportData.Summary.Area.Access)
 	writeCounterSet(report, "Application", &reportData.Summary.Area.Application)
+	writeCounterSet(report, "Analytics", &reportData.Summary.Area.Analytics)
+	writeCounterSet(report, "Branches", &reportData.Summary.Area.Branch)
 	writeCounterSet(report, "Client", &reportData.Summary.Area.Client)
 	writeCounterSet(report, "Flag", &reportData.Summary.Area.Flag)
 	writeCounterSet(report, "Group", &reportData.Summary.Area.Group)

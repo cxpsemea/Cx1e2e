@@ -164,6 +164,12 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogg
 				TestSetFailError = err
 			}
 		}
+		for id := range t.Analytics {
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Analytics[id]), &results, Config, TestSetFailError)
+			if err != nil && TestSetFailError == nil {
+				TestSetFailError = err
+			}
+		}
 		for id := range t.Imports {
 			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Imports[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
@@ -226,6 +232,12 @@ func (t *TestSet) Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogg
 		}
 		for id := range t.Scans {
 			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Scans[id]), &results, Config, TestSetFailError)
+			if err != nil && TestSetFailError == nil {
+				TestSetFailError = err
+			}
+		}
+		for id := range t.Branches {
+			err := RunTest(cx1client, logger, CRUD, t.Name, &(t.Branches[id]), &results, Config, TestSetFailError)
 			if err != nil && TestSetFailError == nil {
 				TestSetFailError = err
 			}
