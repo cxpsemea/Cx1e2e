@@ -4,15 +4,14 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create temporary application, project, new preset, run a scan
-    Projects:
-      - Name: e2e-queryo-project%E2E_RUN_SUFFIX%
-        Test: C
+  - Name: create temporary application
     Applications:
       - Name: e2e-queryo-app%E2E_RUN_SUFFIX%
-        Rules: 
-          - Type: "project.name.in"
-            Value: "e2e-queryo-project%E2E_RUN_SUFFIX%"
+        Test: C
+  - Name: create temporary project, new preset, run a scan
+    Projects:
+      - Name: e2e-queryo-project%E2E_RUN_SUFFIX%
+        Application: e2e-queryo-app%E2E_RUN_SUFFIX%
         Test: C
     Presets:
       - Name: e2e-queryo-preset%E2E_RUN_SUFFIX%
