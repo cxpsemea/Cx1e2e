@@ -27,7 +27,7 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 }
 
 func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
-	if !cx1client.IsEngineAllowed(t.Type) {
+	if _, ok := cx1client.IsEngineAllowed(t.Type); !ok {
 		return fmt.Errorf("test attempts to access results from engine %v but this is not supported in the license and will be skipped", t.Type)
 	}
 	if !Engines.IsEnabled(t.Type) {

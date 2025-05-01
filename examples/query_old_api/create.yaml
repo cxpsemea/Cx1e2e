@@ -11,11 +11,12 @@ Tests:
   - Name: create temporary project, new preset, run a scan
     Projects:
       - Name: e2e-queryo-project%E2E_RUN_SUFFIX%
-        Application: e2e-queryo-app%E2E_RUN_SUFFIX%
+        Applications: [ e2e-queryo-app%E2E_RUN_SUFFIX% ]
         Test: C
     Presets:
       - Name: e2e-queryo-preset%E2E_RUN_SUFFIX%
-        Description: This is my test preset        
+        Description: This is my test preset       
+        Engine: "sast" 
         Queries:
           - Language: JavaScript
             Group: JavaScript_High_Risk

@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 )
@@ -14,7 +15,7 @@ func (t *ApplicationCRUD) Validate(CRUD string) error {
 	return nil
 }
 
-func (t *ApplicationCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
+func (t *ApplicationCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
 	return nil
 }
 
@@ -23,18 +24,61 @@ func (t *ApplicationCRUD) GetModule() string {
 }
 
 func updateApplication(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, t *ApplicationCRUD) error {
-	t.Application.Tags = make(map[string]string)
-	for _, tag := range t.Tags {
-		t.Application.Tags[tag.Key] = tag.Value
+	updated := false
+
+	if len(t.Tags) > 0 {
+		t.Application.Tags = make(map[string]string)
+		for _, tag := range t.Tags {
+			t.Application.Tags[tag.Key] = tag.Value
+		}
+		updated = true
 	}
 
-	// remove all rules
-	t.Application.Rules = make([]Cx1ClientGo.ApplicationRule, 0)
-	for _, r := range t.Rules {
-		t.Application.AddRule(r.Type, r.Value)
+	if len(t.Rules) > 0 {
+		// remove all rules
+		t.Application.Rules = make([]Cx1ClientGo.ApplicationRule, 0)
+		for _, r := range t.Rules {
+			t.Application.AddRule(r.Type, r.Value)
+		}
+
+		err := cx1client.UpdateApplication(t.Application)
+		if err != nil {
+			return err
+		}
+		updatedApplication, err := cx1client.GetApplicationByID(t.Application.ApplicationID)
+		if err != nil {
+			return err
+		}
+		t.Application = &updatedApplication
+		updated = false
 	}
 
-	return cx1client.UpdateApplication(t.Application)
+	if len(t.Projects) > 0 {
+		missing := false
+		for _, p := range t.Projects {
+			project, err := cx1client.GetProjectByName(p)
+			if err != nil {
+				return err
+			}
+			if !slices.Contains(t.Application.ProjectIds, project.ProjectID) {
+				missing = true
+				t.Application.ProjectIds = append(t.Application.ProjectIds, project.ProjectID)
+			}
+		}
+		if missing {
+			err := cx1client.UpdateApplication(t.Application)
+			if err != nil {
+				return err
+			}
+			updated = true
+		}
+	}
+
+	if !updated {
+		return cx1client.UpdateApplication(t.Application)
+	}
+
+	return nil
 }
 
 func (t *ApplicationCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {

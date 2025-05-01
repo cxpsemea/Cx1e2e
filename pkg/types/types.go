@@ -155,6 +155,7 @@ type ApplicationCRUD struct {
 	Criticality uint              `yaml:"Criticality"`
 	Rules       []ApplicationRule `yaml:"Rules"`
 	Tags        []Tag             `yaml:"Tags"`
+	Projects    []string          `yaml:"Projects"`
 	Application *Cx1ClientGo.Application
 }
 
@@ -197,7 +198,7 @@ type CxQLCRUD struct {
 	OldAPI        bool      `yaml:"OldAPI"`
 	ScopeID       string
 	ScopeStr      string
-	Query         *Cx1ClientGo.Query
+	Query         *Cx1ClientGo.SASTQuery
 	LastScan      *Cx1ClientGo.Scan
 }
 
@@ -298,13 +299,14 @@ func (o OIDCClientCRUD) String() string {
 type PresetCRUD struct {
 	CRUDTest    `yaml:",inline"`
 	Name        string `yaml:"Name"`
+	Engine      string `yaml:"Engine"`
 	Description string `yaml:"Description"`
-	Queries     []struct {
+	SASTQueries []struct {
 		QueryID       uint64 `yaml:"ID"`
 		QueryLanguage string `yaml:"Language"`
 		QueryGroup    string `yaml:"Group"`
 		QueryName     string `yaml:"Name"`
-	} `yaml:"Queries"`
+	} `yaml:"SASTQueries"`
 	Preset *Cx1ClientGo.Preset
 }
 
@@ -313,13 +315,14 @@ func (o PresetCRUD) String() string {
 }
 
 type ProjectCRUD struct {
-	CRUDTest    `yaml:",inline"`
-	Name        string   `yaml:"Name"`
-	Groups      []string `yaml:"Groups"`
-	Application string   `yaml:"Application"`
-	Tags        []Tag    `yaml:"Tags"`
-	Preset      string   `yaml:"Preset"`
-	Project     *Cx1ClientGo.Project
+	CRUDTest     `yaml:",inline"`
+	Name         string   `yaml:"Name"`
+	Groups       []string `yaml:"Groups"`
+	Application  string   `yaml:"Application"`
+	Applications []string `yaml:"Applications"`
+	Tags         []Tag    `yaml:"Tags"`
+	Preset       string   `yaml:"Preset"`
+	Project      *Cx1ClientGo.Project
 }
 
 func (o ProjectCRUD) String() string {
@@ -332,7 +335,7 @@ type QueryCRUD struct {
 	QueryLanguage string `yaml:"Language"`
 	QueryGroup    string `yaml:"Group"`
 	QueryName     string `yaml:"Name"`
-	Query         *Cx1ClientGo.Query
+	Query         *Cx1ClientGo.SASTQuery
 }
 
 func (o QueryCRUD) String() string {

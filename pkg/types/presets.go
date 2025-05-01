@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cxpsemea/Cx1ClientGo"
 )
@@ -9,6 +10,14 @@ import (
 func (t *PresetCRUD) Validate(CRUD string) error {
 	if t.Name == "" {
 		return fmt.Errorf("preset name is missing")
+	}
+	if t.Engine == "" {
+		return fmt.Errorf("engine name is missing")
+	}
+
+	t.Engine = strings.ToLower(t.Engine)
+	if t.Engine != "sast" && t.Engine != "iac" {
+		return fmt.Errorf("engine must be 'sast' or 'iac'")
 	}
 
 	return nil
@@ -22,31 +31,31 @@ func (t *PresetCRUD) GetModule() string {
 	return MOD_PRESET
 }
 
-func getQueryIDs(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, t *PresetCRUD) ([]uint64, error) {
-	query_ids := make([]uint64, len(t.Queries))
-
+func getQueryCollection(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, t *PresetCRUD) (Cx1ClientGo.SASTQueryCollection, error) {
+	collection := Cx1ClientGo.SASTQueryCollection{}
 	qc, err := cx1client.GetQueries()
 	if err != nil {
-		return query_ids, fmt.Errorf("failed to retrieve query collection: %s", err)
+		return collection, fmt.Errorf("failed to retrieve query collection: %s", err)
 	}
 
-	for id, q := range t.Queries {
+	for _, q := range t.SASTQueries {
 		qq := qc.GetQueryByName(q.QueryLanguage, q.QueryGroup, q.QueryName)
 		if qq == nil {
-			return query_ids, fmt.Errorf("failed to find query %v -> %v -> %v", q.QueryLanguage, q.QueryGroup, q.QueryName)
+			return collection, fmt.Errorf("failed to find query %v -> %v -> %v", q.QueryLanguage, q.QueryGroup, q.QueryName)
 		}
-		query_ids[id] = qq.QueryID
+
+		collection.AddQuery(*qq)
 	}
-	return query_ids, nil
+	return collection, nil
 }
 
 func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
-	query_ids, err := getQueryIDs(cx1client, logger, t)
+	query_ids, err := getQueryCollection(cx1client, logger, t)
 	if err != nil {
 		return err
 	}
 
-	test_Preset, err := cx1client.CreatePreset(t.Name, t.Description, query_ids)
+	test_Preset, err := cx1client.CreateSASTPreset(t.Name, t.Description, query_ids)
 	if err != nil {
 		return err
 	}
@@ -55,7 +64,7 @@ func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadL
 }
 
 func (t *PresetCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
-	test_Preset, err := cx1client.GetPresetByName(t.Name)
+	test_Preset, err := cx1client.GetPresetByName(t.Engine, t.Name)
 	if err != nil {
 		return err
 	}
@@ -74,13 +83,14 @@ func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadL
 		}
 	}
 
-	query_ids, err := getQueryIDs(cx1client, logger, t)
+	queryCollection, err := getQueryCollection(cx1client, logger, t)
 	if err != nil {
 		return err
 	}
 
-	t.Preset.QueryIDs = query_ids
-	err = cx1client.UpdatePreset(t.Preset)
+	//t.Preset.QueryIDs = query_ids
+	t.Preset.UpdateQueries(queryCollection)
+	err = cx1client.UpdateSASTPreset(*t.Preset)
 	return err
 }
 
@@ -95,7 +105,7 @@ func (t *PresetCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadL
 		}
 	}
 
-	err := cx1client.DeletePreset(t.Preset)
+	err := cx1client.DeletePreset(*t.Preset)
 	if err != nil {
 		return err
 	}

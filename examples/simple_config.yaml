@@ -20,6 +20,7 @@ Tests:
         Test: C
     Presets:
       - Name: e2e-preset1
+        Engine: "sast"
         Description: This is my test preset        
         Queries:
           - Language: Java
@@ -65,6 +66,7 @@ Tests:
         Test: D
     Presets:
       - Name: e2e-preset1
+        Engine: "sast"
         Test: D
     Roles: 
       - Name: e2e-role1

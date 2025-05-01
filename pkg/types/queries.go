@@ -142,7 +142,7 @@ func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, strin
 	return scope, scopeStr, nil
 }
 
-func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) (*Cx1ClientGo.Query, *Cx1ClientGo.Query) {
+func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) (*Cx1ClientGo.SASTQuery, *Cx1ClientGo.SASTQuery) {
 	scope, scopeStr, err := getQueryScope(cx1client, t)
 	if err != nil {
 		logger.Errorf("Error with query scope: %v", err)
@@ -164,7 +164,7 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRU
 		return nil, nil
 	}
 
-	var paQueries []Cx1ClientGo.Query
+	var paQueries Cx1ClientGo.SASTQueryCollection
 
 	// sometimes this fails with a 404 for some reason
 	// quick-and-dirty retry
@@ -173,7 +173,7 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRU
 	retryDelay := 30
 	for i := 0; i < maxRetry; i++ {
 		if t.Scope.Corp {
-			paQueries, err = cx1client.GetAuditQueriesByLevelID(auditSession, scopeStr, scope)
+			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, scopeStr, scope)
 		} else {
 			paQueries, err = cx1client.GetAuditQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID)
 		}
@@ -197,9 +197,9 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRU
 		logger.Errorf("Failed to get %v-level queries for project %v: %s", scopeStr, t.ScopeID, err)
 	}
 
-	queries.AddQueries(&paQueries)
+	queries.AddCollection(&paQueries)
 
-	var query *Cx1ClientGo.Query
+	var query *Cx1ClientGo.SASTQuery
 	logger.Debugf("Trying to find query on scope %v: %v -> %v -> %v", scopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	query = queries.GetQueryByLevelAndName(scopeStr, scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 
@@ -214,7 +214,7 @@ func getQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRU
 	return query, baseQuery
 }
 
-func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) (*Cx1ClientGo.Query, *Cx1ClientGo.Query) {
+func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) (*Cx1ClientGo.SASTQuery, *Cx1ClientGo.SASTQuery) {
 	scope, scopeStr, err := getQueryScope(cx1client, t)
 	if err != nil {
 		logger.Errorf("Error with query scope: %v", err)
@@ -237,7 +237,7 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		return nil, nil
 	}
 
-	var newQuery, baseQuery *Cx1ClientGo.Query
+	var newQuery, baseQuery *Cx1ClientGo.SASTQuery
 
 	auditQuery, err := cx1client.FindQueryByName_v310(queries, scopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
 
@@ -273,7 +273,9 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 
 	t.Query.IsExecutable = t.IsExecutable
 
-	_, err = cx1client.UpdateQuery(auditSession, t.Query)
+	new_query, _, err := cx1client.UpdateSASTQuery(auditSession, *t.Query)
+	t.Query = &new_query
+
 	return err
 }
 
@@ -317,7 +319,7 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD)
 		return nil
 	}
 
-	var baseQuery *Cx1ClientGo.Query
+	var baseQuery *Cx1ClientGo.SASTQuery
 	t.Query, baseQuery = getQuery(cx1client, logger, t)
 
 	if t.Query != nil {
@@ -357,7 +359,7 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD)
 			return fmt.Errorf("query %v does not exist and must be created at Tenant level before it can be created on a Project or Application level", t.String())
 		}
 
-		newQuery := Cx1ClientGo.Query{
+		newQuery := Cx1ClientGo.SASTQuery{
 			Level:        cx1client.QueryTypeTenant(),
 			LevelID:      cx1client.QueryTypeTenant(),
 			Source:       t.Source,
@@ -382,7 +384,7 @@ func create(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD)
 
 func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) error {
 	var err error
-	var baseQuery *Cx1ClientGo.Query
+	var baseQuery *Cx1ClientGo.SASTQuery
 
 	t.Query, baseQuery = getQuery_old(cx1client, logger, t)
 
@@ -433,7 +435,7 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 }
 
 func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
-	var query *Cx1ClientGo.Query
+	var query *Cx1ClientGo.SASTQuery
 	if t.OldAPI {
 		query, _ = getQuery_old(cx1client, logger, t)
 	} else {

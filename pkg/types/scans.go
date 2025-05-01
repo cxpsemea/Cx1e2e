@@ -73,7 +73,7 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 	engines := make([]string, 0)
 
 	for _, e := range requested_engines {
-		if !cx1client.IsEngineAllowed(e) && !t.IsForced() {
+		if _, ok := cx1client.IsEngineAllowed(e); !ok && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this is not supported in the license and will be skipped", e)
 		} else if !Engines.IsEnabled(e) && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this was disabled for this test execution", e)

@@ -20,7 +20,8 @@ Tests:
         Test: C
     Presets:
       - Name: e2e-preset1
-        Description: This is my test preset        
+        Description: This is my test preset
+        Engine: "sast"
         Queries:
           - Language: Java
             Group: "Java_High_Risk"
@@ -75,7 +76,8 @@ Tests:
         Test: U
     Presets:
       - Name: e2e-preset1
-        Description: This is my test preset        
+        Description: This is my test preset    
+        Engine: "sast"    
         Queries:
           - Language: Java
             Group: "Java_High_Risk"
@@ -84,7 +86,7 @@ Tests:
     Projects:
       - Name: e2e-project1
         Groups: [ e2e-group1 ]
-        Application: e2e-app1
+        Applications: [ e2e-app1 ]
         Tags: 
           - Test: tag1
             Test2: tag2
@@ -124,6 +126,7 @@ Tests:
         Test: D
     Presets:
       - Name: e2e-preset1
+        Engine: "sast"
         Test: D
     Projects:
       - Name: e2e-project1

@@ -10,12 +10,13 @@ Tests:
         Test: R
     Projects:
       - Name: e2e-import-project
-        Application: e2e-import-app
+        Applications: [ e2e-import-app ]
         Test: R
   - Name: Update the imported preset to add Client DOM XSS
     Presets:
       - Name: e2e-test-import-preset
         Test: U   
+        Engine: "sast"
         Queries:
           - Language: JavaScript
             Group: "JavaScript_High_Risk"

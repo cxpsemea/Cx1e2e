@@ -21,7 +21,8 @@ Tests:
           FailTestSet: true
     Presets:
       - Name: e2e-query-preset%E2E_RUN_SUFFIX%
-        Description: This is my test preset        
+        Description: This is my test preset      
+        Engine: "sast"  
         Queries:
           - Language: JavaScript
             Group: JavaScript_High_Risk

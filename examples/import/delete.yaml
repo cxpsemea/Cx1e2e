@@ -23,4 +23,5 @@ Tests:
   - Name: Delete imported preset
     Presets:
       - Name: e2e-test-import-preset
+        Engine: "sast"
         Test: D
