@@ -1,0 +1,48 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: create temporary application
+    Applications:
+      - Name: e2e-iacquery-app%E2E_RUN_SUFFIX%
+        Test: C
+  - Name: create temporary project, new preset, run a scan
+    Projects:
+      - Name: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Applications: [ e2e-iacquery-app%E2E_RUN_SUFFIX% ]
+        Test: C
+    Presets:
+      - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        Description: This is my test preset    
+        Engine: iac
+        IACQueries:
+          - Platform: Dockerfile
+            Group: common
+            Name: "Healthcheck Instruction Missing"
+        Test: C
+    Scans:
+      - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        ZipFile: ../files/SSBAv0.8.zip
+        Branch: zip
+        Preset: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        Engine: iac
+        WaitForEnd: true
+        CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
+        Test: C
+    Results:
+      - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Type: iac
+        IACFilter:
+          Query: Healthcheck Instruction Missing
+          Severity: LOW
+        Test: R
+      - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Type: iac
+        IACFilter:
+          Query: Last User is 'root'
+          Severity: LOW
+        FailTest: true
+        Test: R

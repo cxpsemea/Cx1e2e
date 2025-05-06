@@ -12,8 +12,8 @@ Tests:
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Scope: 
           Tenant: false
-          Application: e2e-query-app%E2E_RUN_SUFFIX%
-          Project: e2e-query-project%E2E_RUN_SUFFIX% #Project is still required since the web-audit session is opened in a project's context
+          Application: e2e-sastquery-app%E2E_RUN_SUFFIX%
+          Project: e2e-sastquery-project%E2E_RUN_SUFFIX% #Project is still required since the web-audit session is opened in a project's context
         Source: "result = All.NewCxList(); // application override"
         Severity: LOW
         Compile: true
@@ -21,10 +21,10 @@ Tests:
         OnFail:
           FailTestSet: true
     Scans:
-      - Project: e2e-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-query-preset%E2E_RUN_SUFFIX%
+        Preset: e2e-sastquery-preset%E2E_RUN_SUFFIX%
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Engine: sast
         WaitForEnd: true
@@ -32,7 +32,7 @@ Tests:
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
     Results:
-      - Project: e2e-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Type: SAST
         SASTFilter:
@@ -48,7 +48,7 @@ Tests:
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Scope: 
           Tenant: false
-          Application: e2e-query-app%E2E_RUN_SUFFIX%
-          Project: e2e-query-project%E2E_RUN_SUFFIX%
+          Application: e2e-sastquery-app%E2E_RUN_SUFFIX%
+          Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         Test: D        
         DeleteAuditSession: true

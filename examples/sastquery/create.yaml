@@ -6,15 +6,15 @@ Tenant: your_tenant_here
 Tests:
   - Name: create temporary application
     Applications:
-      - Name: e2e-query-app%E2E_RUN_SUFFIX%
+      - Name: e2e-sastquery-app%E2E_RUN_SUFFIX%
         Test: C
   - Name: create temporary project, new preset, run a scan
     Projects:
-      - Name: e2e-query-project%E2E_RUN_SUFFIX%
-        Applications: [ e2e-query-app%E2E_RUN_SUFFIX% ]
+      - Name: e2e-sastquery-project%E2E_RUN_SUFFIX%
+        Applications: [ e2e-sastquery-app%E2E_RUN_SUFFIX% ]
         Test: C
     Presets:
-      - Name: e2e-query-preset%E2E_RUN_SUFFIX%
+      - Name: e2e-sastquery-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset    
         Engine: "sast"    
         Queries:
@@ -23,17 +23,17 @@ Tests:
             Name: Client_DOM_XSS
         Test: C
     Scans:
-      - Project: e2e-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-query-preset%E2E_RUN_SUFFIX%
+        Preset: e2e-sastquery-preset%E2E_RUN_SUFFIX%
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
     Results:
-      - Project: e2e-query-project%E2E_RUN_SUFFIX%
+      - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         Type: SAST
         SASTFilter:
           Query: Client_DOM_XSS

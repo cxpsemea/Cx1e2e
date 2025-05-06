@@ -5,76 +5,79 @@ Tenant: your_tenant_here
 #LogLevel: DEBUG # if you set this to WARNING, you will get no output except errors and a pass/fail report at the end
 MultiThreadable: true
 Tests:
-  - Name: Query
-    File: query/all.yaml
+  - Name: SAST Query
+    File: sastquery/all.yaml
     Thread: 1
   - Name: 10 second pause
     Wait: 10
-  - Name: Query (old api)
+  - Name: SAST Query (old api)
     File: query_old_api/all.yaml
     Thread: 2
+  - Name: IAC Query
+    File: iacquery/all.yaml
+    Thread: 3
   - Name: 10 second pause
     Wait: 10
   - Name: Import
     File: import/all.yaml
-    Thread: 3
+    Thread: 4
   - Name: 10 second pause
     Wait: 10
   - Name: Scan
     File: scan/all.yaml
-    Thread: 4
+    Thread: 5
   - Name: 10 second pause
     Wait: 10
   - Name: Results
     File: results/all.yaml
-    Thread: 5
+    Thread: 6
   - Name: 10 second pause
     Wait: 10
   - Name: RunAs
     File: runas/all.yaml
-    Thread: 6
+    Thread: 7
   - Name: 10 second pause
     Wait: 10
   - Name: Project
     File: project/all.yaml
-    Thread: 7
+    Thread: 8
   - Name: 10 second pause
     Wait: 10
   - Name: Reports
     File: report/all.yaml
-    Thread: 8
+    Thread: 9
   - Name: 10 second pause
     Wait: 10
   - Name: New Access Management
     File: access/all.yaml
-    Thread: 9
+    Thread: 10
   - Name: 10 second pause
     Wait: 10
   - Name: User
     File: user/all.yaml
-    Thread: 10
+    Thread: 11
   - Name: 10 second pause
     Wait: 10
   - Name: Role
     File: role/all.yaml
-    Thread: 11
+    Thread: 12
   - Name: 10 second pause
     Wait: 10
   - Name: Flags
     File: flag/all.yaml
-    Thread: 12
+    Thread: 13
   - Name: 10 second pause
     Wait: 10
   - Name: Application
     File: application/all.yaml
-    Thread: 13
+    Thread: 14
   - Name: 10 second pause
     Wait: 10
   - Name: Group
     File: group/all.yaml
-    Thread: 14
+    Thread: 15
   - Name: 10 second pause
     Wait: 10
   - Name: Analytics
     File: analytics/all.yaml
-    Thread: 15
+    Thread: 16

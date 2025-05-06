@@ -43,8 +43,8 @@ func (c CRUDTest) GetVersionStr() string {
 	if c.Version.SAST.IsSet() {
 		versions = append(versions, fmt.Sprintf("SAST version %v", c.Version.SAST.String()))
 	}
-	if c.Version.KICS.IsSet() {
-		versions = append(versions, fmt.Sprintf("KICS version %v", c.Version.KICS.String()))
+	if c.Version.IAC.IsSet() {
+		versions = append(versions, fmt.Sprintf("IAC version %v", c.Version.IAC.String()))
 	}
 	return strings.Join(versions, ", ")
 }

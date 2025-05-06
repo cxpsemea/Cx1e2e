@@ -37,10 +37,12 @@ const (
 var RepoCreds *regexp.Regexp = regexp.MustCompile(`//(.*)@`)
 
 type EnabledEngines struct {
-	SAST   bool
-	KICS   bool
-	SCA    bool
-	APISEC bool
+	SAST       bool
+	IAC        bool
+	SCA        bool
+	APISEC     bool
+	Containers bool
+	Secrets    bool
 }
 
 func (e EnabledEngines) IsEnabled(engine string) bool {
@@ -50,10 +52,15 @@ func (e EnabledEngines) IsEnabled(engine string) bool {
 		return e.SAST
 	case "sca":
 		return e.SCA
-	case "kics":
-		return e.KICS
+	case "kics", "iac":
+		return e.IAC
 	case "apisec":
 		return e.APISEC
+	case "secrets", "2ms":
+		return e.Secrets
+	case "containers":
+		return e.Containers
+
 	}
 	return false
 }
@@ -81,7 +88,7 @@ type FailAction struct {
 type ProductVersion struct {
 	CxOne ProductVersionMinMax `yaml:"CxOne"`
 	SAST  ProductVersionMinMax `yaml:"SAST"`
-	KICS  ProductVersionMinMax `yaml:"KICS"`
+	IAC   ProductVersionMinMax `yaml:"IAC"`
 }
 
 type ProductVersionMinMax struct {
@@ -185,26 +192,39 @@ func (o BranchCRUD) String() string {
 
 type CxQLCRUD struct {
 	CRUDTest `yaml:",inline"`
+	Engine   string `yaml:"Engine"`
 	//QueryID       uint64 `yaml:"ID"`
-	QueryLanguage string    `yaml:"Language"`
-	QueryGroup    string    `yaml:"Group"`
-	QueryName     string    `yaml:"Name"`
-	Source        string    `yaml:"Source"`
-	Scope         CxQLScope `yaml:"Scope"`
-	Severity      string    `yaml:"Severity"`
-	IsExecutable  bool      `yaml:"IsExecutable"`
-	Compile       bool      `yaml:"Compile"`
-	DeleteSession bool      `yaml:"DeleteAuditSession"`
-	OldAPI        bool      `yaml:"OldAPI"`
-	ScopeID       string
-	ScopeStr      string
-	Query         *Cx1ClientGo.SASTQuery
-	LastScan      *Cx1ClientGo.Scan
+	QueryLanguage  string    `yaml:"Language"`
+	QueryPlatform  string    `yaml:"Platform"`
+	Category       string    `yaml:"Category"`
+	Description    string    `yaml:"Description"`
+	DescriptionURL string    `yaml:"DescriptionURL"`
+	CWE            string    `yaml:"CWE"`
+	QueryGroup     string    `yaml:"Group"`
+	QueryName      string    `yaml:"Name"`
+	Source         string    `yaml:"Source"`
+	Scope          CxQLScope `yaml:"Scope"`
+	Severity       string    `yaml:"Severity"`
+	IsExecutable   bool      `yaml:"IsExecutable"`
+	Compile        bool      `yaml:"Compile"`
+	DeleteSession  bool      `yaml:"DeleteAuditSession"`
+	OldAPI         bool      `yaml:"OldAPI"`
+	ScopeID        string
+	ScopeStr       string
+	SASTQuery      *Cx1ClientGo.SASTQuery
+	IACQuery       *Cx1ClientGo.IACQuery
+	LastScan       *Cx1ClientGo.Scan
 }
 
 func (o CxQLCRUD) String() string {
 	//if o.QueryName != "" {
-	return fmt.Sprintf("%v: %v -> %v -> %v", o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
+	if o.Engine == "sast" {
+		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
+	} else if o.Engine == "iac" {
+		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryPlatform, o.QueryGroup, o.QueryName)
+	} else {
+		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
+	}
 	/*} else {
 		return fmt.Sprintf("QueryID#%d", o.QueryID)
 	} // */
@@ -307,6 +327,18 @@ type PresetCRUD struct {
 		QueryGroup    string `yaml:"Group"`
 		QueryName     string `yaml:"Name"`
 	} `yaml:"SASTQueries"`
+	Queries []struct {
+		QueryID       uint64 `yaml:"ID"`
+		QueryLanguage string `yaml:"Language"`
+		QueryGroup    string `yaml:"Group"`
+		QueryName     string `yaml:"Name"`
+	} `yaml:"Queries"`
+	IACQueries []struct {
+		QueryKey      uint64 `yaml:"Key"`
+		QueryPlatform string `yaml:"Platform"`
+		QueryGroup    string `yaml:"Group"`
+		QueryName     string `yaml:"Name"`
+	} `yaml:"IACQueries"`
 	Preset *Cx1ClientGo.Preset
 }
 
@@ -329,13 +361,15 @@ func (o ProjectCRUD) String() string {
 	return o.Name
 }
 
+/*
 type QueryCRUD struct {
 	CRUDTest      `yaml:",inline"`
 	QueryID       uint64 `yaml:"ID"`
 	QueryLanguage string `yaml:"Language"`
 	QueryGroup    string `yaml:"Group"`
 	QueryName     string `yaml:"Name"`
-	Query         *Cx1ClientGo.SASTQuery
+	SASTQuery     *Cx1ClientGo.SASTQuery
+	IACQuery      *Cx1ClientGo.IACQuery
 }
 
 func (o QueryCRUD) String() string {
@@ -345,6 +379,7 @@ func (o QueryCRUD) String() string {
 		return fmt.Sprintf("QueryID#%d", o.QueryID)
 	}
 }
+*/
 
 type ReportCRUD struct {
 	CRUDTest      `yaml:",inline"`
@@ -391,21 +426,22 @@ type ResultCRUD struct {
 	Comment     string           `yaml:"Comment"`
 	Type        string           `yaml:"Type"`
 	SASTFilter  SASTResultFilter `yaml:"SASTFilter"`
-	KICSFilter  KICSResultFilter `yaml:"KICSFilter"`
+	IACFilter   IACResultFilter  `yaml:"IACFilter"`
 	SCAFilter   SCAResultFilter  `yaml:"SCAFilter"`
 	Results     *Cx1ClientGo.ScanResultSet
 	Project     *Cx1ClientGo.Project
+	Scan        *Cx1ClientGo.Scan
 }
 
 func (o *ResultCRUD) String() string {
 	var filter string
-	switch o.Type {
-	case "SAST":
+	switch strings.ToLower(o.Type) {
+	case "sast":
 		filter = " matching filter: " + o.SASTFilter.String()
-	case "SCA":
+	case "sca":
 		filter = " matching filter: " + o.SCAFilter.String()
-	case "KICS":
-		filter = " matching filter: " + o.KICSFilter.String()
+	case "iac":
+		filter = " matching filter: " + o.IACFilter.String()
 	}
 	return fmt.Sprintf("%v: %v finding #%d%v", o.ProjectName, o.Type, o.Number, filter)
 }
@@ -460,14 +496,15 @@ func (o *SASTResultFilter) String() string {
 	return strings.Join(filters, ", ")
 }
 
-type KICSResultFilter struct {
-	ResultFilter `yaml:",inline"`
-	QueryID      string `yaml:"QueryID"`
-	QueryName    string `yaml:"Name"`
-	QueryGroup   string `yaml:"Group"`
+type IACResultFilter struct {
+	ResultFilter  `yaml:",inline"`
+	QueryID       string `yaml:"QueryID"`
+	QueryName     string `yaml:"Query"`
+	QueryGroup    string `yaml:"Group"`
+	QueryPlatform string `yaml:"Platform"`
 }
 
-func (o *KICSResultFilter) String() string {
+func (o *IACResultFilter) String() string {
 	var filters []string
 
 	if o.QueryID != "" {

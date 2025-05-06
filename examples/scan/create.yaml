@@ -17,7 +17,7 @@ Tests:
         Branch: master
         Preset: All
         #Engine: sast #SAST only
-        Engine: sast sca kics apisec #throw everything at it
+        Engine: sast sca iac apisec #throw everything at it
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute

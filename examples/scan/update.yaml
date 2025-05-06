@@ -17,7 +17,7 @@ Tests:
       - Project: e2e-scan-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
-        Engine: sast # sca kics apisec
+        Engine: sast # sca iac apisec
         WaitForEnd: true
         CancelOnTimeout: true
         GetLogs: true

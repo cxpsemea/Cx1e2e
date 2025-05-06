@@ -20,7 +20,7 @@ Tests:
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         Preset: All
-        Engine: sast # sca kics apisec
+        Engine: sast # sca iac apisec
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute

@@ -73,6 +73,10 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 	engines := make([]string, 0)
 
 	for _, e := range requested_engines {
+		if e == "iac" {
+			e = "kics"
+		}
+
 		if _, ok := cx1client.IsEngineAllowed(e); !ok && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this is not supported in the license and will be skipped", e)
 		} else if !Engines.IsEnabled(e) && !t.IsForced() {
@@ -83,14 +87,23 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 			//scanConfig := Cx1ClientGo.ScanConfiguration{}
 			//scanConfig.ScanType = e
 			scanConfigSet.AddConfig(e, "", "")
+
 			if e == "sast" {
 				scanConfigSet.AddConfig("sast", "incremental", "false")
 				if t.Preset != "" {
 					scanConfigSet.AddConfig("sast", "presetName", t.Preset)
 				}
-				scanConfigSet.AddConfig("sast", "fast scan mode", "false")
-				scanConfigSet.AddConfig("sast", "light queries", "false")
+				scanConfigSet.AddConfig("sast", "fastScanMode", "false")
+				scanConfigSet.AddConfig("sast", "lightQueries", "false")
 				//scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
+			} else if e == "kics" {
+				if t.Preset != "" {
+					preset, err := cx1client.GetIACPresetByName(t.Preset)
+					if err != nil {
+						return err
+					}
+					scanConfigSet.AddConfig("kics", "presetId", preset.PresetID)
+				}
 			}
 			//scanConfigs = append(scanConfigs, scanConfig)
 		}
@@ -220,15 +233,17 @@ func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogge
 			t.Filter.Index = 1 //
 		}
 		t.Cx1ScanFilter = &(Cx1ClientGo.ScanFilter{
-			BaseFilter: Cx1ClientGo.BaseFilter{
-				Offset: 0,
-				Limit:  uint64(t.Filter.Index),
-			},
-			Statuses: t.Filter.Statuses,
-			Branches: t.Filter.Branches,
+			Statuses:  t.Filter.Statuses,
+			Branches:  t.Filter.Branches,
+			ProjectID: project.ProjectID,
 		})
 
-		scans, err = cx1client.GetLastScansByIDFiltered(project.ProjectID, *t.Cx1ScanFilter)
+		engine := t.Engine
+		if engine == "iac" {
+			engine = "kics"
+		}
+		scans, err := cx1client.GetLastScansByEngineFiltered(engine, uint64(t.Filter.Index), *t.Cx1ScanFilter)
+
 		if err != nil {
 			return err
 		}

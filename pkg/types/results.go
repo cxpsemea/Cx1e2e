@@ -11,7 +11,7 @@ import (
 
 func (t *ResultCRUD) Validate(CRUD string) error {
 	if t.Type == "" {
-		return fmt.Errorf("result type not specified, should be one of: SAST, SCA, KICS")
+		return fmt.Errorf("result type not specified, should be one of: SAST, SCA, IAC")
 	}
 	if t.ProjectName == "" {
 		return fmt.Errorf("project name is missing")
@@ -27,6 +27,7 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 }
 
 func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
+	t.Type = strings.ToLower(t.Type)
 	if _, ok := cx1client.IsEngineAllowed(t.Type); !ok {
 		return fmt.Errorf("test attempts to access results from engine %v but this is not supported in the license and will be skipped", t.Type)
 	}
@@ -35,7 +36,7 @@ func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *Threa
 	}
 
 	if CRUD == OP_UPDATE {
-		if !(t.Type == "SAST" || t.Type == "KICS") {
+		if !(t.Type == "sast" || t.Type == "iac") {
 			return fmt.Errorf("can't update %v results", t.Type)
 		}
 	} else if CRUD != OP_READ {
@@ -79,8 +80,8 @@ func (o SASTResultFilter) Matches(result *Cx1ClientGo.ScanSASTResult) bool {
 	}
 	return true
 }
-func (o KICSResultFilter) Matches(result *Cx1ClientGo.ScanKICSResult) bool {
-	if o.QueryID != "" && o.QueryID != fmt.Sprintf("%v", result.Data.QueryID) {
+func (o IACResultFilter) Matches(result *Cx1ClientGo.ScanIACResult) bool {
+	if o.QueryID != "" && o.QueryID != result.Data.QueryID {
 		return false
 	}
 	if o.QueryGroup != "" && !strings.EqualFold(o.QueryGroup, result.Data.Group) {
@@ -122,8 +123,8 @@ func (o SCAResultFilter) Matches(result *Cx1ClientGo.ScanSCAResult) bool {
 func (t *ResultCRUD) Filter(results *Cx1ClientGo.ScanResultSet) Cx1ClientGo.ScanResultSet {
 	var filtered_results Cx1ClientGo.ScanResultSet
 	var final_results Cx1ClientGo.ScanResultSet
-	switch t.Type {
-	case "SAST":
+	switch strings.ToLower(t.Type) {
+	case "sast":
 		for id := range results.SAST {
 			if t.SASTFilter.Matches(&(results.SAST[id])) {
 				filtered_results.SAST = append(filtered_results.SAST, results.SAST[id])
@@ -136,7 +137,7 @@ func (t *ResultCRUD) Filter(results *Cx1ClientGo.ScanResultSet) Cx1ClientGo.Scan
 		if t.Number <= uint64(len(filtered_results.SAST)) {
 			final_results.SAST = []Cx1ClientGo.ScanSASTResult{filtered_results.SAST[t.Number-1]}
 		}
-	case "SCA":
+	case "sca":
 		for id := range results.SCA {
 			if t.SCAFilter.Matches(&(results.SCA[id])) {
 				filtered_results.SCA = append(filtered_results.SCA, results.SCA[id])
@@ -149,18 +150,18 @@ func (t *ResultCRUD) Filter(results *Cx1ClientGo.ScanResultSet) Cx1ClientGo.Scan
 		if t.Number <= uint64(len(filtered_results.SCA)) {
 			final_results.SCA = []Cx1ClientGo.ScanSCAResult{filtered_results.SCA[t.Number-1]}
 		}
-	case "KICS":
-		for id := range results.KICS {
-			if t.KICSFilter.Matches(&(results.KICS[id])) {
-				filtered_results.KICS = append(filtered_results.KICS, results.KICS[id])
+	case "iac":
+		for id := range results.IAC {
+			if t.IACFilter.Matches(&(results.IAC[id])) {
+				filtered_results.IAC = append(filtered_results.IAC, results.IAC[id])
 			}
 		}
-		sort.SliceStable(filtered_results.KICS, func(i, j int) bool {
-			return filtered_results.KICS[i].SimilarityID < filtered_results.KICS[j].SimilarityID // TODO: Check if this sort of sort is sufficient
+		sort.SliceStable(filtered_results.IAC, func(i, j int) bool {
+			return filtered_results.IAC[i].SimilarityID < filtered_results.IAC[j].SimilarityID // TODO: Check if this sort of sort is sufficient
 		})
 
-		if t.Number <= uint64(len(filtered_results.KICS)) {
-			final_results.KICS = []Cx1ClientGo.ScanKICSResult{filtered_results.KICS[t.Number-1]}
+		if t.Number <= uint64(len(filtered_results.IAC)) {
+			final_results.IAC = []Cx1ClientGo.ScanIACResult{filtered_results.IAC[t.Number-1]}
 		}
 	}
 
@@ -178,7 +179,16 @@ func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 	}
 	t.Project = &project
 
-	last_scans, err := cx1client.GetLastScansByID(project.ProjectID, 1)
+	scanFilter := Cx1ClientGo.ScanFilter{
+		Statuses:  []string{"Completed"},
+		ProjectID: project.ProjectID,
+	}
+
+	engine := t.Type
+	if engine == "iac" {
+		engine = "kics"
+	}
+	last_scans, err := cx1client.GetLastScansByEngineFiltered(engine, 1, scanFilter)
 	if err != nil {
 		return err
 	}
@@ -199,19 +209,20 @@ func (t *ResultCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 
 	filteredResults := t.Filter(&results)
 	t.Results = &filteredResults
+	t.Scan = &last_scan
 
-	switch t.Type {
-	case "SAST":
+	switch strings.ToLower(t.Type) {
+	case "sast":
 		if len(t.Results.SAST) == 0 {
 			return fmt.Errorf("failed to find SAST finding matching filter %v", t.SASTFilter.String())
 		}
-	case "SCA":
+	case "sca":
 		if len(t.Results.SCA) == 0 {
 			return fmt.Errorf("failed to find SCA finding matching filter %v", t.SCAFilter.String())
 		}
-	case "KICS":
-		if len(t.Results.KICS) == 0 {
-			return fmt.Errorf("failed to find KICS finding matching filter %v", t.KICSFilter.String())
+	case "iac":
+		if len(t.Results.IAC) == 0 {
+			return fmt.Errorf("failed to find IAC finding matching filter %v", t.IACFilter.String())
 		}
 	}
 
@@ -229,24 +240,24 @@ func (t *ResultCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadL
 		}
 	}
 
-	switch t.Type {
-	case "SAST":
+	switch strings.ToLower(t.Type) {
+	case "sast":
 		if len(t.Results.SAST) == 0 {
 			return fmt.Errorf("specified SAST result not found")
 		}
-		change := t.Results.SAST[0].CreateResultsPredicate(t.Project.ProjectID)
+		change := t.Results.SAST[0].CreateResultsPredicate(t.Project.ProjectID, t.Scan.ScanID)
 		change.Update(t.State, t.Severity, t.Comment)
 		err := cx1client.AddSASTResultsPredicates([]Cx1ClientGo.SASTResultsPredicates{change})
 		return err
-	case "SCA":
+	case "sca":
 		return fmt.Errorf("updating SCA results is not supported")
-	case "KICS":
-		if len(t.Results.KICS) == 0 {
-			return fmt.Errorf("specified KICS result not found")
+	case "iac":
+		if len(t.Results.IAC) == 0 {
+			return fmt.Errorf("specified IAC result not found")
 		}
-		change := t.Results.KICS[0].CreateResultsPredicate(t.Project.ProjectID)
+		change := t.Results.IAC[0].CreateResultsPredicate(t.Project.ProjectID, t.Scan.ScanID)
 		change.Update(t.State, t.Severity, t.Comment)
-		err := cx1client.AddKICSResultsPredicates([]Cx1ClientGo.KICSResultsPredicates{change})
+		err := cx1client.AddIACResultsPredicates([]Cx1ClientGo.IACResultsPredicates{change})
 		return err
 	}
 

@@ -30,7 +30,7 @@ Tests:
         ZipFile: ../files/xss-burger.zip
         Branch: zip
         Preset: e2e-test-import-preset
-        Engine: sast # sca kics apisec
+        Engine: sast # sca iac apisec
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute

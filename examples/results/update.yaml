@@ -103,8 +103,8 @@ Tests:
         Comment: "This hardcoded password is my secret backdoor, not exploitable"
         State: NOT_EXPLOITABLE
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
-        Type: KICS
-        KICSFilter:
+        Type: IAC
+        IACFilter:
           SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
         Test: U
         Comment: "I don't care about the health of my container"

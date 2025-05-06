@@ -520,9 +520,9 @@ func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, 
 		}
 	}
 
-	if pv.KICS.IsSet() {
-		if pv.KICS.Min != "" {
-			check, err := cur.CheckKICS(pv.KICS.Min)
+	if pv.IAC.IsSet() {
+		if pv.IAC.Min != "" {
+			check, err := cur.CheckIAC(pv.IAC.Min)
 			if err != nil {
 				logger.Errorf("Failed to check version: %s", err)
 			}
@@ -530,8 +530,8 @@ func CheckVersion(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, 
 				return false
 			}
 		}
-		if pv.KICS.Max != "" {
-			check, err := cur.CheckKICS(pv.KICS.Max)
+		if pv.IAC.Max != "" {
+			check, err := cur.CheckIAC(pv.IAC.Max)
 			if err != nil {
 				logger.Errorf("Failed to check version: %s", err)
 			}

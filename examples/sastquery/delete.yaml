@@ -6,12 +6,12 @@ Tenant: your_tenant_here
 Tests:
   - Name: delete preset, project, and app
     Presets:
-      - Name: e2e-query-preset%E2E_RUN_SUFFIX%
+      - Name: e2e-sastquery-preset%E2E_RUN_SUFFIX%
         Engine: "sast"
         Test: D      
     Projects:
-      - Name: e2e-query-project%E2E_RUN_SUFFIX%
+      - Name: e2e-sastquery-project%E2E_RUN_SUFFIX%
         Test: D     
     Applications:
-      - Name: e2e-query-app%E2E_RUN_SUFFIX%
+      - Name: e2e-sastquery-app%E2E_RUN_SUFFIX%
         Test: D

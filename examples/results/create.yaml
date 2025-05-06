@@ -13,7 +13,7 @@ Tests:
         ZipFile: ../files/SSBAv0.8.zip
         Branch: zip
         Preset: All
-        Engine: sast sca kics apisec
+        Engine: sast sca iac apisec
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
@@ -78,9 +78,9 @@ Tests:
         SASTFilter:
           SimilarityID: 715549665
         Test: R
-      - Project: e2e-result-project%E2E_RUN_SUFFIX% # there is also a Healthcheck Instruction Missing finding from KICS
-        Type: KICS
-        KICSFilter:
+      - Project: e2e-result-project%E2E_RUN_SUFFIX% # there is also a Healthcheck Instruction Missing finding from IAC
+        Type: IAC
+        IACFilter:
           SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
         Test: R
       - Project: e2e-result-project%E2E_RUN_SUFFIX% # there is also a SCA finding for Maven-org.apache.tomcat.embed:tomcat-embed-core CVE-2021-43980
