@@ -3,7 +3,7 @@ module github.com/cxpsemea/cx1e2e
 go 1.23.0
 
 require (
-	github.com/cxpsemea/Cx1ClientGo v0.1.1-0.20250408093420-5ee025b5ab2d
+	github.com/cxpsemea/Cx1ClientGo v0.1.1-0.20250507094455-26caa963d73c
 	github.com/sirupsen/logrus v1.9.3
 	github.com/t-tomalak/logrus-easy-formatter v0.0.0-20190827215021-c074f06c5816
 	gopkg.in/yaml.v2 v2.4.0
@@ -16,4 +16,4 @@ require (
 	golang.org/x/sys v0.32.0 // indirect
 )
 
-replace github.com/cxpsemea/Cx1ClientGo v0.1.1-0.20250408093420-5ee025b5ab2d => c:/work/code/cx1clientgo
+//replace github.com/cxpsemea/Cx1ClientGo v0.1.1-0.20250408093420-5ee025b5ab2d => c:/work/code/cx1clientgo
