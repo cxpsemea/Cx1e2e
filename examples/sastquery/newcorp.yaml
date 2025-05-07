@@ -7,6 +7,7 @@ Tests:
   - Name: create new corp query, add to preset
     Queries:
       - Name: EtoE_Test_Cheeseburgers
+        Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 
@@ -23,7 +24,7 @@ Tests:
       - Name: e2e-sastquery-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset      
         Engine: "sast"  
-        Queries:
+        SASTQueries:
           - Language: JavaScript
             Group: JavaScript_High_Risk
             Name: Client_DOM_XSS
@@ -58,6 +59,7 @@ Tests:
   - Name: Delete new corp query
     Queries:
       - Name: EtoE_Test_Cheeseburgers
+        Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 

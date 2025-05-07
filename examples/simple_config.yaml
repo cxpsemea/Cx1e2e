@@ -22,7 +22,7 @@ Tests:
       - Name: e2e-preset1
         Engine: "sast"
         Description: This is my test preset        
-        Queries:
+        SASTPresetQueries:
           - Language: Java
             Group: "Java_High_Risk"
             Name: "Reflected_XSS_All_Clients"    

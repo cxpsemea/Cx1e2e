@@ -22,7 +22,7 @@ Tests:
       - Name: e2e-preset1
         Description: This is my test preset
         Engine: "sast"
-        Queries:
+        SASTQueries:
           - Language: Java
             Group: "Java_High_Risk"
             Name: "Reflected_XSS_All_Clients"
@@ -78,7 +78,7 @@ Tests:
       - Name: e2e-preset1
         Description: This is my test preset    
         Engine: "sast"    
-        Queries:
+        SASTQueries:
           - Language: Java
             Group: "Java_High_Risk"
             Name: "SQL_Injection"    

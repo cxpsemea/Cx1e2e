@@ -31,10 +31,6 @@ func (t *CxQLCRUD) Validate(CRUD string) error {
 		return fmt.Errorf("project name is missing")
 	}
 
-	if t.Engine == "iac" && (t.Category == "" || t.Description == "" || t.DescriptionURL == "" || t.CWE == "") && CRUD == OP_CREATE {
-		return fmt.Errorf("creating an IAC query requires: category, description, descriptionURL & cwe")
-	}
-
 	return nil
 }
 

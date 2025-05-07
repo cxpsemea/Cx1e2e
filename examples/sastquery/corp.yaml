@@ -7,6 +7,7 @@ Tests:
   - Name: create corp query override and run a scan
     Queries:
       - Name: Client_DOM_XSS
+        Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 
@@ -39,6 +40,7 @@ Tests:
   - Name: delete corp override
     Queries:
       - Name: Client_DOM_XSS
+        Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 

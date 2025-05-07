@@ -17,7 +17,7 @@ Tests:
       - Name: e2e-test-import-preset
         Test: U   
         Engine: "sast"
-        Queries:
+        SASTQueries:
           - Language: JavaScript
             Group: "JavaScript_High_Risk"
             Name: "Client_DOM_XSS"    

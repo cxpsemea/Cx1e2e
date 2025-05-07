@@ -17,7 +17,7 @@ Tests:
       - Name: e2e-queryo-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset       
         Engine: "sast" 
-        Queries:
+        SASTQueries:
           - Language: JavaScript
             Group: JavaScript_High_Risk
             Name: Client_DOM_XSS
