@@ -9,7 +9,7 @@ Tests:
       - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
-        Preset: All
+        SASTPreset: All
         Engine: sast
         WaitForEnd: true
         Status: Completed
@@ -32,7 +32,7 @@ Tests:
       - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
-        Preset: All
+        SASTPreset: All
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true

@@ -26,7 +26,7 @@ Tests:
       - Project: e2e-queryo-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-queryo-preset%E2E_RUN_SUFFIX%
+        SASTPreset: e2e-queryo-preset%E2E_RUN_SUFFIX%
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED", "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         Engine: sast
         WaitForEnd: true

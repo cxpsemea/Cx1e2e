@@ -32,9 +32,9 @@ Tests:
         Test: C
     Scans:
       - Project: e2e-project1
-        Repository: https://github.com/michaelkubiaczyk/ssba
+        Repository: https://github.com/cx-michael-kubiaczyk/ssba
         Branch: master
-        Preset: e2e-preset1
+        SASTPreset: e2e-preset1
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true

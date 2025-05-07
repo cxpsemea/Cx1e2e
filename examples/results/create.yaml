@@ -12,7 +12,7 @@ Tests:
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.8.zip
         Branch: zip
-        Preset: All
+        SASTPreset: All
         Engine: sast sca iac apisec
         WaitForEnd: true
         CancelOnTimeout: true

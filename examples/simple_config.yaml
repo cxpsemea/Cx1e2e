@@ -47,7 +47,7 @@ Tests:
         Engine: sast
         Repository: https://github.com/cxpsemea/cx1clientgo
         Branch: main
-        Preset: e2e-preset1
+        SASTPreset: e2e-preset1
         Test: C
         WaitForEnd: true
         CancelOnTimeout: true

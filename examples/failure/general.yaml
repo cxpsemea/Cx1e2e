@@ -7,9 +7,9 @@ Tests:
   - Name: Run a scan that will fail on the General step (bad branch)
     Scans:
       - Project: e2e-failure-project%E2E_RUN_SUFFIX%
-        Repository: https://github.com/michaelkubiaczyk/ssba
+        Repository: https://github.com/cx-michael-kubiaczyk/ssba
         Branch: cecinestpasunebranche
-        Preset: All
+        SASTPreset: All
         Engine: sast #SAST only
         #Engine: sast sca iac apisec #throw everything at it
         WaitForEnd: true

@@ -27,7 +27,7 @@ Tests:
       - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.8.zip
         Branch: zip
-        Preset: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        IACPreset: e2e-iacquery-preset%E2E_RUN_SUFFIX%
         Engine: iac
         WaitForEnd: true
         CancelOnTimeout: true

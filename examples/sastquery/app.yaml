@@ -24,7 +24,7 @@ Tests:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-sastquery-preset%E2E_RUN_SUFFIX%
+        SASTPreset: e2e-sastquery-preset%E2E_RUN_SUFFIX%
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Engine: sast
         WaitForEnd: true

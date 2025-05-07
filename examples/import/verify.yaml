@@ -29,7 +29,7 @@ Tests:
       - Project: e2e-import-project
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-test-import-preset
+        SASTPreset: e2e-test-import-preset
         Engine: sast # sca iac apisec
         WaitForEnd: true
         CancelOnTimeout: true

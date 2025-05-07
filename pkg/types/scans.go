@@ -90,15 +90,15 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 
 			if e == "sast" {
 				scanConfigSet.AddConfig("sast", "incremental", "false")
-				if t.Preset != "" {
-					scanConfigSet.AddConfig("sast", "presetName", t.Preset)
+				if t.SASTPreset != "" {
+					scanConfigSet.AddConfig("sast", "presetName", t.SASTPreset)
 				}
 				scanConfigSet.AddConfig("sast", "fastScanMode", "false")
 				scanConfigSet.AddConfig("sast", "lightQueries", "false")
 				//scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
 			} else if e == "kics" {
-				if t.Preset != "" {
-					preset, err := cx1client.GetIACPresetByName(t.Preset)
+				if t.IACPreset != "" {
+					preset, err := cx1client.GetIACPresetByName(t.IACPreset)
 					if err != nil {
 						return err
 					}

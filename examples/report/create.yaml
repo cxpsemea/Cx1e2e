@@ -12,9 +12,9 @@ Tests:
           - Test: tag1
     Scans:
       - Project: e2e-report-project-1%E2E_RUN_SUFFIX%
-        Repository: https://github.com/michaelkubiaczyk/ssba
+        Repository: https://github.com/cx-michael-kubiaczyk/ssba
         Branch: master
-        Preset: All
+        SASTPreset: All
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
@@ -28,9 +28,9 @@ Tests:
           - Test: tag1
     Scans:
       - Project: e2e-report-project-2%E2E_RUN_SUFFIX%
-        Repository: https://github.com/michaelkubiaczyk/simple-java-command-injection
+        Repository: https://github.com/cx-michael-kubiaczyk/simple-java-command-injection
         Branch: main
-        Preset: All
+        SASTPreset: All
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true

@@ -577,7 +577,8 @@ type ScanCRUD struct {
 	Incremental      bool        `yaml:"Incremental"`
 	WaitForEnd       bool        `yaml:"WaitForEnd"`
 	ZipFile          string      `yaml:"ZipFile"`
-	Preset           string      `yaml:"Preset"`
+	SASTPreset       string      `yaml:"SASTPreset"`
+	IACPreset        string      `yaml:"IACPreset"`
 	Status           string      `yaml:"Status"`
 	Timeout          int         `yaml:"Timeout"`
 	Cancel           bool        `yaml:"CancelOnTimeout"`
