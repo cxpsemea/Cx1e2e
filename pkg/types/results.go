@@ -22,12 +22,13 @@ func (t *ResultCRUD) Validate(CRUD string) error {
 	if t.Number == 0 {
 		t.Number = 1
 	}
+	t.Type = strings.ToLower(t.Type)
 
 	return nil
 }
 
 func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
-	t.Type = strings.ToLower(t.Type)
+	//t.Type = strings.ToLower(t.Type)
 	if _, ok := cx1client.IsEngineAllowed(t.Type); !ok {
 		return fmt.Errorf("test attempts to access results from engine %v but this is not supported in the license and will be skipped", t.Type)
 	}
@@ -36,7 +37,7 @@ func (t *ResultCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *Threa
 	}
 
 	if CRUD == OP_UPDATE {
-		if !(t.Type == "sast" || t.Type == "iac") {
+		if !(t.Type == "sast" || t.Type == "iac" || t.Type == "kics") {
 			return fmt.Errorf("can't update %v results", t.Type)
 		}
 	} else if CRUD != OP_READ {
