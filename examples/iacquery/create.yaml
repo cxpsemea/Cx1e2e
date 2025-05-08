@@ -7,15 +7,18 @@ Tests:
   - Name: create temporary application
     Applications:
       - Name: e2e-iacquery-app%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Test: C
   - Name: create temporary project, new preset, run a scan
     Projects:
       - Name: e2e-iacquery-project%E2E_RUN_SUFFIX%
         Applications: [ e2e-iacquery-app%E2E_RUN_SUFFIX% ]
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Test: C
     Presets:
       - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset    
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Engine: iac
         IACQueries:
           - Platform: Dockerfile
@@ -27,6 +30,7 @@ Tests:
         ZipFile: ../files/SSBAv0.8.zip
         Branch: zip
         IACPreset: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Engine: iac
         WaitForEnd: true
         CancelOnTimeout: true
@@ -35,6 +39,7 @@ Tests:
     Results:
       - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
         Type: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         IACFilter:
           Query: Healthcheck Instruction Missing
           Severity: LOW

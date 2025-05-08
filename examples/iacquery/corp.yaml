@@ -10,6 +10,7 @@ Tests:
         Engine: iac
         Group: common
         Platform: Dockerfile
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Scope: 
           Tenant: true
           Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
@@ -27,6 +28,7 @@ Tests:
         ZipFile: ../files/SSBAv0.8.zip
         Branch: zip
         IACPreset: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Engine: iac
         WaitForEnd: true
         CancelOnTimeout: true
@@ -35,6 +37,7 @@ Tests:
     Results:
       - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
         Type: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         IACFilter:
           Query: Healthcheck Instruction Missing
           Severity: HIGH
@@ -44,6 +47,7 @@ Tests:
     Queries:
       - Name: Healthcheck Instruction Missing
         Engine: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Group: common
         Platform: Dockerfile
         Scope: 

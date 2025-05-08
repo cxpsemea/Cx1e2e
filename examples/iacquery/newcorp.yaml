@@ -12,6 +12,7 @@ Tests:
         Platform: Dockerfile
         Category: Resource Management
         Description: This is a custom preset
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         DescriptionURL: https://checkmarx.com
         CWE: 123
         Scope: 
@@ -46,6 +47,7 @@ Tests:
       - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        
         Engine: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         IACQueries:
           - Platform: Dockerfile
             Group: common
@@ -60,6 +62,7 @@ Tests:
         ZipFile: ../files/SSBAv0.8.zip
         Branch: zip
         IACPreset: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Engine: iac
         WaitForEnd: true
         CancelOnTimeout: true
@@ -68,6 +71,7 @@ Tests:
     Results:
       - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
         Type: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         IACFilter:
           Query: Ronald McDonald is running things
           Severity: LOW
@@ -78,6 +82,7 @@ Tests:
         Engine: iac
         Group: common
         Platform: Dockerfile
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Scope: 
           Tenant: true
           Project: e2e-iacquery-project%E2E_RUN_SUFFIX%

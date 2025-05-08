@@ -8,10 +8,13 @@ Tests:
     Presets:
       - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
         Engine: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Test: D      
     Projects:
       - Name: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Test: D     
     Applications:
       - Name: e2e-iacquery-app%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Test: D
