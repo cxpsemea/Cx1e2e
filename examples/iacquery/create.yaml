@@ -46,6 +46,7 @@ Tests:
         Test: R
       - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
         Type: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         IACFilter:
           Query: Last User is 'root'
           Severity: LOW
