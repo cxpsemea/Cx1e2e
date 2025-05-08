@@ -6,7 +6,8 @@ Tenant: your_tenant_here
 Tests:
   - Name: Delete imported project, app, query
     Queries:
-      - Name: Cheeseburgers
+      - Engine: sast
+        Name: Cheeseburgers
         Group: JavaScript_Low_Visibility
         Language: JavaScript
         Scope: 

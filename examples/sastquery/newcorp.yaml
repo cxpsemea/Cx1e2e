@@ -6,7 +6,8 @@ Tenant: your_tenant_here
 Tests:
   - Name: create new corp query, add to preset
     Queries:
-      - Name: EtoE_Test_Cheeseburgers
+      - Engine: sast
+        Name: EtoE_Test_Cheeseburgers
         Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
@@ -58,7 +59,8 @@ Tests:
         Test: R
   - Name: Delete new corp query
     Queries:
-      - Name: EtoE_Test_Cheeseburgers
+      - Engine: sast
+        Name: EtoE_Test_Cheeseburgers
         Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript

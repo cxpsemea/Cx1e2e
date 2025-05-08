@@ -31,6 +31,9 @@ Tests:
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
+        OnFail:
+          RetryCount: 5
+          RetryDelay: 30
         Test: C
     Results:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%

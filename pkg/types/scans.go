@@ -82,7 +82,7 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		} else if !Engines.IsEnabled(e) && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this was disabled for this test execution", e)
 		} else {
-
+			logger.Infof("Requested to run with engine %v", e)
 			engines = append(engines, e)
 			//scanConfig := Cx1ClientGo.ScanConfiguration{}
 			//scanConfig.ScanType = e
@@ -91,6 +91,7 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 			if e == "sast" {
 				scanConfigSet.AddConfig("sast", "incremental", "false")
 				if t.SASTPreset != "" {
+					logger.Infof("Adding preset: %v", t.SASTPreset)
 					scanConfigSet.AddConfig("sast", "presetName", t.SASTPreset)
 				}
 				scanConfigSet.AddConfig("sast", "fastScanMode", "false")
@@ -198,20 +199,36 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		}
 
 		if getWorkflow {
+			var fail_reason string = "Failed"
+			{
+				var fail_reasons []string
+				for _, status := range test_Scan.StatusDetails {
+					if status.Status != expectedResult {
+						fail_reasons = append(fail_reasons, fmt.Sprintf("%v: %v", status.Name, status.Details))
+					}
+				}
+				fail_reason = strings.Join(fail_reasons, ", ")
+			}
+
 			workflow, err := cx1client.GetScanWorkflowByID(test_Scan.ScanID)
 			if err != nil {
 				logger.Errorf("Failed to get workflow update for scan %v: %s", test_Scan.ScanID, err)
-				return fmt.Errorf("scan finished with status '%v' but %v was expected", test_Scan.Status, expectedResult)
+				return fmt.Errorf("scan finished with status '%v' (%v) but %v was expected", test_Scan.Status, fail_reason, expectedResult)
 			} else {
 				if len(workflow) == 0 {
-					return fmt.Errorf("scan finished with status '%v' but %v was expected, there was no workflow log available for additional details", test_Scan.Status, expectedResult)
+					return fmt.Errorf("scan finished with status '%v' (%v) but %v was expected, there was no workflow log available for additional details", test_Scan.Status, fail_reason, expectedResult)
 				} else {
 					workflow_index := len(workflow) - 2
 					if workflow_index <= 0 {
 						workflow_index = 0
 					}
 
-					return fmt.Errorf("scan finished with status '%v - %v' but %v was expected", test_Scan.Status, workflow[workflow_index].Info, expectedResult)
+					logger.Debugf("Full workflow: ")
+					for id := range workflow {
+						logger.Debugf("%d: %v", id, workflow[id].Info)
+					}
+
+					return fmt.Errorf("scan finished with status '%v' (%v) but %v was expected", test_Scan.Status, fail_reason, expectedResult)
 				}
 			}
 		}

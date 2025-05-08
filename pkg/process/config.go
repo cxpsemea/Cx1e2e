@@ -104,7 +104,20 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 	}
 
 	//conf.Tests = testSet
+	if !conf.IsValid(logger) {
+		return conf, fmt.Errorf("Tests failed to validate - review the logs and update the YAMLs")
+	}
 	return conf, nil
+}
+
+func (t *TestConfig) IsValid(logger *logrus.Logger) bool {
+	failedTests := false
+	for _, test := range t.Tests {
+		if !test.IsValid(logger) {
+			failedTests = true
+		}
+	}
+	return !failedTests
 }
 
 func (t *TestConfig) InitTestIDs() {
@@ -491,6 +504,113 @@ func (t *TestSet) SetActiveThread(thread int) {
 	for id2 := range t.SubTests {
 		t.SubTests[id2].SetActiveThread(thread)
 	}
+}
+
+func (t TestSet) IsValid(logger *logrus.Logger) bool {
+	failedTests := false
+
+	for id2 := range t.AccessAssignments {
+		if !isTestValid(&t.AccessAssignments[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Analytics {
+		if !isTestValid(&t.Analytics[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Applications {
+		if !isTestValid(&t.Applications[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Branches {
+		if !isTestValid(&t.Branches[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Clients {
+		if !isTestValid(&t.Clients[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Flags {
+		if !isTestValid(&t.Flags[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Groups {
+		if !isTestValid(&t.Groups[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Imports {
+		if !isTestValid(&t.Imports[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Presets {
+		if !isTestValid(&t.Presets[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Projects {
+		if !isTestValid(&t.Projects[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Queries {
+		if !isTestValid(&t.Queries[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Reports {
+		if !isTestValid(&t.Reports[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Results {
+		if !isTestValid(&t.Results[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Roles {
+		if !isTestValid(&t.Roles[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Scans {
+		if !isTestValid(&t.Scans[id2], logger) {
+			failedTests = true
+		}
+	}
+	for id2 := range t.Users {
+		if !isTestValid(&t.Users[id2], logger) {
+			failedTests = true
+		}
+	}
+
+	for id2 := range t.SubTests {
+		if !t.SubTests[id2].IsValid(logger) {
+			failedTests = true
+		}
+	}
+	return !failedTests
+}
+
+func isTestValid(runner TestRunner, logger *logrus.Logger) bool {
+	failedTest := false
+
+	for _, test := range []string{types.OP_CREATE, types.OP_READ, types.OP_UPDATE, types.OP_DELETE} {
+		if runner.IsType(test) {
+			if err := runner.Validate(test); err != nil {
+				logger.Infof("Test %v %v is invalid: %v", runner.String(), test, err)
+				failedTest = true
+			}
+		}
+	}
+
+	return !failedTest
 }
 
 func (t TestSet) GetTestCount() int {

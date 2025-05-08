@@ -6,7 +6,8 @@ Tenant: your_tenant_here
 Tests:
   - Name: create app-level override and run a scan (old api)
     Queries:
-      - Name: Client_DOM_XSS
+      - Engine: sast
+        Name: Client_DOM_XSS
         Group: JavaScript_High_Risk
         Language: JavaScript
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED", "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
@@ -44,7 +45,8 @@ Tests:
         FailTest: true
   - Name: Delete app-level override
     Queries:
-      - Name: Client_DOM_XSS
+      - Engine: sast
+        Name: Client_DOM_XSS
         Group: JavaScript_High_Risk
         Language: JavaScript
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED", "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]

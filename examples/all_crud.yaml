@@ -42,7 +42,8 @@ Tests:
         Test: C
   - Name: simple test Create Query after scan
     Queries:
-      - Name: "e2e_test_query1"
+      - Engine: sast
+        Name: "e2e_test_query1"
         Group: "e2e_test_querygroup1"
         Language: "Java"
         Scope: 
@@ -100,7 +101,8 @@ Tests:
         Severity: HIGH
         Test: U
     Queries:
-      - Name: "e2e_test_query1"
+      - Engine: sast
+        Name: "e2e_test_query1"
         Group: "e2e_test_querygroup1"
         Language: "Java"
         Scope: 
@@ -135,7 +137,8 @@ Tests:
       - Project: e2e-project1
         Test: D
     Queries:
-      - Name: "e2e_test_query1"
+      - Engine: sast
+        Name: "e2e_test_query1"
         Group: "e2e_test_querygroup1"
         Language: "Java"
         Scope: 

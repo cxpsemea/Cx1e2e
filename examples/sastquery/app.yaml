@@ -6,7 +6,8 @@ Tenant: your_tenant_here
 Tests:
   - Name: create app-level override and run a scan
     Queries:
-      - Name: Client_DOM_XSS
+      - Engine: sast
+        Name: Client_DOM_XSS
         Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
@@ -43,7 +44,8 @@ Tests:
         FailTest: true
   - Name: Delete app-level override
     Queries:
-      - Name: Client_DOM_XSS
+      - Engine: sast
+        Name: Client_DOM_XSS
         Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript

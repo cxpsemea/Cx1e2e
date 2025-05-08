@@ -6,7 +6,8 @@ Tenant: your_tenant_here
 Tests:
   - Name: create project query override and run a scan
     Queries:
-      - Name: Client_DOM_XSS
+      - Engine: sast
+        Name: Client_DOM_XSS
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 
@@ -38,7 +39,8 @@ Tests:
         FailTest: true
   - Name: delete project query override
     Queries:
-      - Name: Client_DOM_XSS
+      - Engine: sast
+        Name: Client_DOM_XSS
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 
