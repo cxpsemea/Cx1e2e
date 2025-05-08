@@ -82,7 +82,6 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		} else if !Engines.IsEnabled(e) && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this was disabled for this test execution", e)
 		} else {
-			logger.Infof("Requested to run with engine %v", e)
 			engines = append(engines, e)
 			//scanConfig := Cx1ClientGo.ScanConfiguration{}
 			//scanConfig.ScanType = e
@@ -91,7 +90,6 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 			if e == "sast" {
 				scanConfigSet.AddConfig("sast", "incremental", "false")
 				if t.SASTPreset != "" {
-					logger.Infof("Adding preset: %v", t.SASTPreset)
 					scanConfigSet.AddConfig("sast", "presetName", t.SASTPreset)
 				}
 				scanConfigSet.AddConfig("sast", "fastScanMode", "false")
