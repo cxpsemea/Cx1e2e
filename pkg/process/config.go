@@ -103,10 +103,6 @@ func LoadConfig(logger *logrus.Logger, configPath string) (TestConfig, error) {
 		conf.Tests[tid].Init()
 	}
 
-	//conf.Tests = testSet
-	if !conf.IsValid(logger) {
-		return conf, fmt.Errorf("Tests failed to validate - review the logs and update the YAMLs")
-	}
 	return conf, nil
 }
 
@@ -595,16 +591,16 @@ func (t TestSet) IsValid(logger *logrus.Logger) bool {
 			failedTests = true
 		}
 	}
+
 	return !failedTests
 }
 
 func isTestValid(runner TestRunner, logger *logrus.Logger) bool {
 	failedTest := false
-
 	for _, test := range []string{types.OP_CREATE, types.OP_READ, types.OP_UPDATE, types.OP_DELETE} {
 		if runner.IsType(test) {
 			if err := runner.Validate(test); err != nil {
-				logger.Infof("Test %v %v is invalid: %v", runner.String(), test, err)
+				logger.Infof("Test [%v] %v %v is invalid: %v", runner.GetSource(), runner.String(), test, err)
 				failedTest = true
 			}
 		}

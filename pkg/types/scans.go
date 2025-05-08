@@ -14,6 +14,9 @@ func (t *ScanCRUD) Validate(CRUD string) error {
 	if CRUD == OP_CREATE && ((t.Repository == "" && t.Branch == "") && t.ZipFile == "") {
 		return fmt.Errorf("project repository and branch or zip file is missing")
 	}
+	if t.Engine == "" {
+		return fmt.Errorf("engine is missing")
+	}
 
 	return nil
 }

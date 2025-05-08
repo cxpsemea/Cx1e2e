@@ -27,6 +27,7 @@ Tests:
     Scans:
       - Project: e2e-scan-project%E2E_RUN_SUFFIX%
         Branch: master
+        Engine: sast
         Summary: true
         AggregateSummary: true
         Test: R

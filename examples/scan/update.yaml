@@ -32,6 +32,7 @@ Tests:
   - Name: Delete the previous master-branch scan
     Scans:
       - Project: e2e-scan-project%E2E_RUN_SUFFIX%
+        Engine: sast
         Filter:
           Branches: [ master ]
         Test: D

@@ -89,6 +89,11 @@ func run() uint {
 		return 0
 	}
 
+	if !Config.IsValid(logger) {
+		logger.Errorf("Test configuration failed to validate - review the logs and update the YAMLs")
+		return 0
+	}
+
 	if *LogLevel == "" && Config.LogLevel != "" {
 		switch strings.ToUpper(*LogLevel) {
 		case "TRACE":
