@@ -82,9 +82,9 @@ Tests:
           Query: Use_Of_Hardcoded_Password
           State: NOT_EXPLOITABLE
         Test: R
-      - Project: e2e-result-project%E2E_RUN_SUFFIX%  # there is also a Healthcheck Instruction Missing finding from KICS
-        Type: KICS
-        KICSFilter:
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%  # there is also a Healthcheck Instruction Missing finding from IAC
+        Type: IAC
+        IACFilter:
           SimilarityID: "073d0fe168d28e70e0bb8c3bd0dddf9cbf613a45f3a06f4b406e08a6cfa3f2bc"
           State: NOT_EXPLOITABLE
         Test: R

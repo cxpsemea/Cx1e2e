@@ -4,17 +4,16 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: Create Project, App, and User
-    Projects:
-      - Name: e2e-access-project%E2E_RUN_SUFFIX%
-        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
-        Test: C
+  - Name: Create App
     Applications:
       - Name: e2e-access-app%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
-        Rules: 
-          - Type: "project.name.in"
-            Value: "e2e-access-project%E2E_RUN_SUFFIX%"
+        Test: C
+  - Name: Create Project and User
+    Projects:
+      - Name: e2e-access-project%E2E_RUN_SUFFIX%
+        Applications: [ e2e-access-app%E2E_RUN_SUFFIX% ]
+        FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Test: C
     Groups:
       - Name: e2e-access-group%E2E_RUN_SUFFIX%

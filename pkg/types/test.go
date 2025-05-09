@@ -43,8 +43,8 @@ func (c CRUDTest) GetVersionStr() string {
 	if c.Version.SAST.IsSet() {
 		versions = append(versions, fmt.Sprintf("SAST version %v", c.Version.SAST.String()))
 	}
-	if c.Version.KICS.IsSet() {
-		versions = append(versions, fmt.Sprintf("KICS version %v", c.Version.KICS.String()))
+	if c.Version.IAC.IsSet() {
+		versions = append(versions, fmt.Sprintf("IAC version %v", c.Version.IAC.String()))
 	}
 	return strings.Join(versions, ", ")
 }
@@ -63,4 +63,12 @@ func (c CRUDTest) OnFail() FailAction {
 
 func (c CRUDTest) GetCurrentThread() int {
 	return c.ActiveThread
+}
+
+func (c CRUDTest) Validate(CRUD string) error {
+	return fmt.Errorf("not implemented")
+}
+
+func (c CRUDTest) String() string {
+	return fmt.Sprintf("[%v] %v", c.TestSource, c.Test)
 }

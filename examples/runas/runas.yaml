@@ -19,8 +19,8 @@ Tests:
       - Project: e2e-runas-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
-        Preset: All
-        Engine: sast # sca kics apisec
+        SASTPreset: All
+        Engine: sast # sca iac apisec
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
@@ -104,6 +104,7 @@ Tests:
   - Name: Delete scan fail-test
     Scans:
       - Project: e2e-runas-project%E2E_RUN_SUFFIX%
+        Engine: sast
         Filter:
           Index: 1 # there should be the scan we just ran
           Statuses: [ "Completed", "Canceled" ]

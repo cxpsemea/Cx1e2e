@@ -14,6 +14,9 @@ func (t *ScanCRUD) Validate(CRUD string) error {
 	if CRUD == OP_CREATE && ((t.Repository == "" && t.Branch == "") && t.ZipFile == "") {
 		return fmt.Errorf("project repository and branch or zip file is missing")
 	}
+	if t.Engine == "" {
+		return fmt.Errorf("engine is missing")
+	}
 
 	return nil
 }
@@ -73,24 +76,36 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 	engines := make([]string, 0)
 
 	for _, e := range requested_engines {
-		if !cx1client.IsEngineAllowed(e) && !t.IsForced() {
+		if e == "iac" {
+			e = "kics"
+		}
+
+		if _, ok := cx1client.IsEngineAllowed(e); !ok && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this is not supported in the license and will be skipped", e)
 		} else if !Engines.IsEnabled(e) && !t.IsForced() {
 			logger.Warnf("Requested to run a scan with engine %v but this was disabled for this test execution", e)
 		} else {
-
 			engines = append(engines, e)
 			//scanConfig := Cx1ClientGo.ScanConfiguration{}
 			//scanConfig.ScanType = e
 			scanConfigSet.AddConfig(e, "", "")
+
 			if e == "sast" {
 				scanConfigSet.AddConfig("sast", "incremental", "false")
-				if t.Preset != "" {
-					scanConfigSet.AddConfig("sast", "presetName", t.Preset)
+				if t.SASTPreset != "" {
+					scanConfigSet.AddConfig("sast", "presetName", t.SASTPreset)
 				}
-				scanConfigSet.AddConfig("sast", "fast scan mode", "false")
-				scanConfigSet.AddConfig("sast", "light queries", "false")
+				scanConfigSet.AddConfig("sast", "fastScanMode", "false")
+				scanConfigSet.AddConfig("sast", "lightQueries", "false")
 				//scanConfig.Values = map[string]string{"incremental": strconv.FormatBool(t.Incremental), "presetName": t.Preset}
+			} else if e == "kics" {
+				if t.IACPreset != "" {
+					preset, err := cx1client.GetIACPresetByName(t.IACPreset)
+					if err != nil {
+						return err
+					}
+					scanConfigSet.AddConfig("kics", "presetId", preset.PresetID)
+				}
 			}
 			//scanConfigs = append(scanConfigs, scanConfig)
 		}
@@ -185,20 +200,36 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		}
 
 		if getWorkflow {
+			var fail_reason string = "Failed"
+			{
+				var fail_reasons []string
+				for _, status := range test_Scan.StatusDetails {
+					if status.Status != expectedResult {
+						fail_reasons = append(fail_reasons, fmt.Sprintf("%v: %v", status.Name, status.Details))
+					}
+				}
+				fail_reason = strings.Join(fail_reasons, ", ")
+			}
+
 			workflow, err := cx1client.GetScanWorkflowByID(test_Scan.ScanID)
 			if err != nil {
 				logger.Errorf("Failed to get workflow update for scan %v: %s", test_Scan.ScanID, err)
-				return fmt.Errorf("scan finished with status '%v' but %v was expected", test_Scan.Status, expectedResult)
+				return fmt.Errorf("scan finished with status '%v' (%v) but %v was expected", test_Scan.Status, fail_reason, expectedResult)
 			} else {
 				if len(workflow) == 0 {
-					return fmt.Errorf("scan finished with status '%v' but %v was expected, there was no workflow log available for additional details", test_Scan.Status, expectedResult)
+					return fmt.Errorf("scan finished with status '%v' (%v) but %v was expected, there was no workflow log available for additional details", test_Scan.Status, fail_reason, expectedResult)
 				} else {
 					workflow_index := len(workflow) - 2
 					if workflow_index <= 0 {
 						workflow_index = 0
 					}
 
-					return fmt.Errorf("scan finished with status '%v - %v' but %v was expected", test_Scan.Status, workflow[workflow_index].Info, expectedResult)
+					logger.Debugf("Full workflow: ")
+					for id := range workflow {
+						logger.Debugf("%d: %v", id, workflow[id].Info)
+					}
+
+					return fmt.Errorf("scan finished with status '%v' (%v) but %v was expected", test_Scan.Status, fail_reason, expectedResult)
 				}
 			}
 		}
@@ -220,15 +251,17 @@ func (t *ScanCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogge
 			t.Filter.Index = 1 //
 		}
 		t.Cx1ScanFilter = &(Cx1ClientGo.ScanFilter{
-			BaseFilter: Cx1ClientGo.BaseFilter{
-				Offset: 0,
-				Limit:  uint64(t.Filter.Index),
-			},
-			Statuses: t.Filter.Statuses,
-			Branches: t.Filter.Branches,
+			Statuses:  t.Filter.Statuses,
+			Branches:  t.Filter.Branches,
+			ProjectID: project.ProjectID,
 		})
 
-		scans, err = cx1client.GetLastScansByIDFiltered(project.ProjectID, *t.Cx1ScanFilter)
+		engine := t.Engine
+		if engine == "iac" {
+			engine = "kics"
+		}
+		scans, err := cx1client.GetLastScansByEngineFiltered(engine, uint64(t.Filter.Index), *t.Cx1ScanFilter)
+
 		if err != nil {
 			return err
 		}

@@ -13,11 +13,11 @@ Tests:
             Value: tag1value
     Scans:
       - Project: e2e-scan-project%E2E_RUN_SUFFIX%
-        Repository: https://github.com/michaelkubiaczyk/ssba
+        Repository: https://github.com/cx-michael-kubiaczyk/ssba
         Branch: master
-        Preset: All
+        SASTPreset: All
         #Engine: sast #SAST only
-        Engine: sast sca kics apisec #throw everything at it
+        Engine: sast sca iac apisec #throw everything at it
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
@@ -27,6 +27,7 @@ Tests:
     Scans:
       - Project: e2e-scan-project%E2E_RUN_SUFFIX%
         Branch: master
+        Engine: sast
         Summary: true
         AggregateSummary: true
         Test: R

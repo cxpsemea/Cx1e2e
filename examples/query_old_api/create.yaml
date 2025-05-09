@@ -4,20 +4,20 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create temporary application, project, new preset, run a scan
-    Projects:
-      - Name: e2e-queryo-project%E2E_RUN_SUFFIX%
-        Test: C
+  - Name: create temporary application
     Applications:
       - Name: e2e-queryo-app%E2E_RUN_SUFFIX%
-        Rules: 
-          - Type: "project.name.in"
-            Value: "e2e-queryo-project%E2E_RUN_SUFFIX%"
+        Test: C
+  - Name: create temporary project, new preset, run a scan
+    Projects:
+      - Name: e2e-queryo-project%E2E_RUN_SUFFIX%
+        Applications: [ e2e-queryo-app%E2E_RUN_SUFFIX% ]
         Test: C
     Presets:
       - Name: e2e-queryo-preset%E2E_RUN_SUFFIX%
-        Description: This is my test preset        
-        Queries:
+        Description: This is my test preset       
+        Engine: "sast" 
+        SASTQueries:
           - Language: JavaScript
             Group: JavaScript_High_Risk
             Name: Client_DOM_XSS
@@ -26,7 +26,7 @@ Tests:
       - Project: e2e-queryo-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
         Branch: zip
-        Preset: e2e-queryo-preset%E2E_RUN_SUFFIX%
+        SASTPreset: e2e-queryo-preset%E2E_RUN_SUFFIX%
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true

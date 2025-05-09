@@ -1,0 +1,57 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: create corp query override and run a scan
+    Queries:
+      - Name: Healthcheck Instruction Missing
+        Engine: iac
+        Group: common
+        Platform: Dockerfile
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        Scope: 
+          Tenant: true
+          Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Source: |
+          package Cx
+          CxPolicy[result] {
+              result := {}
+          }
+        Severity: LOW       
+        Test: C
+        OnFail:
+          FailTestSet: true
+    Scans:
+      - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        ZipFile: ../files/SSBAv0.8.zip
+        Branch: zip
+        IACPreset: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        Engine: iac
+        WaitForEnd: true
+        CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
+        Test: C
+    Results:
+      - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Type: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        IACFilter:
+          Query: Healthcheck Instruction Missing
+          Severity: HIGH
+        Test: R
+        FailTest: true
+  - Name: delete project query override
+    Queries:
+      - Name: Healthcheck Instruction Missing
+        Engine: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        Group: common
+        Platform: Dockerfile
+        Scope: 
+          Tenant: true
+          Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Test: D
+        DeleteAuditSession: true

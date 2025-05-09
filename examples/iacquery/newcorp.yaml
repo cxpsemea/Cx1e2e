@@ -1,0 +1,90 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: create a new corp query and add to preset
+    Queries:
+      - Name: Ronald McDonald is running things
+        Engine: iac
+        Group: common
+        Platform: Dockerfile
+        Category: Resource Management
+        Description: This is a custom preset
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        DescriptionURL: https://checkmarx.com
+        CWE: 123
+        Scope: 
+          Tenant: true
+          Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Source: |
+          package Cx
+
+          import data.generic.dockerfile as dockerLib
+
+          CxPolicy[result] {
+            resource := input.document[i].command[name]
+            dockerLib.check_multi_stage(name, input.document[i].command)
+
+              userCmd := resource[j]
+              userCmd.Cmd == "user"
+              userCmd.Value[0] == "ronaldmcdonald"
+
+              result := {
+                  "documentId": input.document[i].id,
+                  "searchKey": sprintf("USER=%s", [userCmd.Value[0]]),
+                  "issueType": "IncorrectValue",
+                  "keyExpectedValue": "User shouldn't be Ronald McDonald",
+                  "keyActualValue": "User is Ronald McDonald",
+              }
+          }
+        Severity: LOW       
+        Test: C
+        OnFail:
+          FailTestSet: true
+    Presets:
+      - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        Description: This is my test preset        
+        Engine: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        IACQueries:
+          - Platform: Dockerfile
+            Group: common
+            Name: "Healthcheck Instruction Missing"
+          - Platform: Dockerfile
+            Group: common
+            Name: "Ronald McDonald is running things"
+        Test: U
+  - Name: Run a scan and check the results
+    Scans:
+      - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        ZipFile: ../files/SSBAv0.8.zip
+        Branch: zip
+        IACPreset: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        Engine: iac
+        WaitForEnd: true
+        CancelOnTimeout: true
+        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
+        Test: C
+    Results:
+      - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Type: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        IACFilter:
+          Query: Ronald McDonald is running things
+          Severity: LOW
+        Test: R
+  - Name: delete project query override
+    Queries:
+      - Name: Ronald McDonald is running things
+        Engine: iac
+        Group: common
+        Platform: Dockerfile
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        Scope: 
+          Tenant: true
+          Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Test: D
+        DeleteAuditSession: true

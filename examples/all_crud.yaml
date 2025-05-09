@@ -20,8 +20,9 @@ Tests:
         Test: C
     Presets:
       - Name: e2e-preset1
-        Description: This is my test preset        
-        Queries:
+        Description: This is my test preset
+        Engine: "sast"
+        SASTQueries:
           - Language: Java
             Group: "Java_High_Risk"
             Name: "Reflected_XSS_All_Clients"
@@ -31,9 +32,9 @@ Tests:
         Test: C
     Scans:
       - Project: e2e-project1
-        Repository: https://github.com/michaelkubiaczyk/ssba
+        Repository: https://github.com/cx-michael-kubiaczyk/ssba
         Branch: master
-        Preset: e2e-preset1
+        SASTPreset: e2e-preset1
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
@@ -41,7 +42,8 @@ Tests:
         Test: C
   - Name: simple test Create Query after scan
     Queries:
-      - Name: "e2e_test_query1"
+      - Engine: sast
+        Name: "e2e_test_query1"
         Group: "e2e_test_querygroup1"
         Language: "Java"
         Scope: 
@@ -75,8 +77,9 @@ Tests:
         Test: U
     Presets:
       - Name: e2e-preset1
-        Description: This is my test preset        
-        Queries:
+        Description: This is my test preset    
+        Engine: "sast"    
+        SASTQueries:
           - Language: Java
             Group: "Java_High_Risk"
             Name: "SQL_Injection"    
@@ -84,7 +87,7 @@ Tests:
     Projects:
       - Name: e2e-project1
         Groups: [ e2e-group1 ]
-        Application: e2e-app1
+        Applications: [ e2e-app1 ]
         Tags: 
           - Test: tag1
             Test2: tag2
@@ -98,7 +101,8 @@ Tests:
         Severity: HIGH
         Test: U
     Queries:
-      - Name: "e2e_test_query1"
+      - Engine: sast
+        Name: "e2e_test_query1"
         Group: "e2e_test_querygroup1"
         Language: "Java"
         Scope: 
@@ -124,6 +128,7 @@ Tests:
         Test: D
     Presets:
       - Name: e2e-preset1
+        Engine: "sast"
         Test: D
     Projects:
       - Name: e2e-project1
@@ -132,7 +137,8 @@ Tests:
       - Project: e2e-project1
         Test: D
     Queries:
-      - Name: "e2e_test_query1"
+      - Engine: sast
+        Name: "e2e_test_query1"
         Group: "e2e_test_querygroup1"
         Language: "Java"
         Scope: 

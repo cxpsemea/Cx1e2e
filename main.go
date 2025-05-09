@@ -36,7 +36,7 @@ func run() uint {
 	LogLevel := flag.String("log", "", "Log level: TRACE, DEBUG, INFO, WARNING, ERROR, FATAL")
 	ReportType := flag.String("report-type", "html,json", "Report output format: html or json")
 	ReportName := flag.String("report-name", "cx1e2e_result", "Report output base name")
-	Engines := flag.String("engines", "sast,sca,kics,apisec", "Run tests only for these engines")
+	Engines := flag.String("engines", "sast,sca,iac,apisec,2ms,containers", "Run tests only for these engines")
 	Proxy := flag.String("proxy", "", "Optional: Proxy to use when connecting to CheckmarxOne")
 	NoTLS := flag.Bool("notls", false, "Optional: Disable TLS verification")
 	Threads := flag.Int("threads", 1, "How many concurrent tests to run")
@@ -86,6 +86,11 @@ func run() uint {
 	Config, err := process.LoadConfig(logger, *testConfig)
 	if err != nil {
 		logger.Fatalf("Failed to load configuration file %v: %s", *testConfig, err)
+		return 0
+	}
+
+	if !Config.IsValid(logger) {
+		logger.Errorf("Test configuration failed to validate - review the logs and update the YAMLs")
 		return 0
 	}
 
@@ -216,10 +221,14 @@ func run() uint {
 			Config.Engines.SAST = true
 		case "sca":
 			Config.Engines.SCA = true
-		case "kics":
-			Config.Engines.KICS = true
+		case "kics", "iac":
+			Config.Engines.IAC = true
 		case "apisec":
 			Config.Engines.APISEC = true
+		case "2ms", "secrets":
+			Config.Engines.Secrets = true
+		case "containers":
+			Config.Engines.Containers = true
 		}
 	}
 

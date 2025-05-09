@@ -16,7 +16,7 @@ func (t *ReportCRUD) Validate(CRUD string) error {
 	}
 
 	if len(t.Scanners) == 0 {
-		return fmt.Errorf("report scanners must have more than one scanner, eg: sast, sca, kics")
+		return fmt.Errorf("report scanners must have more than one scanner, eg: sast, sca, iac")
 	}
 
 	if t.ReportType == "scan" {

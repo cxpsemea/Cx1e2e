@@ -11,5 +11,5 @@ Tests:
     Projects:
       - Name: e2e-project-project%E2E_RUN_SUFFIX%
         Test: C
-        Application: e2e-project-app%E2E_RUN_SUFFIX%
+        Applications: [ e2e-project-app%E2E_RUN_SUFFIX% ]
         

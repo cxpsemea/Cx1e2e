@@ -20,8 +20,9 @@ Tests:
         Test: C
     Presets:
       - Name: e2e-preset1
+        Engine: "sast"
         Description: This is my test preset        
-        Queries:
+        SASTPresetQueries:
           - Language: Java
             Group: "Java_High_Risk"
             Name: "Reflected_XSS_All_Clients"    
@@ -46,7 +47,7 @@ Tests:
         Engine: sast
         Repository: https://github.com/cxpsemea/cx1clientgo
         Branch: main
-        Preset: e2e-preset1
+        SASTPreset: e2e-preset1
         Test: C
         WaitForEnd: true
         CancelOnTimeout: true
@@ -65,6 +66,7 @@ Tests:
         Test: D
     Presets:
       - Name: e2e-preset1
+        Engine: "sast"
         Test: D
     Roles: 
       - Name: e2e-role1

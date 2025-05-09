@@ -14,7 +14,7 @@ Tests:
       - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
-        Preset: All
+        SASTPreset: All
         Engine: apisec # this is disabled in my local test environment
         ForceRun: true
         WaitForEnd: true        

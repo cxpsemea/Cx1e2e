@@ -36,9 +36,9 @@ func NewAuditSessionManager() *AuditSessionManager {
 	}
 }
 
-func (m *AuditSessionManager) GetOrCreateSession(thread int, scope CxQLScope, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) (*Cx1ClientGo.AuditSession, error) {
-	logger.Debugf("Audit Session Manager: get or create session for scope %v, language %v, project %v", scope.String(), language, lastScan.ProjectID)
-	session, err := m.GetSession(thread, scope, language, lastScan, cx1client, logger)
+func (m *AuditSessionManager) GetOrCreateSession(thread int, scope CxQLScope, engine, platform, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) (*Cx1ClientGo.AuditSession, error) {
+	logger.Debugf("Audit Session Manager: get or create session for engine %v, scope %v, platform %v, language %v, project %v", engine, scope.String(), platform, language, lastScan.ProjectID)
+	session, err := m.GetSession(thread, scope, engine, platform, language, lastScan, cx1client, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +47,8 @@ func (m *AuditSessionManager) GetOrCreateSession(thread int, scope CxQLScope, la
 	}
 
 	// no session found so we need to create a new one
-	logger.Debugf("Audit Session Manager: create session for scope %v, language %v, project %v", scope, language, lastScan.ProjectID)
-	new_session, err := cx1client.GetAuditSessionByID("sast", lastScan.ProjectID, lastScan.ScanID)
+	logger.Debugf("Audit Session Manager: create session for engine %v, scope %v, platform %v, language %v, project %v", engine, scope, platform, language, lastScan.ProjectID)
+	new_session, err := cx1client.GetAuditSessionByID(engine, lastScan.ProjectID, lastScan.ScanID)
 	if err != nil {
 		return nil, err
 	}
@@ -60,8 +60,8 @@ func (m *AuditSessionManager) GetOrCreateSession(thread int, scope CxQLScope, la
 	return &new_session, nil
 }
 
-func (m *AuditSessionManager) GetSession(thread int, scope CxQLScope, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) (*Cx1ClientGo.AuditSession, error) {
-	logger.Debugf("Audit Session Manager: get session for scope %v, language %v, project %v", scope.String(), language, lastScan.ProjectID)
+func (m *AuditSessionManager) GetSession(thread int, scope CxQLScope, engine, platform, language string, lastScan *Cx1ClientGo.Scan, cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger) (*Cx1ClientGo.AuditSession, error) {
+	logger.Debugf("Audit Session Manager: get session for engine %v, scope %v, platform %v, language %v, project %v", engine, scope.String(), platform, language, lastScan.ProjectID)
 	m.Lock.Lock()
 	defer m.Lock.Unlock()
 
@@ -69,7 +69,8 @@ func (m *AuditSessionManager) GetSession(thread int, scope CxQLScope, language s
 
 	for id := range m.Sessions {
 		session := m.Sessions[id].Session
-		if m.Sessions[id].Thread == thread && (session.ProjectID == scope.ProjectID || scope.Corp) && session.HasLanguage(language) {
+		logger.Debugf("Checking session: %v", session.String())
+		if m.Sessions[id].Thread == thread && (session.ProjectID == scope.ProjectID || scope.Corp) && (session.HasLanguage(language) || session.HasPlatform(platform)) && session.Engine == engine {
 			if time.Since(session.LastHeartbeat) < AuditSessionTimeoutMinutes*time.Minute {
 				if err := cx1client.AuditSessionKeepAlive(session); err != nil {
 					logger.Warnf("Tried to refresh existing audit session %v but failed: %s", session.String(), err)
@@ -77,7 +78,7 @@ func (m *AuditSessionManager) GetSession(thread int, scope CxQLScope, language s
 					m.Sessions = slices.Delete(m.Sessions, id, id+1)
 					return nil, nil
 				} else {
-					logger.Warnf("Found existing audit session %v (scope: %v, language: %v)", session.String(), scope.String(), language)
+					logger.Debugf("Found existing audit session %v", session.String())
 					return session, nil
 				}
 			} else {

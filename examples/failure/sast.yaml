@@ -9,7 +9,7 @@ Tests:
       - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
-        Preset: All
+        SASTPreset: All
         Engine: sast
         WaitForEnd: true
         Status: Completed
@@ -17,7 +17,8 @@ Tests:
         Test: C
   - Name: Create a query override that will fail
     Queries:   
-      - Name: Stored_XSS
+      - Engine: sast
+        Name: Stored_XSS
         Group: Java_High_Risk
         Language: Java
         Scope: 
@@ -32,7 +33,7 @@ Tests:
       - Project: e2e-failure-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
-        Preset: All
+        SASTPreset: All
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
@@ -41,7 +42,8 @@ Tests:
         Test: C
   - Name: delete project query override
     Queries:
-      - Name: Stored_XSS
+      - Engine: sast
+        Name: Stored_XSS
         Group: Java_High_Risk
         Language: Java
         Scope: 
