@@ -23,7 +23,7 @@ Tests:
             Name: Client_DOM_XSS
         Test: C
         OnFail:
-          RetryCount: 2
+          Retries: 2
           RetryDelay: 30
     Scans:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
@@ -35,7 +35,7 @@ Tests:
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         OnFail:
-          RetryCount: 5
+          Retries: 5
           RetryDelay: 30
         Test: C
     Results:

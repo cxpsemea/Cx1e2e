@@ -18,7 +18,7 @@ Tests:
         Compile: true        
         Test: C
         OnFail:
-          RetryCount: 1
+          Retries: 1
           RetryDelay: 30
           FailTestSet: true
     Scans:
@@ -32,7 +32,7 @@ Tests:
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
         OnFail:
-          RetryCount: 1
+          Retries: 1
           RetryDelay: 30
           FailTestSet: true
     Results:

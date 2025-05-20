@@ -26,7 +26,7 @@ Tests:
             Name: "Healthcheck Instruction Missing"
         Test: C
         OnFail:
-          RetryCount: 2
+          Retries: 2
           RetryDelay: 32
     Scans:
       - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
