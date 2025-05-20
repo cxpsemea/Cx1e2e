@@ -69,6 +69,7 @@ type TestResult struct {
 	TestObject string
 	Reason     []string
 	TestSource string
+	Attempts   uint
 }
 
 // test result output
