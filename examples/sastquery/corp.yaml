@@ -19,6 +19,8 @@ Tests:
         Compile: true
         Test: C
         OnFail:
+          RetryCount: 1
+          RetryDelay: 30
           FailTestSet: true
     Scans:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
@@ -29,6 +31,10 @@ Tests:
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
+        OnFail:
+          RetryCount: 1
+          RetryDelay: 30
+          FailTestSet: true
         Test: C
     Results:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
