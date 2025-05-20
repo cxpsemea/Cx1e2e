@@ -22,6 +22,9 @@ Tests:
             Group: JavaScript_High_Risk
             Name: Client_DOM_XSS
         Test: C
+        OnFail:
+          RetryCount: 2
+          RetryDelay: 31
     Scans:
       - Project: e2e-queryo-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
