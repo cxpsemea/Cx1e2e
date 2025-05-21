@@ -345,7 +345,7 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD,
 				err = fmt.Errorf("test expects %v, current version is %v", test.GetVersionStr(), v.String())
 			}
 
-			if err != nil && !test.IsForced() {
+			if err != nil && !test.IsForced() { // if an error prevents us from running the test, and the test isn't a Forced test, skip
 				result = MakeResult(test)
 				result.CRUD = CRUD
 				result.Name = testName
@@ -353,13 +353,17 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD,
 				result.Reason = []string{err.Error()}
 				result.Result = TST_SKIP
 				logger.Warnf("Test for %v %v will be skipped. Reason: %s", CRUD, test.String(), err)
-			} else {
+			} else { // test can run
 				result = Run(cx1client, logger, CRUD, testName, test, Config)
 				if failAction.RetryCount > 0 && result.Result == TST_FAIL {
 					for count := 1; count <= (int)(failAction.RetryCount); count++ {
 						logger.Infof("Test for %v %v failed due to %v, waiting %d seconds for retry %d of %d", CRUD, test.String(), result.Reason[0], failAction.RetryDelay, count, failAction.RetryCount)
 						time.Sleep(time.Duration(failAction.RetryDelay) * time.Second)
 						result = Run(cx1client, logger, CRUD, testName, test, Config)
+					}
+
+					if result.Result == TST_FAIL {
+						result.Reason = append(result.Reason, fmt.Sprintf(" (with %d retries)", failAction.RetryCount))
 					}
 				}
 			}
@@ -562,12 +566,20 @@ func LogResult(logger *types.ThreadLogger, result TestResult) {
 	switch result.Result {
 	case TST_FAIL:
 		logger.Errorf("FAIL [%.3fs]: %v %v %v '%v' (%v) [%v]", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject, result.TestSource)
-		logger.Errorf("Failure reason: %v", result.Reason[0])
+		if result.Attempts > 1 {
+			logger.Errorf("Failure reason: %v (with %d attempts)", result.Reason[0], result.Attempts)
+		} else {
+			logger.Errorf("Failure reason: %v", result.Reason[0])
+		}
 	case TST_SKIP:
 		logger.Warnf("SKIP [%.3fs]: %v %v %v '%v' (%v) [%v]", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject, result.TestSource)
 		logger.Warnf("Skip reason: %v", result.Reason)
 	case TST_PASS:
-		logger.Infof("PASS [%.3fs]: %v %v %v '%v' (%v) [%v]", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject, result.TestSource)
+		if result.Attempts > 1 {
+			logger.Infof("PASS [%.3fs]: %v %v %v '%v' (%v) [%v] - took %d attempts", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject, result.TestSource, result.Attempts)
+		} else {
+			logger.Infof("PASS [%.3fs]: %v %v %v '%v' (%v) [%v]", result.Duration, result.CRUD, result.Module, testType, result.Name, result.TestObject, result.TestSource)
+		}
 	}
 }
 

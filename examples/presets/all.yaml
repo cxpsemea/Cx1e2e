@@ -1,0 +1,38 @@
+IAMURL: https://eu.iam.checkmarx.net
+Cx1URL: https://eu.ast.checkmarx.net
+Tenant: your_tenant_here
+#ProxyURL: http://127.0.0.1:8080
+#LogLevel: TRACE
+Tests:
+  - Name: Create a new SAST preset
+    Presets:
+      - Name: e2e-sastquery-preset%E2E_RUN_SUFFIX%
+        Description: This is my test preset    
+        Engine: "sast"    
+        SASTQueries:
+          - Language: JavaScript
+            Group: JavaScript_High_Risk
+            Name: Client_DOM_XSS
+        Test: C
+  - Name: Create a new IAC preset
+    Presets:
+      - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        Description: This is my test preset    
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        Engine: iac
+        IACQueries:
+          - Platform: Dockerfile
+            Group: common
+            Name: "Healthcheck Instruction Missing"
+        Test: C
+  - Name: Delete SAST preset
+    Presets:
+      - Name: e2e-sastquery-preset%E2E_RUN_SUFFIX%
+        Engine: "sast"
+        Test: D      
+  - Name: Delete IAC preset
+    Presets:
+      - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+        Engine: iac
+        FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
+        Test: D   
