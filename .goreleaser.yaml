@@ -1,0 +1,25 @@
+version: 2
+
+project_name: cx1e2e
+
+builds:
+  - id: default
+    main: ./main.go
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+    binary: cx1e2e
+
+archives:
+  - format: zip
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  github:
+    owner: cxpsemea
+    name: cx1e2e

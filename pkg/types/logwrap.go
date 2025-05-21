@@ -56,6 +56,13 @@ func (l ThreadLogger) Error(msg string) {
 	l.logger.Errorf(l.makeMsg(msg))
 }
 
+func (l ThreadLogger) Fatalf(msg string, keysAndValues ...interface{}) {
+	l.logger.Fatal(l.makeMsgf(msg, keysAndValues...))
+}
+func (l ThreadLogger) Fatal(msg string) {
+	l.logger.Fatalf(l.makeMsg(msg))
+}
+
 func (l ThreadLogger) Infof(msg string, keysAndValues ...interface{}) {
 	l.logger.Info(l.makeMsgf(msg, keysAndValues...))
 }
