@@ -100,7 +100,7 @@ func (t *ProjectCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLo
 
 	t.Project = &test_Project
 
-	if len(t.Applications) > 0 {
+	if len(t.Applications) > 0 && t.IsType(OP_READ) { // we only want to validate on read (read op can be called from update, which could be adding apps)
 		for _, appName := range t.Applications {
 			match := false
 			app, err := cx1client.GetApplicationByName(appName)
