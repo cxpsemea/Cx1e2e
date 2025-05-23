@@ -415,7 +415,7 @@ func (t *CxQLCRUD) TerminateSession(session_source string, cx1client *Cx1ClientG
 	// a session can be created by the automatic Read operation inserted prior to an Update or Delete operation.
 	// in that case, the session would be created & deleted during the RunRead part, and no longer exist when the Update/Delete executes
 	// so we only want to terminate the session if it was created during the same operation as the test
-	if t.DeleteSession && t.CRUDTest.IsType(session_source) {
+	if t.DeleteSession && t.CRUDTest.IsType(session_source) && t.LastScan != nil {
 		auditSession, err := ASM.GetSession(t.ActiveThread, t.Scope, t.Engine, t.QueryPlatform, t.QueryLanguage, t.LastScan, cx1client, logger)
 		if err != nil {
 			logger.Errorf("Failed to get audit session: %s", err)
