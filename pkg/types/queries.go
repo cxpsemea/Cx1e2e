@@ -356,26 +356,42 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 	}
 
 	if t.Engine == "sast" {
-		t.SASTQuery.Severity = t.Severity
+
+		var new_query Cx1ClientGo.SASTQuery
+
+		if (t.Severity != "" && t.Severity != t.SASTQuery.Severity) || t.IsExecutable != t.SASTQuery.IsExecutable {
+			meta := t.SASTQuery.GetMetadata()
+			meta.Severity = t.Severity
+			meta.IsExecutable = t.IsExecutable
+			new_query, err = cx1client.UpdateSASTQueryMetadata(auditSession, *t.SASTQuery, meta)
+			if err != nil {
+				return err
+			}
+		}
 
 		if t.Source != "" {
 			t.SASTQuery.Source = t.Source
+			new_query, _, err = cx1client.UpdateSASTQuerySource(auditSession, *t.SASTQuery, t.Source)
+			if err != nil {
+				return err
+			}
 		}
 
-		t.SASTQuery.IsExecutable = t.IsExecutable
-
-		var new_query Cx1ClientGo.SASTQuery
-		new_query, _, err = cx1client.UpdateSASTQuery(auditSession, *t.SASTQuery)
 		t.SASTQuery = &new_query
 	} else if t.Engine == "iac" {
-		t.IACQuery.Severity = t.Severity
-
-		if t.Source != "" {
-			t.IACQuery.Source = t.Source
+		var new_query Cx1ClientGo.IACQuery
+		if t.Severity != t.IACQuery.Severity {
+			meta := t.IACQuery.GetMetadata()
+			meta.Severity = t.Severity
+			new_query, err = cx1client.UpdateIACQueryMetadata(auditSession, *t.IACQuery, meta)
+			if err != nil {
+				return err
+			}
 		}
 
-		var new_query Cx1ClientGo.IACQuery
-		new_query, _, err = cx1client.UpdateIACQuery(auditSession, *t.IACQuery)
+		if t.Source != "" {
+			new_query, _, err = cx1client.UpdateIACQuerySource(auditSession, *t.IACQuery, t.Source)
+		}
 		t.IACQuery = &new_query
 	}
 
