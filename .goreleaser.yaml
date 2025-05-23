@@ -13,11 +13,13 @@ builds:
     binary: cx1e2e
 
 archives:
-  - format: zip
+  - formats: zip
+    id: zips
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  - formats: binary
+    id: bins
+    name_template: "{{ .Binary }}"
 
-artifacts:
-  - type: binary
 
 checksum:
   name_template: "checksums.txt"
