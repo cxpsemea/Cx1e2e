@@ -100,7 +100,7 @@ func (t *ProjectCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLo
 
 	t.Project = &test_Project
 
-	if len(t.Applications) > 0 {
+	if len(t.Applications) > 0 && t.IsType(OP_READ) { // we only want to validate on read (read op can be called from update, which could be adding apps)
 		for _, appName := range t.Applications {
 			match := false
 			app, err := cx1client.GetApplicationByName(appName)
@@ -136,14 +136,21 @@ func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 	}
 
 	if len(t.Applications) > 0 {
+		changed := false
 		for _, appName := range t.Applications {
 			app, err := cx1client.GetApplicationByName(appName)
 			if err != nil {
 				return err
 			}
-			app.AssignProject(t.Project)
 
-			err = cx1client.UpdateApplication(&app)
+			if !t.Project.IsInApplication(&app) {
+				t.Project.AssignApplication(&app)
+				changed = true
+			}
+
+		}
+		if changed {
+			err := cx1client.UpdateProject(t.Project)
 			if err != nil {
 				return err
 			}
@@ -179,7 +186,7 @@ func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 	if len(t.Groups) > 0 || len(t.Project.Groups) > 0 {
 		group_ids := []string{}
 
-		diffGroups := false
+		changed := false
 		for _, g := range t.Groups {
 			group, err := cx1client.GetGroupByName(g)
 			if err != nil {
@@ -187,17 +194,17 @@ func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 			}
 			group_ids = append(group_ids, group.GroupID)
 			if !slices.Contains(t.Project.Groups, group.GroupID) {
-				diffGroups = true
+				changed = true
 			}
 		}
 
 		for _, g := range t.Project.Groups {
 			if !slices.Contains(group_ids, g) {
-				diffGroups = true
+				changed = true
 			}
 		}
 
-		if diffGroups {
+		if changed {
 			t.Project.Groups = group_ids
 			if err := cx1client.UpdateProject(t.Project); err != nil {
 				return err
