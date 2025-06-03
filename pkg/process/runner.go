@@ -436,6 +436,7 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, tes
 			return result
 		} else {
 			result.Result = TST_FAIL
+			result.Reason = []string{err.Error()}
 			return result
 		}
 	} else {
