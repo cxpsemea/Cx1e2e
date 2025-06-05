@@ -11,13 +11,22 @@ builds:
     goarch:
       - amd64
     binary: cx1e2e
+  - id: static
+    main: ./main.go
+    goos:
+      - linux
+    goarch:
+      - amd64
+    binary: cx1e2e-static
+    env:
+      - CGO_ENABLED=0
 
 archives:
   - formats: zip
     id: zips
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-  - formats: binary
-    id: bins
+  - id: bins
+    formats: binary
     name_template: "{{ .Binary }}"
 
 
