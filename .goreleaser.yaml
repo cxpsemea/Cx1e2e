@@ -2,6 +2,10 @@ version: 2
 
 project_name: cx1e2e
 
+
+checks:
+  validate-archives: false
+
 builds:
   - id: default
     main: ./main.go
