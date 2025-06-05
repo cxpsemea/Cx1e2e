@@ -2,10 +2,6 @@ version: 2
 
 project_name: cx1e2e
 
-
-checks:
-  validate-archives: false
-
 builds:
   - id: default
     main: ./main.go
@@ -27,12 +23,21 @@ builds:
 
 archives:
   - formats: zip
-    id: zips
+    id: zips-default
+    ids: [default]
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-  - id: bins
+  - id: bins-default
+    ids: [default]
     formats: binary
     name_template: "{{ .Binary }}"
-
+  - formats: zip
+    id: zips-static
+    ids: [static]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  - id: bins-static
+    ids: [static]
+    formats: binary
+    name_template: "{{ .Binary }}"
 
 checksum:
   name_template: "checksums.txt"
