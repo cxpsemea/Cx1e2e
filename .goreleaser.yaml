@@ -22,18 +22,18 @@ builds:
       - CGO_ENABLED=0
 
 archives:
-  - formats: zip
-    id: zips-default
+  - id: zips-default
+    formats: zip    
     ids: [default]
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
   - id: bins-default
     ids: [default]
     formats: binary
     name_template: "{{ .Binary }}"
-  - formats: zip
-    id: zips-static
+  - id: zips-static
+    formats: zip    
     ids: [static]
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}_static"
   - id: bins-static
     ids: [static]
     formats: binary
