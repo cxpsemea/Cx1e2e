@@ -10,9 +10,6 @@ Tests:
         Test: C
     Applications:
       - Name: e2e-app-app%E2E_RUN_SUFFIX%
-        Rules: 
-          - Type: "project.name.in"
-            Value: "e2e-app-project%E2E_RUN_SUFFIX%"
         Test: C
   - Name: Project Create
     Projects:
@@ -20,3 +17,8 @@ Tests:
         Groups: [ e2e-app-group%E2E_RUN_SUFFIX% ]
         Applications: [ e2e-app-app%E2E_RUN_SUFFIX% ]
         Test: C
+  - Name: Check that the project is in the app
+    Projects:
+      - Name: e2e-app-project%E2E_RUN_SUFFIX%
+        Applications: [ e2e-app-app%E2E_RUN_SUFFIX% ]
+        Test: R
