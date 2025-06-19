@@ -429,26 +429,28 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, tes
 
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	result.Duration = duration
-	logger.Tracef("Test finished: %v", result)
 	if err != nil {
 		if test.IsNegative() { // negative test with error = pass
 			result.Result = TST_PASS
-			return result
 		} else {
 			result.Result = TST_FAIL
 			result.Reason = []string{err.Error()}
-			return result
 		}
 	} else {
 		if test.IsNegative() { // negative test with no error = fail
 			result.Result = TST_FAIL
 			result.Reason = []string{"action succeeded but should have failed"}
-			return result
 		} else {
 			result.Result = TST_PASS
-			return result
 		}
 	}
+
+	if result.Result != TST_PASS && len(result.Reason) == 0 {
+		// this shouldn't happen?
+		logger.Tracef("Test did not pass, but has no reason for it: #%d - %v %v %v: %v [%v]", result.Id, result.CRUD, result.Module, result.TestObject, result.Name, result.FailTest, result.TestSource)
+		result.Reason = []string{"unknown error"}
+	}
+	return result
 }
 
 func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, test TestRunner) bool {
