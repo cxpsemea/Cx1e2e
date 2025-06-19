@@ -177,7 +177,7 @@ func OutputReportHTML(reportName string, reportData *Report, Config *TestConfig)
 	report.WriteString(fmt.Sprintf("Running end to end tests against %v (version: %v)<br>", reportData.Settings.Target, reportData.Settings.Version.String()))
 	report.WriteString(fmt.Sprintf("Authenticated using %v<br>", reportData.Settings.Auth))
 	report.WriteString(fmt.Sprintf("Test set defined in configuration %v<br>", reportData.Settings.Config))
-	report.WriteString(fmt.Sprintf("Test Execution %v took, from %v until %v.<br>", reportData.Settings.Duration, reportData.Settings.StartTime, reportData.Settings.EndTime))
+	report.WriteString(fmt.Sprintf("Test Execution took %v, from %v until %v.<br>", reportData.Settings.Duration, reportData.Settings.StartTime, reportData.Settings.EndTime))
 	report.WriteString(fmt.Sprintf("Tests executed using %d threads.<br>", reportData.Settings.Threads))
 	if os.Getenv("E2E_RUN_SUFFIX") == "" {
 		report.WriteString(fmt.Sprintf("Default object name suffix %%E2E_RUN_SUFFIX%% environment variable is blank. Objects created by cx1e2e will use default names.<br>"))

@@ -162,7 +162,7 @@ type ApplicationCRUD struct {
 	Criticality uint              `yaml:"Criticality"`
 	Rules       []ApplicationRule `yaml:"Rules"`
 	Tags        []Tag             `yaml:"Tags"`
-	Projects    []string          `yaml:"Projects"`
+	Projects    *[]string         `yaml:"Projects"` // this is expected to be a full list of projects in the app
 	Application *Cx1ClientGo.Application
 }
 
@@ -348,12 +348,12 @@ func (o PresetCRUD) String() string {
 
 type ProjectCRUD struct {
 	CRUDTest     `yaml:",inline"`
-	Name         string   `yaml:"Name"`
-	Groups       []string `yaml:"Groups"`
-	Application  string   `yaml:"Application"`
-	Applications []string `yaml:"Applications"`
-	Tags         []Tag    `yaml:"Tags"`
-	Preset       string   `yaml:"Preset"`
+	Name         string    `yaml:"Name"`
+	Groups       *[]string `yaml:"Groups"`
+	Application  string    `yaml:"Application"`
+	Applications *[]string `yaml:"Applications"` // this is expected to be a full list of all applications with this project
+	Tags         []Tag     `yaml:"Tags"`
+	Preset       string    `yaml:"Preset"`
 	Project      *Cx1ClientGo.Project
 }
 

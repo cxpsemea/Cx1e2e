@@ -4,11 +4,34 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: App Update
+  - Name: Remove all projects from the app
     Applications:
       - Name: e2e-app-app%E2E_RUN_SUFFIX%
         Criticality: 3
         Tags: 
-          - Key: tag1
-            Value: value1
+          - Key: tag2
+            Value: value2
+        Projects: []
         Test: U
+  - Name: Check that the project is not in the app
+    Projects:
+      - Name: e2e-app-project%E2E_RUN_SUFFIX%
+        Applications: [ e2e-app-app%E2E_RUN_SUFFIX% ]
+        FailTest: true
+        Test: R
+        OnFail:          
+          Retries: 5
+          RetryDelay: 30
+  - Name: Add the project back into the app
+    Projects:
+      - Name: e2e-app-project%E2E_RUN_SUFFIX%
+        Applications: [ e2e-app-app%E2E_RUN_SUFFIX% ]
+        Test: U
+  - Name: Check that the project is back in the app
+    Projects:
+      - Name: e2e-app-project%E2E_RUN_SUFFIX%
+        Applications: [ e2e-app-app%E2E_RUN_SUFFIX% ]
+        Test: R
+        OnFail:          
+          Retries: 5
+          RetryDelay: 30

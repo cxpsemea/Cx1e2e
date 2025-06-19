@@ -16,7 +16,7 @@ func (t *ProjectCRUD) Validate(CRUD string) error {
 		return fmt.Errorf("project name is missing")
 	}
 
-	if CRUD == OP_CREATE && len(t.Applications) > 1 {
+	if CRUD == OP_CREATE && t.Applications != nil && len(*t.Applications) > 1 {
 		return fmt.Errorf("cannot create a project inside multiple applications - create it in one application, then update it to add others")
 	}
 
@@ -26,8 +26,9 @@ func (t *ProjectCRUD) Validate(CRUD string) error {
 func (t *ProjectCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
 	if t.Application != "" {
 		logger.Warnf("The configuration %v test %v includes a project with an 'Application' set. This has been replaced by the array 'Applications' - please update your configuration.", t.TestSource, t.Name)
-		if !slices.Contains(t.Applications, t.Application) {
-			t.Applications = append(t.Applications, t.Application)
+		if !slices.Contains(*t.Applications, t.Application) {
+			apps := append(*t.Applications, t.Application)
+			t.Applications = &apps
 		}
 		t.Application = ""
 	}
@@ -41,12 +42,14 @@ func (t *ProjectCRUD) GetModule() string {
 func (t *ProjectCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
 	group_ids := []string{}
 
-	for _, g := range t.Groups {
-		group, err := cx1client.GetGroupByName(g)
-		if err != nil {
-			return err
+	if t.Groups != nil {
+		for _, g := range *t.Groups {
+			group, err := cx1client.GetGroupByName(g)
+			if err != nil {
+				return err
+			}
+			group_ids = append(group_ids, group.GroupID)
 		}
-		group_ids = append(group_ids, group.GroupID)
 	}
 
 	tags := make(map[string]string)
@@ -54,14 +57,14 @@ func (t *ProjectCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 		tags[tag.Key] = tag.Value
 	}
 
-	if len(t.Applications) == 0 {
+	if t.Applications == nil {
 		test_Project, err := cx1client.CreateProject(t.Name, group_ids, tags)
 		if err != nil {
 			return err
 		}
 		t.Project = &test_Project
 	} else {
-		app, err := cx1client.GetApplicationByName(t.Applications[0])
+		app, err := cx1client.GetApplicationByName((*t.Applications)[0])
 		if err != nil {
 			return err
 		}
@@ -100,15 +103,15 @@ func (t *ProjectCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLo
 
 	t.Project = &test_Project
 
-	if len(t.Applications) > 0 && t.IsType(OP_READ) { // we only want to validate on read (read op can be called from update, which could be adding apps)
-		for _, appName := range t.Applications {
+	if t.Applications != nil && t.IsType(OP_READ) { // we only want to validate on read (read op can be called from update, which could be adding apps)
+		for _, appName := range *t.Applications {
 			match := false
 			app, err := cx1client.GetApplicationByName(appName)
 			if err != nil {
 				return err
 			}
 
-			for _, p := range app.ProjectIds {
+			for _, p := range *app.ProjectIds {
 				if p == t.Project.ProjectID {
 					match = true
 					break
@@ -135,25 +138,68 @@ func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 		}
 	}
 
-	if len(t.Applications) > 0 {
-		changed := false
-		for _, appName := range t.Applications {
-			app, err := cx1client.GetApplicationByName(appName)
-			if err != nil {
-				return err
+	if t.Applications != nil {
+		// this flow has to change based on direct_app_association
+		if flag, _ := cx1client.CheckFlag("DIRECT_APP_ASSOCIATION_ENABLED"); flag {
+			// with direct app association, we can do all of the project-to-app assignment via the project update call
+			newApps := []string{}
+			for _, appName := range *t.Applications {
+				app, err := cx1client.GetApplicationByName(appName)
+				if err != nil {
+					return err
+				}
+				newApps = append(newApps, app.ApplicationID)
+				if !slices.Contains(*t.Project.Applications, app.ApplicationID) {
+					t.Project.AssignApplicationByID(app.ApplicationID)
+				}
+			}
+			currentApps := *t.Project.Applications
+			for _, appId := range currentApps {
+				if !slices.Contains(newApps, appId) {
+					t.Project.RemoveApplicationByID(appId)
+				}
 			}
 
-			if !t.Project.IsInApplication(&app) {
-				t.Project.AssignApplication(&app)
-				changed = true
-			}
-
-		}
-		if changed {
 			err := cx1client.UpdateProject(t.Project)
 			if err != nil {
 				return err
 			}
+		} else {
+			// without direct app assignment, all changes must be done via rules through the application
+			newApps := []string{}
+			for _, appName := range *t.Applications {
+				app, err := cx1client.GetApplicationByName(appName)
+				if err != nil {
+					return err
+				}
+				newApps = append(newApps, app.ApplicationID)
+				app.AssignProject(t.Project)
+				err = cx1client.UpdateApplication(&app)
+				if err != nil {
+					return fmt.Errorf("failed to add project %v to application %v: %v", t.Project.String(), app.String(), err)
+				}
+			}
+			//t.Project.Applications = &newApps
+
+			for _, appId := range *t.Project.Applications {
+				if !slices.Contains(newApps, appId) {
+					app, err := cx1client.GetApplicationByID(appId)
+					if err != nil {
+						return err
+					}
+					app.UnassignProject(t.Project)
+					err = cx1client.UpdateApplication(&app)
+					if err != nil {
+						return fmt.Errorf("failed to remove project %v from application %v: %v", t.Project.String(), app.String(), err)
+					}
+				}
+			}
+
+			project, err := cx1client.GetProjectByID(t.Project.ProjectID)
+			if err != nil {
+				return err
+			}
+			t.Project = &project
 		}
 	}
 
@@ -183,11 +229,11 @@ func (t *ProjectCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 		}
 	}
 
-	if len(t.Groups) > 0 || len(t.Project.Groups) > 0 {
+	if t.Groups != nil { // the groups field is set in the yaml, so we want to change/update the groups
 		group_ids := []string{}
 
 		changed := false
-		for _, g := range t.Groups {
+		for _, g := range *t.Groups {
 			group, err := cx1client.GetGroupByName(g)
 			if err != nil {
 				return err

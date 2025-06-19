@@ -356,8 +356,8 @@ func RunTest(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD,
 			} else { // test can run
 				result = Run(cx1client, logger, CRUD, testName, test, Config)
 				if failAction.RetryCount > 0 && result.Result == TST_FAIL {
-					for count := 1; count <= (int)(failAction.RetryCount); count++ {
-						logger.Infof("Test for %v %v failed due to %v, waiting %d seconds for retry %d of %d", CRUD, test.String(), result.Reason[0], failAction.RetryDelay, count, failAction.RetryCount)
+					for count := 1; count <= (int)(failAction.RetryCount) && result.Result == TST_FAIL; count++ {
+						logger.Infof("Test for %v %v failed: %v, waiting %d seconds for retry %d of %d", CRUD, test.String(), result.Reason[0], failAction.RetryDelay, count, failAction.RetryCount)
 						time.Sleep(time.Duration(failAction.RetryDelay) * time.Second)
 						result = Run(cx1client, logger, CRUD, testName, test, Config)
 					}
@@ -430,25 +430,27 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, tes
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	result.Duration = duration
 	if err != nil {
-		result.Reason = []string{err.Error()}
 		if test.IsNegative() { // negative test with error = pass
 			result.Result = TST_PASS
-			return result
 		} else {
 			result.Result = TST_FAIL
 			result.Reason = []string{err.Error()}
-			return result
 		}
 	} else {
 		if test.IsNegative() { // negative test with no error = fail
 			result.Result = TST_FAIL
 			result.Reason = []string{"action succeeded but should have failed"}
-			return result
 		} else {
 			result.Result = TST_PASS
-			return result
 		}
 	}
+
+	if result.Result != TST_PASS && len(result.Reason) == 0 {
+		// this shouldn't happen?
+		logger.Tracef("Test did not pass, but has no reason for it: #%d - %v %v %v: %v, failtest: %v [%v]", result.Id, result.CRUD, result.Module, result.TestObject, result.Name, result.FailTest, result.TestSource)
+		result.Reason = []string{"unknown error"}
+	}
+	return result
 }
 
 func CheckFlags(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, test TestRunner) bool {

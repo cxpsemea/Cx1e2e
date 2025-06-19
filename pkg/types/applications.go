@@ -24,14 +24,15 @@ func (t *ApplicationCRUD) GetModule() string {
 }
 
 func updateApplication(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, t *ApplicationCRUD) error {
-	updated := false
-
 	if len(t.Tags) > 0 {
 		t.Application.Tags = make(map[string]string)
 		for _, tag := range t.Tags {
 			t.Application.Tags[tag.Key] = tag.Value
 		}
-		updated = true
+		err := cx1client.UpdateApplication(t.Application)
+		if err != nil {
+			return err
+		}
 	}
 
 	if len(t.Rules) > 0 {
@@ -50,34 +51,41 @@ func updateApplication(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, t *App
 			return err
 		}
 		t.Application = &updatedApplication
-		updated = false
 	}
 
-	if len(t.Projects) > 0 {
-		missing := false
-		for _, p := range t.Projects {
+	if t.Projects != nil {
+		newProjects := []string{}
+		oldProjects := []string{}
+		if t.Application.ProjectIds != nil {
+			oldProjects = *t.Application.ProjectIds
+		}
+
+		for _, p := range *t.Projects {
 			project, err := cx1client.GetProjectByName(p)
 			if err != nil {
 				return err
 			}
-			if !slices.Contains(t.Application.ProjectIds, project.ProjectID) {
-				missing = true
-				t.Application.ProjectIds = append(t.Application.ProjectIds, project.ProjectID)
+			newProjects = append(newProjects, project.ProjectID)
+			if !slices.Contains(oldProjects, project.ProjectID) {
+				t.Application.AssignProject(&project)
 			}
 		}
-		if missing {
-			err := cx1client.UpdateApplication(t.Application)
-			if err != nil {
-				return err
+
+		for _, pid := range oldProjects {
+			if !slices.Contains(newProjects, pid) {
+				p, err := cx1client.GetProjectByID(pid)
+				if err != nil {
+					return err
+				}
+				t.Application.UnassignProject(&p)
 			}
-			updated = true
+		}
+
+		err := cx1client.UpdateApplication(t.Application)
+		if err != nil {
+			return err
 		}
 	}
-
-	if !updated {
-		return cx1client.UpdateApplication(t.Application)
-	}
-
 	return nil
 }
 
