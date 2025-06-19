@@ -5,3 +5,4 @@ cx1e2e*
 *.html
 *.log
 dist
+run*.sh
