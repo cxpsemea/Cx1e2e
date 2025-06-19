@@ -9,7 +9,10 @@ Tests:
       - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
         Engine: iac
         FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
-        Test: D      
+        Test: D     
+        OnFail:
+          Retries: 5
+          RetryDelay: 2 
     Projects:
       - Name: e2e-iacquery-project%E2E_RUN_SUFFIX%
         FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]

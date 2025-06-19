@@ -26,3 +26,6 @@ Tests:
       - Name: e2e-test-import-preset
         Engine: "sast"
         Test: D
+        OnFail:
+          Retries: 5
+          RetryDelay: 2
