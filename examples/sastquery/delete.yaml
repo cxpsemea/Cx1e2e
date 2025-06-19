@@ -8,7 +8,14 @@ Tests:
     Presets:
       - Name: e2e-sastquery-preset%E2E_RUN_SUFFIX%
         Engine: "sast"
-        Test: D      
+        Test: D     
+      - Name: e2e-sastquery-dummy%E2E_RUN_SUFFIX%
+        Engine: "sast"
+        Test: D 
+        Version: 
+          CxOne: 
+            AtLeast: "3.36.0" 
+            Below: "3.37.0"    
     Projects:
       - Name: e2e-sastquery-project%E2E_RUN_SUFFIX%
         Test: D     
