@@ -447,7 +447,7 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, tes
 
 	if result.Result != TST_PASS && len(result.Reason) == 0 {
 		// this shouldn't happen?
-		logger.Tracef("Test did not pass, but has no reason for it: #%d - %v %v %v: %v [%v]", result.Id, result.CRUD, result.Module, result.TestObject, result.Name, result.FailTest, result.TestSource)
+		logger.Tracef("Test did not pass, but has no reason for it: #%d - %v %v %v: %v, failtest: %v [%v]", result.Id, result.CRUD, result.Module, result.TestObject, result.Name, result.FailTest, result.TestSource)
 		result.Reason = []string{"unknown error"}
 	}
 	return result
