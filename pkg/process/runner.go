@@ -429,8 +429,8 @@ func Run(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, CRUD, tes
 
 	duration := float64(time.Now().UnixNano()-start) / float64(time.Second)
 	result.Duration = duration
+	logger.Tracef("Test finished: %v", result)
 	if err != nil {
-		result.Reason = []string{err.Error()}
 		if test.IsNegative() { // negative test with error = pass
 			result.Result = TST_PASS
 			return result
