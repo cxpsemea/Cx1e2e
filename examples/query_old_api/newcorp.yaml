@@ -48,6 +48,8 @@ Tests:
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
+        OnFail:
+          FailTestSet: true
     Results:
       - Project: e2e-queryo-project%E2E_RUN_SUFFIX%
         Type: SAST
