@@ -25,6 +25,21 @@ Tests:
         OnFail:
           Retries: 2
           RetryDelay: 30
+      - Name: e2e-sastquery-dummy%E2E_RUN_SUFFIX%
+        Description: This is my test preset
+        Engine: "sast"
+        Version: 
+          CxOne: 
+            AtLeast: "3.36.0" 
+            Below: "3.37.0"    
+        SASTQueries:
+          - Language: JavaScript
+            Group: JavaScript_High_Risk
+            Name: Client_DOM_XSS
+        Test: C
+        OnFail:
+          Retries: 2
+          RetryDelay: 30
     Scans:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip

@@ -34,6 +34,8 @@ Tests:
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
         Test: C
+        OnFail:
+          FailTestSet: true
     Results:
       - Project: e2e-queryo-project%E2E_RUN_SUFFIX%
         FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED", "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
