@@ -24,9 +24,17 @@ Tests:
     Results:
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
+        FeatureFlags: [ "!CVSS_V3_ENABLED" ]
         SASTFilter:
           Query: Stored_XSS
           Severity: HIGH
+        Test: R
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
+        Type: SAST
+        FeatureFlags: [ "CVSS_V3_ENABLED" ]
+        SASTFilter:
+          Query: Stored_XSS
+          Severity: CRITICAL
         Test: R
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 # there will be three reflected_xss finding
