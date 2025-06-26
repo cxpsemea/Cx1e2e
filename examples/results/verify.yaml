@@ -9,7 +9,7 @@ Tests:
       - Project: e2e-result-project%E2E_RUN_SUFFIX% # the stored_xss finding should now be medium
         Type: SAST
         SASTFilter:
-          QueryID: Stored_XSS # from 3.23-3.30+, before 3.23 was 13625251660291496964
+          Query: Stored_XSS # from 3.23-3.30+, before 3.23 was 13625251660291496964
           Severity: MEDIUM
         Test: R
       - Project: e2e-result-project%E2E_RUN_SUFFIX% # Only one of the reflected xss findings is "confirmed" now
