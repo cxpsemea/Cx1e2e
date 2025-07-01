@@ -8,12 +8,22 @@ Tests:
     Results:
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
+        FeatureFlags: [ "!CVSS_V3_ENABLED" ]
         SASTFilter:
           Query: Stored_XSS # there is only one Stored_XSS finding
           Severity: HIGH
         Test: U
         Severity: MEDIUM
         Comment: "This Stored XSS is medium, not high"
+      - Project: e2e-result-project%E2E_RUN_SUFFIX%
+        Type: SAST
+        FeatureFlags: [ "CVSS_V3_ENABLED" ]
+        SASTFilter:
+          Query: Stored_XSS # there is only one Stored_XSS finding
+          Severity: CRITICAL
+        Test: U
+        Severity: MEDIUM
+        Comment: "This Stored XSS is medium, not critical"
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
         Version: 
