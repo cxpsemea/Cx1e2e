@@ -102,11 +102,15 @@ func (m *AuditSessionManager) Clear(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 	defer m.Lock.Unlock()
 
 	for _, s := range m.Sessions {
-		err := cx1client.AuditDeleteSession(s.Session)
-		if err != nil {
-			logger.Errorf("Failed to terminate audit session: %s", err)
+		if s.Session != nil {
+			err := cx1client.AuditDeleteSession(s.Session)
+			if err != nil {
+				logger.Errorf("Failed to terminate audit session %v: %s", s.String(), err)
+			} else {
+				logger.Warningf("Terminated left-over audit session %v (created: %v)", s.String(), s.Session.CreatedAt.String())
+			}
 		} else {
-			logger.Warningf("Terminated left-over audit session %v (created: %v)", s.String(), s.Session.CreatedAt.String())
+			logger.Errorf("Error: session from thread %d is nil", s.Thread)
 		}
 	}
 	m.Sessions = []AuditSessionWrapper{}
