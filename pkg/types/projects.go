@@ -20,18 +20,14 @@ func (t *ProjectCRUD) Validate(CRUD string) error {
 		return fmt.Errorf("cannot create a project inside multiple applications - create it in one application, then update it to add others")
 	}
 
+	if t.Application != "" {
+		return fmt.Errorf("the configuration %v test %v includes a project with an 'Application' set. This has been replaced by the array 'Applications' - please update your configuration", t.TestSource, t.Name)
+	}
+
 	return nil
 }
 
 func (t *ProjectCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
-	if t.Application != "" {
-		logger.Warnf("The configuration %v test %v includes a project with an 'Application' set. This has been replaced by the array 'Applications' - please update your configuration.", t.TestSource, t.Name)
-		if !slices.Contains(*t.Applications, t.Application) {
-			apps := append(*t.Applications, t.Application)
-			t.Applications = &apps
-		}
-		t.Application = ""
-	}
 	return nil
 }
 
