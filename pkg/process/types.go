@@ -48,6 +48,7 @@ type TestConfig struct {
 	Tests              []TestSet               `yaml:"Tests"`
 	LogLevel           string                  `yaml:"LogLevel"`
 	MultiThreadable    bool                    `yaml:"MultiThreadable"`
+	InlineReport       bool                    `yaml:"-"`
 	ConfigPath         string                  `yaml:"-"`
 	AuthType           string                  `yaml:"-"`
 	AuthUser           string                  `yaml:"-"`

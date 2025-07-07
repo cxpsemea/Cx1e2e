@@ -41,6 +41,7 @@ func run() uint {
 	NoTLS := flag.Bool("notls", false, "Optional: Disable TLS verification")
 	Threads := flag.Int("threads", 1, "How many concurrent tests to run")
 	LogFile := flag.String("logfile", "", "Optional: output log to file")
+	InlineReport := flag.Bool("inline-report", false, "Print the report (json/html) contents at the end of execution")
 
 	flag.Parse()
 
@@ -213,6 +214,7 @@ func run() uint {
 		logger.Errorf("Failed to get version info: %s", err)
 	}
 	logger.Infof("Cx1 version: %v", Config.EnvironmentVersion.String())
+	Config.InlineReport = *InlineReport
 
 	EngineList := strings.Split(strings.ToLower(*Engines), ",")
 	for _, e := range EngineList {
