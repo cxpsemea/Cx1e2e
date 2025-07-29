@@ -66,7 +66,7 @@ func (t *AnalyticsCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 	case "vulnerabilitiesByStatusTotal":
 		_, err = cx1client.GetAnalyticsVulnerabilitiesByStatusTotal(filter)
 	case "vulnerabilitiesBySeverityAndStateTotal":
-		_, err = cx1client.GetAnalyticsVulnerabilitiesByStatusTotal(filter)
+		_, err = cx1client.GetAnalyticsVulnerabilitiesBySeverityAndStateTotal(filter)
 	case "vulnerabilitiesBySeverityOvertime":
 		_, err = cx1client.GetAnalyticsVulnerabilitiesBySeverityOvertime(filter)
 	case "fixedVulnerabilitiesBySeverityOvertime":
