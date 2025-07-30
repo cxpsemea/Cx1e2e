@@ -258,16 +258,34 @@ func GenerateReport(tests *[]TestResult, logger *logrus.Logger, Config *TestConf
 	OutputSummaryConsole(&reportData, logger)
 
 	if strings.Contains(Config.ReportType, "html") {
-		err := OutputReportHTML(fmt.Sprintf("%v.html", Config.ReportName), &reportData, Config)
+		filename := fmt.Sprintf("%v.html", Config.ReportName)
+		err := OutputReportHTML(filename, &reportData, Config)
 		if err != nil {
 			logger.Errorf("Failed to write HTML report to %v.html: %s", Config.ReportName, err)
+		} else if Config.InlineReport {
+			data, err := os.ReadFile(filename)
+			if err != nil {
+				logger.Errorf("Failed to read report %v for inline-report output: %s", filename, err)
+			} else {
+				logger.Infof("Printing report %v inline:", filename)
+				fmt.Println(string(data))
+			}
 		}
 	}
 
 	if strings.Contains(Config.ReportType, "json") {
-		err := OutputReportJSON(fmt.Sprintf("%v.json", Config.ReportName), &reportData)
+		filename := fmt.Sprintf("%v.json", Config.ReportName)
+		err := OutputReportJSON(filename, &reportData)
 		if err != nil {
 			logger.Errorf("Failed to write JSON report to %v.json: %s", Config.ReportName, err)
+		} else if Config.InlineReport {
+			data, err := os.ReadFile(filename)
+			if err != nil {
+				logger.Errorf("Failed to read report %v for inline-report output: %s", filename, err)
+			} else {
+				logger.Infof("Printing report %v inline:", filename)
+				fmt.Println(string(data))
+			}
 		}
 	}
 

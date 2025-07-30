@@ -152,7 +152,11 @@ type AnalyticsCRUD struct {
 }
 
 func (o AnalyticsCRUD) String() string {
-	return fmt.Sprintf("Analytics KPI %v matching filter: %v", o.KPI, o.Filter.String())
+	filter := "(all results)"
+	if fstr := o.Filter.String(); fstr != "" {
+		filter = "(matching filter: " + fstr + ")"
+	}
+	return fmt.Sprintf("Analytics KPI %v %v", o.KPI, filter)
 }
 
 type ApplicationCRUD struct {
