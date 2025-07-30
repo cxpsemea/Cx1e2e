@@ -17,6 +17,10 @@ var kpiTypes []string = []string{
 	"meanTimeToResolution",
 	"mostCommonVulnerabilities",
 	"mostAgingVulnerabilities",
+	"allVulnerabilities",
+	"agingTotal",
+	"ideTotal",
+	"ideOvertime",
 }
 
 func (t *AnalyticsCRUD) Validate(CRUD string) error {
@@ -58,27 +62,65 @@ func (t *AnalyticsCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 		filter.Projects = append(filter.Projects, proj.ProjectID)
 	}
 
+	count := uint64(0)
+
 	switch t.KPI {
 	case "vulnerabilitiesBySeverityTotal":
-		_, err = cx1client.GetAnalyticsVulnerabilitiesBySeverityTotal(filter)
+		results, err2 := cx1client.GetAnalyticsVulnerabilitiesBySeverityTotal(filter)
+		count = results.Total
+		err = err2
 	case "vulnerabilitiesByStateTotal":
-		_, err = cx1client.GetAnalyticsVulnerabilitiesByStateTotal(filter)
+		results, err2 := cx1client.GetAnalyticsVulnerabilitiesByStateTotal(filter)
+		count = results.Total
+		err = err2
 	case "vulnerabilitiesByStatusTotal":
-		_, err = cx1client.GetAnalyticsVulnerabilitiesByStatusTotal(filter)
+		results, err2 := cx1client.GetAnalyticsVulnerabilitiesByStatusTotal(filter)
+		count = results.Total
+		err = err2
 	case "vulnerabilitiesBySeverityAndStateTotal":
-		_, err = cx1client.GetAnalyticsVulnerabilitiesBySeverityAndStateTotal(filter)
+		results, err2 := cx1client.GetAnalyticsVulnerabilitiesBySeverityAndStateTotal(filter)
+		count = uint64(len(results))
+		err = err2
 	case "vulnerabilitiesBySeverityOvertime":
-		_, err = cx1client.GetAnalyticsVulnerabilitiesBySeverityOvertime(filter)
+		results, err2 := cx1client.GetAnalyticsVulnerabilitiesBySeverityOvertime(filter)
+		count = uint64(len(results))
+		err = err2
 	case "fixedVulnerabilitiesBySeverityOvertime":
-		_, err = cx1client.GetAnalyticsFixedVulnerabilitiesBySeverityOvertime(filter)
+		results, err2 := cx1client.GetAnalyticsFixedVulnerabilitiesBySeverityOvertime(filter)
+		count = uint64(len(results))
+		err = err2
 	case "meanTimeToResolution":
-		_, err = cx1client.GetAnalyticsMeanTimeToResolution(filter)
+		results, err2 := cx1client.GetAnalyticsMeanTimeToResolution(filter)
+		count = uint64(results.TotalResults)
+		err = err2
 	case "mostCommonVulnerabilities":
-		_, err = cx1client.GetAnalyticsMostCommonVulnerabilities(100, filter)
+		results, err2 := cx1client.GetAnalyticsMostCommonVulnerabilities(100, filter)
+		count = uint64(len(results))
+		err = err2
+	case "allVulnerabilities":
+		results, err2 := cx1client.GetAnalyticsAllVulnerabilities(1000, 0, filter)
+		count = uint64(len(results))
+		err = err2
 	case "mostAgingVulnerabilities":
-		_, err = cx1client.GetAnalyticsMostAgingVulnerabilities(100, filter)
+		results, err2 := cx1client.GetAnalyticsMostAgingVulnerabilities(100, filter)
+		count = uint64(len(results))
+		err = err2
+	case "agingTotal":
+		results, err2 := cx1client.GetAnalyticsVulnerabilitiesByAgingTotal(filter)
+		count = uint64(len(results))
+		err = err2
+	case "ideTotal":
+		results, err2 := cx1client.GetAnalyticsIDETotal()
+		count = uint64(len(results))
+		err = err2
+	case "ideOvertime":
+		results, err2 := cx1client.GetAnalyticsIDEOverTimeStats()
+		count = uint64(len(results))
+		err = err2
 	}
-
+	if err == nil {
+		logger.Infof("Got %d results", count)
+	}
 	return err
 }
 

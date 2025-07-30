@@ -24,4 +24,12 @@ Tests:
         Test: R
       - KPI: mostAgingVulnerabilities
         Test: R
+      - KPI: allVulnerabilities
+        Test: R
+      - KPI: agingTotal
+        Test: R
+      - KPI: ideTotal
+        Test: R
+      - KPI: ideOvertime
+        Test: R
     
