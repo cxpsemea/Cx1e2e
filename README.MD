@@ -1,3 +1,9 @@
+# Important Repository Announcement
+Due to organization policy, this repository will no longer be public in the near future.
+If you use this repository and require continued access, please contact your CSM/TAM or other Checkmarx representative to discuss options and alternatives.
+
+
+## Module information
 This is an automated end-to-end workflow testing tool for Cx1 via the REST API, as exposed by Cx1ClientGo (https://github.com/cxpsemea/Cx1ClientGo/)
 
 # Quick Start 
