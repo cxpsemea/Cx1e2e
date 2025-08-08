@@ -465,7 +465,7 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 				logger.Debugf("Will create project override on %v", t.Scope.Project)
 				newq, err := cx1client.CreateSASTQueryOverride(auditSession, cx1client.QueryTypeProject(), baseQuery)
 				if err != nil {
-					return fmt.Errorf("failed to create application override of %v: %s", baseQuery.StringDetailed(), err)
+					return fmt.Errorf("failed to create project override of %v: %s", baseQuery.StringDetailed(), err)
 				}
 				t.SASTQuery = &newq
 			}
@@ -535,7 +535,7 @@ func createIAC(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCR
 				logger.Debugf("Will create project override on %v", t.Scope.Project)
 				newq, err := cx1client.CreateIACQueryOverride(auditSession, cx1client.QueryTypeProject(), baseQuery)
 				if err != nil {
-					return fmt.Errorf("failed to create application override of %v: %s", baseQuery.StringDetailed(), err)
+					return fmt.Errorf("failed to create project override of %v: %s", baseQuery.StringDetailed(), err)
 				}
 				t.IACQuery = &newq
 			}
