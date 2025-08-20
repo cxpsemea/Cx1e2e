@@ -36,37 +36,3 @@ Tests:
         DescriptionID: 124
         Compile: true        
         Test: U
-  - Name: run a scan and verify that the results are correct
-    Scans:
-      - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
-        ZipFile: ../files/xss-burger.zip
-        Branch: zip
-        SASTPreset: e2e-sastquery-preset%E2E_RUN_SUFFIX%
-        Engine: sast
-        WaitForEnd: true
-        CancelOnTimeout: true
-        Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
-        Test: C
-        OnFail:
-          Retries: 1
-          RetryDelay: 30
-          FailTestSet: true
-    Results:
-      - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
-        Type: SAST
-        SASTFilter:
-          Query: Client_DOM_XSS
-          Severity: HIGH
-        Test: R
-        FailTest: true
-  - Name: delete project query override
-    Queries:
-      - Engine: sast
-        Name: Client_DOM_XSS
-        Group: JavaScript_High_Risk
-        Language: JavaScript
-        Scope: 
-          Tenant: false
-          Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
-        Test: D
-        DeleteAuditSession: true

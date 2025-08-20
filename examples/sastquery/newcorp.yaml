@@ -8,7 +8,6 @@ Tests:
     Queries:
       - Engine: sast
         Name: EtoE_Test_Cheeseburgers
-        Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
         Scope: 
@@ -17,6 +16,8 @@ Tests:
         Source: "result = Find_Strings().FindByName(\"cheeseburger\"); // brand new corp query"
         Severity: HIGH
         IsExecutable: true
+        CWE: 123
+        DescriptionID: 123
         Compile: true
         Test: C
         OnFail:

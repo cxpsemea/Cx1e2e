@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -356,13 +357,28 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 	}
 
 	if t.Engine == "sast" {
-
 		var new_query Cx1ClientGo.SASTQuery
+		meta := t.SASTQuery.GetMetadata()
 
-		if (t.Severity != "" && t.Severity != t.SASTQuery.Severity) || t.IsExecutable != t.SASTQuery.IsExecutable {
-			meta := t.SASTQuery.GetMetadata()
+		if t.Severity != "" {
 			meta.Severity = t.Severity
-			meta.IsExecutable = t.IsExecutable
+		}
+
+		meta.IsExecutable = t.IsExecutable
+		if t.CWE != "" {
+			cweID, err := strconv.ParseInt(t.CWE, 10, 64)
+			if err != nil {
+				logger.Errorf("CWE %v is not a valid int64 value: %v", t.CWE, err)
+			} else {
+				meta.Cwe = cweID
+			}
+		}
+
+		if t.DescriptionID != 0 {
+			meta.CxDescriptionID = t.DescriptionID
+		}
+
+		if t.SASTQuery.MetadataDifferent(meta) {
 			new_query, err = cx1client.UpdateSASTQueryMetadata(auditSession, *t.SASTQuery, meta)
 			if err != nil {
 				return err
@@ -488,6 +504,17 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 			Severity:     t.Severity,
 			IsExecutable: t.IsExecutable,
 			Custom:       true,
+		}
+
+		if t.CWE != "" {
+			cweID, err := strconv.ParseInt(t.CWE, 10, 64)
+			if err != nil {
+				cweID = 0
+			}
+			newQuery.CweID = cweID
+		}
+		if t.DescriptionID != 0 {
+			newQuery.QueryDescriptionId = t.DescriptionID
 		}
 
 		newQuery, _, err := cx1client.CreateNewSASTQuery(auditSession, newQuery)
