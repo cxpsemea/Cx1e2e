@@ -195,13 +195,13 @@ func (o BranchCRUD) String() string {
 }
 
 type CxQLCRUD struct {
-	CRUDTest `yaml:",inline"`
-	Engine   string `yaml:"Engine"`
-	//QueryID       uint64 `yaml:"ID"`
+	CRUDTest       `yaml:",inline"`
+	Engine         string    `yaml:"Engine"`
 	QueryLanguage  string    `yaml:"Language"`
 	QueryPlatform  string    `yaml:"Platform"`
 	Category       string    `yaml:"Category"`
 	Description    string    `yaml:"Description"`
+	DescriptionID  int64     `yaml:"DescriptionID"`
 	DescriptionURL string    `yaml:"DescriptionURL"`
 	CWE            string    `yaml:"CWE"`
 	QueryGroup     string    `yaml:"Group"`

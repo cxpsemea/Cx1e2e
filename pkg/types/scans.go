@@ -26,6 +26,26 @@ func (t *ScanCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadL
 		return fmt.Errorf("updating a scan is not supported")
 	}
 
+	requested_engines := strings.Split(t.Engine, " ")
+	ok_engines := 0
+
+	for _, e := range requested_engines {
+		if e == "iac" {
+			e = "kics"
+		}
+
+		if _, ok := cx1client.IsEngineAllowed(e); !ok && !t.IsForced() {
+			logger.Warnf("Requested to run a scan with engine %v but this is not supported in the license and will be skipped", e)
+		} else if !Engines.IsEnabled(e) && !t.IsForced() {
+			logger.Warnf("Requested to run a scan with engine %v but this was disabled for this test execution", e)
+		} else {
+			ok_engines++
+		}
+	}
+	if ok_engines == 0 {
+		return fmt.Errorf("no valid engines were configured for this scan")
+	}
+
 	return nil
 }
 
@@ -109,6 +129,10 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 			}
 			//scanConfigs = append(scanConfigs, scanConfig)
 		}
+	}
+
+	if len(scanConfigSet.Configurations) == 0 {
+		return fmt.Errorf("no valid scan engines were requested")
 	}
 
 	var test_Scan Cx1ClientGo.Scan

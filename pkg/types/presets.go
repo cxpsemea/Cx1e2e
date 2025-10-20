@@ -38,6 +38,12 @@ func (t *PresetCRUD) Validate(CRUD string) error {
 }
 
 func (t *PresetCRUD) IsSupported(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, CRUD string, Engines *EnabledEngines) error {
+	if _, ok := cx1client.IsEngineAllowed(t.Engine); !ok {
+		return fmt.Errorf("test attempts to access presets for engine %v but this is not supported in the license and will be skipped", t.Engine)
+	}
+	if !Engines.IsEnabled(t.Engine) {
+		return fmt.Errorf("test attempts to access presets for engine %v but this was disabled for this test execution", t.Engine)
+	}
 	return nil
 }
 
