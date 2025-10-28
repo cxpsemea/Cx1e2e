@@ -82,19 +82,20 @@ func run() uint {
 
 	if *testConfig == "" || (*APIKey == "" && (*ClientID == "" || *ClientSecret == "")) {
 		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration. For help run: cx1e2e.exe -h")
-		logger.Fatalf("Test configuration yaml or authentication (API Key or client+secret) not provided.")
+		logger.Errorf("Test configuration yaml or authentication (API Key or client+secret) not provided.")
+		return 1
 	}
 
 	var err error
 	Config, err := process.LoadConfig(logger, *testConfig)
 	if err != nil {
-		logger.Fatalf("Failed to load configuration file %v: %s", *testConfig, err)
-		return 0
+		logger.Errorf("Failed to load configuration file %v: %s", *testConfig, err)
+		return 1
 	}
 
 	if !Config.IsValid(logger) {
 		logger.Errorf("Test configuration failed to validate - review the logs and update the YAMLs")
-		return 0
+		return 1
 	}
 
 	if *LogLevel == "" && Config.LogLevel != "" {
@@ -156,7 +157,8 @@ func run() uint {
 
 	httpClient, err := Config.CreateHTTPClient(logger)
 	if err != nil {
-		logger.Fatalf("Failed to create HTTP client: %s", err)
+		logger.Errorf("Failed to create HTTP client: %s", err)
+		return 1
 	}
 
 	if *Tenant != "" {
@@ -178,8 +180,8 @@ func run() uint {
 	}
 
 	if err != nil {
-		logger.Fatalf("Failed to create Cx1 client: %s", err)
-		return 0
+		logger.Errorf("Failed to create Cx1 client: %s", err)
+		return 1
 	}
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
