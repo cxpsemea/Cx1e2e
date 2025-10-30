@@ -53,7 +53,7 @@ func (t *ProjectCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *Thread
 		tags[tag.Key] = tag.Value
 	}
 
-	if t.Applications == nil {
+	if t.Applications == nil || len(*t.Applications) == 0 {
 		test_Project, err := cx1client.CreateProject(t.Name, group_ids, tags)
 		if err != nil {
 			return err
