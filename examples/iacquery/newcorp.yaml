@@ -43,6 +43,9 @@ Tests:
         Test: C
         OnFail:
           FailTestSet: true
+          Retries: 2
+          RetryDelay: 15
+          
     Presets:
       - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        

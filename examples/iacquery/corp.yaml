@@ -23,6 +23,8 @@ Tests:
         Test: C
         OnFail:
           FailTestSet: true
+          Retries: 2
+          RetryDelay: 15
     Scans:
       - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.8.zip
