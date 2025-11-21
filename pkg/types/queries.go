@@ -89,58 +89,6 @@ func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *
 
 }
 
-/*
-func getAuditSession_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) error {
-	if auditSession != nil {
-		if (t.Scope.Corp || auditSession.ProjectID == t.Scope.ProjectID) && auditSession.HasLanguage(t.QueryLanguage) {
-			err := cx1client.AuditSessionKeepAlive(auditSession)
-			if err != nil {
-				auditSession = nil
-				logger.Warningf("Tried to reuse existing audit session but it couldn't be refreshed")
-			} else {
-				scope := "Tenant"
-				if !t.Scope.Corp {
-					if t.Scope.Application != "" {
-						scope = fmt.Sprintf("application %v", t.Scope.Application)
-					} else {
-						scope = fmt.Sprintf("project %v", t.Scope.Project)
-					}
-				}
-				logger.Warningf("Reusing existing %v (scope: %v, project ID: %v, language: %v)", auditSession.String(), scope, t.Scope.ProjectID, t.QueryLanguage)
-				return nil
-			}
-		} else {
-			logger.Warningf("Existing audit session is not suitable (corp? %v, has %v? %v, is project id %v? %v)", t.Scope.Corp, t.QueryLanguage, auditSession.HasLanguage(t.QueryLanguage), t.Scope.ProjectID, auditSession.ProjectID)
-		}
-	}
-
-	if t.LastScan == nil {
-		proj, err := cx1client.GetProjectByName(t.Scope.Project)
-		if err != nil {
-			return err
-		}
-
-		lastscans, err := cx1client.GetLastScansByStatusAndID(proj.ProjectID, 1, []string{"Completed"})
-		if err != nil {
-			return fmt.Errorf("error getting last successful scan for project %v: %s", proj.ProjectID, err)
-		}
-
-		if len(lastscans) == 0 {
-			return fmt.Errorf("unable to create audit session: no Completed scans exist for project %v", proj.ProjectID)
-		}
-
-		t.LastScan = &lastscans[0]
-	}
-
-	session, err := cx1client.GetAuditSessionByID("sast", t.LastScan.ProjectID, t.LastScan.ScanID)
-	if err == nil {
-		auditSession = &session
-	}
-
-	return err
-}
-*/
-
 func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, string, error) {
 	scope := "Tenant"
 	scopeStr := cx1client.QueryTypeTenant()
@@ -370,7 +318,12 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 			meta.Severity = t.Severity
 		}
 
-		meta.IsExecutable = t.IsExecutable
+		if t.IsExecutable != nil {
+			if *t.IsExecutable != meta.IsExecutable {
+				logger.Warnf("Attempting to change IsExecutable from %v to %v for query %v", meta.IsExecutable, *t.IsExecutable, t.SASTQuery.StringDetailed())
+				meta.IsExecutable = *t.IsExecutable
+			}
+		}
 		if t.CWE != "" {
 			cweID, err := strconv.ParseInt(t.CWE, 10, 64)
 			if err != nil {
@@ -387,7 +340,14 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 		if t.SASTQuery.MetadataDifferent(meta) {
 			new_query, err = cx1client.UpdateSASTQueryMetadata(auditSession, *t.SASTQuery, meta)
 			if err != nil {
-				return err
+				if strings.Contains(err.Error(), "query not found") {
+					logger.Errorf("Failed to update metadata for query: %v. Will pause and retry.", err)
+					time.Sleep(15 * time.Second)
+					new_query, err = cx1client.UpdateSASTQueryMetadata(auditSession, *t.SASTQuery, meta)
+				}
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -427,7 +387,9 @@ func updateQuery_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 		t.SASTQuery.Source = t.Source
 	}
 
-	t.SASTQuery.IsExecutable = t.IsExecutable
+	if t.IsExecutable != nil {
+		t.SASTQuery.IsExecutable = *t.IsExecutable
+	}
 
 	query := t.SASTQuery.ToAuditQuery_v310()
 	return cx1client.UpdateQuery_v310(query)
@@ -500,6 +462,10 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 			return fmt.Errorf("query %v does not exist and must be created at Tenant level before it can be created on a Project or Application level", t.String())
 		}
 
+		if t.IsExecutable == nil {
+			return fmt.Errorf("cannot create a new corp query without specifying if it is executable")
+		}
+
 		newQuery := Cx1ClientGo.SASTQuery{
 			Level:        cx1client.QueryTypeTenant(),
 			LevelID:      cx1client.QueryTypeTenant(),
@@ -508,7 +474,7 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 			Group:        t.QueryGroup,
 			Language:     t.QueryLanguage,
 			Severity:     t.Severity,
-			IsExecutable: t.IsExecutable,
+			IsExecutable: *t.IsExecutable,
 			Custom:       true,
 		}
 

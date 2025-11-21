@@ -209,7 +209,7 @@ type CxQLCRUD struct {
 	Source         string    `yaml:"Source"`
 	Scope          CxQLScope `yaml:"Scope"`
 	Severity       string    `yaml:"Severity"`
-	IsExecutable   bool      `yaml:"IsExecutable"`
+	IsExecutable   *bool     `yaml:"IsExecutable"`
 	Compile        bool      `yaml:"Compile"`
 	DeleteSession  bool      `yaml:"DeleteAuditSession"`
 	OldAPI         bool      `yaml:"OldAPI"`
