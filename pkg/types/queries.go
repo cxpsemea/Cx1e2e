@@ -148,7 +148,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		if t.Scope.Corp {
 			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, scopeStr, scope)
 		} else {
-			paQueries, err = cx1client.GetAuditQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID)
+			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID)
 		}
 		if err == nil {
 			break
@@ -177,6 +177,12 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 	query = queries.GetQueryByLevelAndName(scopeStr, scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
 
 	if query != nil {
+		qq, err := cx1client.GetAuditSASTQueryByKey(auditSession, query.EditorKey)
+		if err != nil {
+			logger.Errorf("Failed to get full query details for %v: %s", query.StringDetailed(), err)
+		} else {
+			query = &qq
+		}
 		logger.Debugf("Found query: %v", query.StringDetailed())
 	} else {
 		logger.Debugf("Query doesn't exist")
@@ -249,6 +255,12 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 	query = queries.GetQueryByLevelAndName(scopeStr, scope, t.QueryPlatform, t.QueryGroup, t.QueryName)
 
 	if query != nil {
+		qq, err := cx1client.GetAuditIACQueryByID(auditSession, query.QueryID)
+		if err != nil {
+			logger.Errorf("Failed to get full query details for %v: %s", query.StringDetailed(), err)
+		} else {
+			query = &qq
+		}
 		logger.Debugf("Found query: %v", query.StringDetailed())
 	} else {
 		logger.Debugf("Query doesn't exist")
@@ -293,7 +305,7 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		newQuery = &query
 	}
 
-	bq, err := cx1client.FindQueryByName_v310(queries, Cx1ClientGo.AUDIT_QUERY_PRODUCT, t.QueryLanguage, t.QueryGroup, t.QueryName)
+	bq, err := cx1client.FindQueryByName_v310(queries, cx1client.QueryTypeProduct(), t.QueryLanguage, t.QueryGroup, t.QueryName)
 	if err != nil {
 		logger.Warnf("Error getting product-level query %v: %s", t.String(), err)
 	} else {
