@@ -279,7 +279,7 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 		if err != nil {
 			logger.Errorf("Failed to get full query details for %v: %s", baseQuery.StringDetailed(), err)
 		} else {
-			query = &qq
+			baseQuery = &qq
 		}
 	}
 
