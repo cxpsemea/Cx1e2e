@@ -146,14 +146,14 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 	retryDelay := 30
 	for i := 0; i < maxRetry; i++ {
 		if t.Scope.Corp {
-			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, scopeStr, scope)
+			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, cx1client.QueryTypeTenant(), cx1client.QueryTypeTenant())
 		} else {
-			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID)
+			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID) // can't fetch app-level queries
 		}
 		if err == nil {
 			break
 		} else {
-			logger.Warnf("Attempt %d/%d to get %v-level queries failed with error '%s', waiting %d sec to retry...", i, maxRetry, scopeStr, err, retryDelay)
+			logger.Warnf("Attempt %d/%d to get %v-level queries failed with error '%s', waiting %d sec to retry...", i, maxRetry, t.ScopeID, err, retryDelay)
 			if err = cx1client.AuditSessionKeepAlive(auditSession); err != nil {
 				logger.Errorf("%v has expired, generating a new session", auditSession.String())
 				auditSession = nil
@@ -167,14 +167,14 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		}
 	}
 	if err != nil {
-		logger.Errorf("Failed to get %v-level queries for project %v: %s", scopeStr, t.ScopeID, err)
+		logger.Errorf("Failed to get %v-level queries for project %v: %s", t.ScopeStr, t.ScopeID, err)
 	}
 
 	queries.AddCollection(&paQueries)
 
 	var query *Cx1ClientGo.SASTQuery
-	logger.Debugf("Trying to find query on scope %v: %v -> %v -> %v", scopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
-	query = queries.GetQueryByLevelAndName(scopeStr, scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
+	logger.Debugf("Trying to find query on scope %v: %v -> %v -> %v", t.ScopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
+	query = queries.GetQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
 
 	if query != nil {
 		qq, err := cx1client.GetAuditSASTQueryByKey(auditSession, query.EditorKey)
@@ -188,8 +188,15 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		logger.Debugf("Query doesn't exist")
 	}
 
-	baseQuery := queries.GetQueryByName(t.QueryLanguage, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
-
+	baseQuery := queries.GetClosestQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
+	{
+		qq, err := cx1client.GetAuditSASTQueryByKey(auditSession, baseQuery.EditorKey)
+		if err != nil {
+			logger.Errorf("Failed to get full base query details for %v: %s", baseQuery.StringDetailed(), err)
+		} else {
+			baseQuery = &qq
+		}
+	}
 	return query, baseQuery
 }
 
@@ -224,14 +231,14 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 	retryDelay := 30
 	for i := 0; i < maxRetry; i++ {
 		if t.Scope.Corp {
-			paQueries, err = cx1client.GetAuditIACQueriesByLevelID(auditSession, scopeStr, scope)
+			paQueries, err = cx1client.GetAuditIACQueriesByLevelID(auditSession, cx1client.QueryTypeTenant(), cx1client.QueryTypeTenant())
 		} else {
 			paQueries, err = cx1client.GetAuditIACQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID)
 		}
 		if err == nil {
 			break
 		} else {
-			logger.Warnf("Attempt %d/%d to get %v-level queries failed with error '%s', waiting %d sec to retry...", i, maxRetry, scopeStr, err, retryDelay)
+			logger.Warnf("Attempt %d/%d to get %v-level queries failed with error '%s', waiting %d sec to retry...", i, maxRetry, t.ScopeStr, err, retryDelay)
 			if err = cx1client.AuditSessionKeepAlive(auditSession); err != nil {
 				logger.Errorf("%v has expired, generating a new session", auditSession.String())
 				auditSession = nil
@@ -245,14 +252,14 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 		}
 	}
 	if err != nil {
-		logger.Errorf("Failed to get %v-level queries for project %v: %s", scopeStr, t.ScopeID, err)
+		logger.Errorf("Failed to get %v-level queries for project %v: %s", t.ScopeStr, t.ScopeID, err)
 	}
 
 	queries.AddCollection(&paQueries)
 
 	var query *Cx1ClientGo.IACQuery
-	logger.Debugf("Trying to find query on scope %v: %v -> %v -> %v", scopeStr, t.QueryPlatform, t.QueryGroup, t.QueryName)
-	query = queries.GetQueryByLevelAndName(scopeStr, scope, t.QueryPlatform, t.QueryGroup, t.QueryName)
+	logger.Debugf("Trying to find query on scope %v: %v -> %v -> %v", t.ScopeStr, t.QueryPlatform, t.QueryGroup, t.QueryName)
+	query = queries.GetQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryPlatform, t.QueryGroup, t.QueryName)
 
 	if query != nil {
 		qq, err := cx1client.GetAuditIACQueryByID(auditSession, query.QueryID)
@@ -267,6 +274,14 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 	}
 
 	baseQuery := queries.GetQueryByName(t.QueryPlatform, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
+	{
+		qq, err := cx1client.GetAuditIACQueryByID(auditSession, baseQuery.QueryID)
+		if err != nil {
+			logger.Errorf("Failed to get full query details for %v: %s", baseQuery.StringDetailed(), err)
+		} else {
+			query = &qq
+		}
+	}
 
 	return query, baseQuery
 }
