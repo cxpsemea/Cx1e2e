@@ -183,6 +183,7 @@ func run() uint {
 	}
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
+	cx1client.SetDeprecationWarning(false)
 	if cx1client.IsUser {
 		currentUser, err := cx1client.GetCurrentUser()
 		if err != nil {
