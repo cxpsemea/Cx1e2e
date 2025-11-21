@@ -189,7 +189,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 	}
 
 	baseQuery := queries.GetClosestQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
-	{
+	if baseQuery != nil {
 		qq, err := cx1client.GetAuditSASTQueryByKey(auditSession, baseQuery.EditorKey)
 		if err != nil {
 			logger.Errorf("Failed to get full base query details for %v: %s", baseQuery.StringDetailed(), err)
@@ -274,7 +274,7 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 	}
 
 	baseQuery := queries.GetQueryByName(t.QueryPlatform, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
-	{
+	if baseQuery != nil {
 		qq, err := cx1client.GetAuditIACQueryByID(auditSession, baseQuery.QueryID)
 		if err != nil {
 			logger.Errorf("Failed to get full query details for %v: %s", baseQuery.StringDetailed(), err)
