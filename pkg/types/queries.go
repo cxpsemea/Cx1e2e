@@ -299,9 +299,12 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 
 	if t.Scope.Corp {
 		scopeStr = cx1client.QueryTypeTenant()
-		queries, err = cx1client.GetQueriesByLevelID_v310(scopeStr, scope)
+		queries, err = cx1client.GetQueriesByLevelID_v310(Cx1ClientGo.AUDIT_QUERY_v310.TENANT, scope)
 	} else {
-		queries, err = cx1client.GetQueriesByLevelID_v310(scopeStr, t.Scope.ProjectID)
+		if t.Scope.Application != "" {
+			scopeStr = Cx1ClientGo.AUDIT_QUERY_v310.APPLICATION
+		}
+		queries, err = cx1client.GetQueriesByLevelID_v310(Cx1ClientGo.AUDIT_QUERY_v310.PROJECT, t.Scope.ProjectID)
 	}
 
 	if err != nil {
