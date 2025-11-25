@@ -26,8 +26,6 @@ func run() uint {
 	logger.SetFormatter(myformatter)
 	logger.SetOutput(os.Stdout)
 
-	logger.Warnf("Notice: the cx1e2e repo is likely to become internal in the future. If you require continued access, please reach out to your CSM or Checkmarx contact.")
-
 	testConfig := flag.String("config", "", "Path to a test config.yaml")
 	APIKey := flag.String("apikey", "", "CheckmarxOne API Key (if not using client id/secret)")
 	ClientID := flag.String("client", "", "CheckmarxOne Client ID (if not using API Key)")
@@ -185,6 +183,7 @@ func run() uint {
 	}
 
 	logger.Infof("Created Cx1 client %s", cx1client.String())
+	cx1client.SetDeprecationWarning(false)
 	if cx1client.IsUser {
 		currentUser, err := cx1client.GetCurrentUser()
 		if err != nil {

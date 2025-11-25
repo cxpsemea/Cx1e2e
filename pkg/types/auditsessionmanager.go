@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const AuditSessionTimeoutMinutes = 5
+const AuditSessionTimeoutMinutes = 10
 
 type AuditSessionManager struct {
 	Lock     sync.Mutex
