@@ -6,8 +6,6 @@ Tenant: your_tenant_here
 Tests:
   - Name: Check some flags
     Flags:
-      - Name: AUDIT_APPLICATION_LEVEL_ENABLED
-        Test: R
       - Name: ACCESS_MANAGEMENT_ENABLED
         Test: R
         #FailTest: true # this flag is not currently enabled in some environments

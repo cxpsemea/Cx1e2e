@@ -11,7 +11,6 @@ Tests:
         Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
-        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Scope: 
           Tenant: false
           Application: e2e-sastquery-app%E2E_RUN_SUFFIX%
@@ -29,7 +28,6 @@ Tests:
         ZipFile: ../files/xss-burger.zip
         Branch: zip
         SASTPreset: e2e-sastquery-preset%E2E_RUN_SUFFIX%
-        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Engine: sast
         WaitForEnd: true
         CancelOnTimeout: true
@@ -41,7 +39,6 @@ Tests:
         Test: C
     Results:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
-        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Type: SAST
         SASTFilter:
           Query: Client_DOM_XSS
@@ -55,7 +52,6 @@ Tests:
         Engine: sast
         Group: JavaScript_High_Risk
         Language: JavaScript
-        FeatureFlags: [ "AUDIT_APPLICATION_LEVEL_ENABLED" ]
         Scope: 
           Tenant: false
           Application: e2e-sastquery-app%E2E_RUN_SUFFIX%
