@@ -49,14 +49,6 @@ func (t *CxQLCRUD) GetModule() string {
 	return MOD_QUERY
 }
 
-func CheckALQFlag(cx1client *Cx1ClientGo.Cx1Client) bool {
-	appLevelQueries, err := cx1client.CheckFlag("AUDIT_APPLICATION_LEVEL_ENABLED")
-	if err != nil {
-		return false
-	}
-	return appLevelQueries
-}
-
 func getAuditSession(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) (*Cx1ClientGo.AuditSession, error) {
 	if t.LastScan == nil {
 		proj, err := cx1client.GetProjectByName(t.Scope.Project)
