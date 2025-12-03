@@ -12,20 +12,8 @@ Tests:
           Query: Stored_XSS # from 3.23-3.30+, before 3.23 was 13625251660291496964
           Severity: MEDIUM
         Test: R
-      - Project: e2e-result-project%E2E_RUN_SUFFIX% # Only one of the reflected xss findings is "confirmed" now
-        Type: SAST
-        Version: 
-          SAST: 
-            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
-        SASTFilter:
-          Query: Reflected_XSS_All_Clients
-          State: CONFIRMED
-        Test: R
       - Project: e2e-result-project%E2E_RUN_SUFFIX%  # Only one of the reflected xss findings is "confirmed" now
         Type: SAST
-        Version: 
-          SAST: 
-            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           State: CONFIRMED
@@ -33,20 +21,6 @@ Tests:
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 # there should no longer be 3 ref_xss HIGH findings, only two
         Type: SAST
-        Version: 
-          SAST: 
-            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
-        SASTFilter:
-          Query: Reflected_XSS_All_Clients
-          Severity: HIGH
-        Test: R
-        FailTest: true
-      - Project: e2e-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 3 # there should no longer be 3 ref_xss HIGH findings, only two
-        Type: SAST
-        Version: 
-          SAST: 
-            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           Severity: HIGH
