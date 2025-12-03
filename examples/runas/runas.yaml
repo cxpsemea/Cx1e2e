@@ -40,21 +40,6 @@ Tests:
     Results:
       - Project: e2e-runas-project%E2E_RUN_SUFFIX%
         Type: SAST
-        Version: 
-          SAST: 
-            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
-        SASTFilter:
-          Query: Reflected_XSS_All_Clients
-          Severity: HIGH
-        Test: U
-        State: URGENT
-        Severity: MEDIUM
-        Comment: "This Reflected XSS is urgent, but medium"
-      - Project: e2e-runas-project%E2E_RUN_SUFFIX%
-        Type: SAST
-        Version: 
-          SAST: 
-            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           Severity: HIGH
@@ -64,20 +49,8 @@ Tests:
         Comment: "This Reflected XSS is urgent, but medium"
   - Name: Check that the scan result is updated
     Results:
-      - Project: e2e-runas-project%E2E_RUN_SUFFIX%  # Only one of the reflected xss findings is "confirmed" now
-        Type: SAST
-        Version: 
-          SAST: 
-            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
-        SASTFilter:
-          Query: Reflected_XSS_All_Clients
-          State: URGENT
-        Test: R
       - Project: e2e-runas-project%E2E_RUN_SUFFIX% # Only one of the reflected xss findings is "confirmed" now
         Type: SAST
-        Version: 
-          SAST: 
-            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           State: URGENT

@@ -39,45 +39,12 @@ Tests:
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         FindingNumber: 3 # there will be three reflected_xss finding
         Type: SAST
-        Version: 
-          SAST: 
-            AtLeast: "9.7.1"
         SASTFilter:
           Query: Reflected_XSS
           Severity: HIGH
         Test: R
-      - Project: e2e-result-project%E2E_RUN_SUFFIX%
-        FindingNumber: 3 # there will be three reflected_xss_all_clients finding
-        Type: SAST
-        Version: 
-          SAST: 
-            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
-        SASTFilter:
-          Query: Reflected_XSS_All_Clients
-          Severity: HIGH
-        Test: R
       - Project: e2e-result-project%E2E_RUN_SUFFIX% # there will be a Parameter_Tampering finding with this result hash
         Type: SAST
-        Version: 
-          CxOne: 
-            Below: "3.31.0"
-        SASTFilter:
-          ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
-        Test: R
-      - Project: e2e-result-project%E2E_RUN_SUFFIX%  # there will be a Parameter_Tampering finding with this result hash
-        Type: SAST
-        Version: 
-          CxOne: 
-            AtLeast: "3.31.0"
-            Below: "3.33.14"
-        SASTFilter:
-          ResultHash: "j2c7AUjdAQeBoe5LY7Kvap1kyT4="
-        Test: R
-      - Project: e2e-result-project%E2E_RUN_SUFFIX% # there will be a Parameter_Tampering finding with this result hash
-        Type: SAST
-        Version: 
-          CxOne: 
-            AtLeast: "3.33.14"
         SASTFilter:
           ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: R

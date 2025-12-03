@@ -26,21 +26,6 @@ Tests:
         Comment: "This Stored XSS is medium, not critical"
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
-        Version: 
-          SAST: 
-            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
-        SASTFilter:
-          Query: Reflected_XSS_All_Clients
-          Severity: HIGH
-          SimilarityID: -1514176724
-        Test: U
-        State: CONFIRMED
-        Comment: "This Reflected XSS is confirmed"
-      - Project: e2e-result-project%E2E_RUN_SUFFIX%
-        Type: SAST
-        Version: 
-          SAST: 
-            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           Severity: HIGH
@@ -50,22 +35,6 @@ Tests:
         Comment: "This Reflected XSS is confirmed"
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
-        Version: 
-          SAST: 
-            Below: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
-        SASTFilter:
-          Query: Reflected_XSS_All_Clients
-          Severity: HIGH
-          SimilarityID: 1318375675
-        Test: U
-        State: URGENT
-        Severity: MEDIUM
-        Comment: "This Reflected XSS is urgent, but medium"
-      - Project: e2e-result-project%E2E_RUN_SUFFIX%
-        Type: SAST
-        Version: 
-          SAST: 
-            AtLeast: "9.7.1" # Reflected_XSS_All_Clients becomes Reflected_XSS after v3.31.0 (sast 9.7.1)
         SASTFilter:
           Query: Reflected_XSS
           SimilarityID: 1318375675
@@ -76,30 +45,6 @@ Tests:
         Comment: "This Reflected XSS is urgent, but medium"
       - Project: e2e-result-project%E2E_RUN_SUFFIX%
         Type: SAST
-        Version: 
-          CxOne: 
-            Below: "3.31.0" # 
-        SASTFilter:
-          ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
-        Test: U
-        Comment: "This parameter tampering is actually high rish"
-        Severity: HIGH
-      - Project: e2e-result-project%E2E_RUN_SUFFIX%
-        Type: SAST
-        Version: 
-          CxOne: 
-            AtLeast: "3.31.0" 
-            Below: "3.33.14"
-        SASTFilter:
-          ResultHash: "j2c7AUjdAQeBoe5LY7Kvap1kyT4="
-        Test: U
-        Comment: "This parameter tampering is actually high rish"
-        Severity: HIGH
-      - Project: e2e-result-project%E2E_RUN_SUFFIX%
-        Type: SAST
-        Version: 
-          CxOne: 
-            AtLeast: "3.33.14" # 
         SASTFilter:
           ResultHash: "yuiHUdhdPjkIW60IP0Pf+P/WRdA="
         Test: U
