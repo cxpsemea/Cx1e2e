@@ -595,7 +595,7 @@ func FailError(result TestResult) error {
 }
 
 func (t TestSet) OtherUser() bool {
-	return t.RunAs.APIKey != "" || (t.RunAs.ClientID != "" && t.RunAs.ClientSecret != "") || t.RunAs.OIDCClient != ""
+	return t.RunAs.APIKey != "" || t.RunAs.ClientID != ""
 }
 
 func (t TestSet) GetOtherClient(cx1client *Cx1ClientGo.Cx1Client, logger *types.ThreadLogger, config *TestConfig) (*Cx1ClientGo.Cx1Client, error) {
@@ -604,26 +604,37 @@ func (t TestSet) GetOtherClient(cx1client *Cx1ClientGo.Cx1Client, logger *types.
 		return nil, err
 	}
 
+	cx1clientconfig := Cx1ClientGo.Cx1ClientConfiguration{
+		HttpClient:  httpClient,
+		Logger:      logger.GetLogger(),
+		HTTPHeaders: cx1client.GetHeaders(),
+		IAMUrl:      cx1client.GetIAMURL(),
+		Cx1Url:      cx1client.GetBaseURL(),
+		Tenant:      cx1client.GetTenantName(),
+	}
+
 	if t.RunAs.APIKey != "" {
-		return Cx1ClientGo.NewAPIKeyClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, t.RunAs.APIKey, logger.GetLogger())
+		cx1clientconfig.Auth.APIKey = t.RunAs.APIKey
+		return Cx1ClientGo.NewClientWithOptions(cx1clientconfig)
 	}
 
-	if t.RunAs.ClientID != "" && t.RunAs.ClientSecret != "" {
-		return Cx1ClientGo.NewOAuthClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, t.RunAs.ClientID, t.RunAs.ClientSecret, logger.GetLogger())
-	}
+	if t.RunAs.ClientID != "" {
+		cx1clientconfig.Auth.ClientID = t.RunAs.ClientID
+		if t.RunAs.ClientSecret != "" {
+			cx1clientconfig.Auth.ClientSecret = t.RunAs.ClientSecret
+		} else {
+			client, err := cx1client.GetClientByName(t.RunAs.ClientID)
+			if err != nil {
+				return nil, err
+			}
 
-	if t.RunAs.OIDCClient != "" {
-		client, err := cx1client.GetClientByName(t.RunAs.OIDCClient)
-		if err != nil {
-			return nil, err
+			secret, err := cx1client.GetClientSecret(&client)
+			if err != nil {
+				return nil, err
+			}
+			cx1clientconfig.Auth.ClientSecret = secret
 		}
-
-		secret, err := cx1client.GetClientSecret(&client)
-		if err != nil {
-			return nil, err
-		}
-
-		return Cx1ClientGo.NewOAuthClient(httpClient, config.Cx1URL, config.IAMURL, config.Tenant, client.ClientID, secret, logger.GetLogger())
+		return Cx1ClientGo.NewClientWithOptions(cx1clientconfig)
 	}
 
 	return nil, fmt.Errorf("no credentials provided in test %v step, file %v", t.Name, t.File)

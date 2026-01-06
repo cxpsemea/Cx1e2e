@@ -12,7 +12,6 @@ type TestSet struct {
 		APIKey       string `yaml:"APIKey"`
 		ClientID     string `yaml:"ClientID"`
 		ClientSecret string `yaml:"ClientSecret"`
-		OIDCClient   string `yaml:"OIDCClient"`
 	} `yaml:"RunAs"`
 
 	AccessAssignments []types.AccessAssignmentCRUD `yaml:"AccessAssignments"`

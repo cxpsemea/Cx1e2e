@@ -9,9 +9,8 @@ Tests:
   - Name: RunAs
     File: runas.yaml
     RunAs:
-      #ClientID: %E2E_CLIENT2_ID%
-      #ClientSecret: %E2E_CLIENT2_SECRET%
+      ClientID: e2e-runas-client%E2E_RUN_SUFFIX%
+      #ClientSecret: %E2E_CLIENT2_SECRET% # If no clientsecret is provided, it will be fetched automatically
       #APIKey: %E2E_CLIENT2_APIKEY%
-      OIDCClient: e2e-runas-client%E2E_RUN_SUFFIX%
   - Name: Delete
     File: delete.yaml
