@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strings"
 
@@ -42,6 +43,7 @@ func run() uint {
 	Threads := flag.Int("threads", 1, "How many concurrent tests to run")
 	LogFile := flag.String("logfile", "", "Optional: output log to file")
 	InlineReport := flag.Bool("inline-report", false, "Print the report (json/html) contents at the end of execution")
+	UserAgent := flag.String("useragent", "", "Optional: Custom User-Agent string to use in API requests")
 
 	flag.Parse()
 
@@ -159,32 +161,50 @@ func run() uint {
 		return 1
 	}
 
+	cx1config := Cx1ClientGo.Cx1ClientConfiguration{
+		HttpClient:  httpClient,
+		Logger:      logger,
+		HTTPHeaders: http.Header{},
+	}
+
 	if *Tenant != "" {
 		Config.Tenant = *Tenant
+		cx1config.Tenant = *Tenant
 	}
 	if *Cx1URL != "" {
 		Config.Cx1URL = *Cx1URL
+		cx1config.Cx1Url = *Cx1URL
 	}
 	if *IAMURL != "" {
 		Config.IAMURL = *IAMURL
+		cx1config.IAMUrl = *IAMURL
 	}
-
+	if *UserAgent != "" {
+		cx1config.HTTPHeaders.Set("User-Agent", *UserAgent)
+		logger.Infof("Using custom User-Agent: %s", *UserAgent)
+	} else {
+		cx1config.HTTPHeaders.Set("User-Agent", "Cx1e2e")
+	}
 	if *APIKey != "" {
-		cx1client, err = Cx1ClientGo.NewAPIKeyClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, *APIKey, logger)
+		cx1config.Auth.APIKey = *APIKey
 		Config.AuthType = fmt.Sprintf("APIKey %v", Cx1ClientGo.ShortenGUID(*APIKey))
 	} else {
-		cx1client, err = Cx1ClientGo.NewOAuthClient(httpClient, Config.Cx1URL, Config.IAMURL, Config.Tenant, *ClientID, *ClientSecret, logger)
+		cx1config.Auth.ClientID = *ClientID
+		cx1config.Auth.ClientSecret = *ClientSecret
 		Config.AuthType = fmt.Sprintf("OAuth client %v", *ClientID)
 	}
+
+	cx1client, err = Cx1ClientGo.NewClientWithOptions(cx1config)
 
 	if err != nil {
 		logger.Errorf("Failed to create Cx1 client: %s", err)
 		return 1
 	}
 
-	logger.Infof("Created Cx1 client %s", cx1client.String())
+	logger.Infof("Created Cx1 client: %s", cx1client.String())
+
 	cx1client.SetDeprecationWarning(false)
-	if cx1client.IsUser {
+	if cx1client.IsUser() {
 		currentUser, err := cx1client.GetCurrentUser()
 		if err != nil {
 			logger.Errorf("Failed to get cx1 client current user: %s", err)

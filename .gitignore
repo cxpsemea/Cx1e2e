@@ -8,3 +8,4 @@ dist
 run*.sh
 build*.sh
 release*.sh
+.vscode
