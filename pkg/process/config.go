@@ -1,9 +1,11 @@
 package process
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -645,26 +647,35 @@ func (o TestConfig) GetTestCount() int {
 
 func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error) {
 	httpClient := &http.Client{}
+	transport := &http.Transport{}
 
 	if o.ProxyURL != "" {
 		proxyURL, err := url.Parse(o.ProxyURL)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse specified proxy address %v: %s", o.ProxyURL, err)
 		}
-		transport := &http.Transport{}
 		transport.Proxy = http.ProxyURL(proxyURL)
-		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-		httpClient.Transport = transport
 		logger.Infof("Running with proxy: %v", o.ProxyURL)
-	} else if o.NoTLS {
-		transport := &http.Transport{}
-		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-		httpClient.Transport = transport
-		logger.Info("Running without TLS verification")
 	}
 
+	if o.NoTLS {
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		logger.Warn("Running without TLS verification")
+	}
+
+	if o.IPv4 {
+		logger.Infof("Running with IPv4 only")
+		transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return net.Dial("tcp4", addr)
+		}
+	} else if o.IPv6 {
+		logger.Infof("Running with IPv6 only")
+		transport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return net.Dial("tcp6", addr)
+		}
+	}
+
+	httpClient.Transport = transport
 	return httpClient, nil
 }
 

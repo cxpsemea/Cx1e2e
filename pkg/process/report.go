@@ -13,8 +13,18 @@ import (
 
 func prepareReportData(tests *[]TestResult, Config *TestConfig, startTime, endTime time.Time, threads int) Report {
 	var report Report
-	report.Settings.Target = fmt.Sprintf("%v tenant %v", Config.Cx1URL, Config.Tenant)
-	report.Settings.Auth = fmt.Sprintf("%v user %v", Config.AuthType, Config.AuthUser)
+	ipState := ""
+	if Config.IPv4 {
+		ipState = " (IPv4)"
+	} else if Config.IPv6 {
+		ipState = " (IPv6)"
+	}
+	report.Settings.Target = fmt.Sprintf("%v%v tenant %v", Config.Cx1URL, ipState, Config.Tenant)
+	if Config.AuthUser != "" {
+		report.Settings.Auth = fmt.Sprintf("%v (%v)", Config.AuthType, Config.AuthUser)
+	} else {
+		report.Settings.Auth = Config.AuthType
+	}
 	report.Settings.Config = Config.ConfigPath
 	report.Settings.StartTime = startTime.String()
 	report.Settings.EndTime = endTime.String()

@@ -56,6 +56,8 @@ type TestConfig struct {
 	Engines            types.EnabledEngines    `yaml:"-"`
 	EnvironmentVersion Cx1ClientGo.VersionInfo `yaml:"-"`
 	TestCount          int                     `yaml:"-"`
+	IPv4               bool                    `yaml:"-"`
+	IPv6               bool                    `yaml:"-"`
 }
 
 type TestResult struct {
