@@ -20,7 +20,11 @@ func prepareReportData(tests *[]TestResult, Config *TestConfig, startTime, endTi
 		ipState = " (IPv6)"
 	}
 	report.Settings.Target = fmt.Sprintf("%v%v tenant %v", Config.Cx1URL, ipState, Config.Tenant)
-	report.Settings.Auth = fmt.Sprintf("%v user %v", Config.AuthType, Config.AuthUser)
+	if Config.AuthUser != "" {
+		report.Settings.Auth = fmt.Sprintf("%v (%v)", Config.AuthType, Config.AuthUser)
+	} else {
+		report.Settings.Auth = Config.AuthType
+	}
 	report.Settings.Config = Config.ConfigPath
 	report.Settings.StartTime = startTime.String()
 	report.Settings.EndTime = endTime.String()
