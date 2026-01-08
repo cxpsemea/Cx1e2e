@@ -44,6 +44,8 @@ func run() uint {
 	LogFile := flag.String("logfile", "", "Optional: output log to file")
 	InlineReport := flag.Bool("inline-report", false, "Print the report (json/html) contents at the end of execution")
 	UserAgent := flag.String("useragent", "", "Optional: Custom User-Agent string to use in API requests")
+	IPv4 := flag.Bool("ipv4", false, "Optional: Use IPv4 only for API requests")
+	IPv6 := flag.Bool("ipv6", false, "Optional: Use IPv6 only for API requests")
 
 	flag.Parse()
 
@@ -144,6 +146,9 @@ func run() uint {
 			Config.ReportType = "html,json"
 		}
 	}
+
+	Config.IPv4 = *IPv4
+	Config.IPv6 = *IPv6
 
 	var cx1client *Cx1ClientGo.Cx1Client
 
