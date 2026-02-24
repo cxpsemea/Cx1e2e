@@ -6,7 +6,7 @@ Tenant: your_tenant_here
 Tests:
   - Name: Create a new SAST preset
     Presets:
-      - Name: e2e-sastquery-preset%E2E_RUN_SUFFIX%
+      - Name: e2e-presets-sast%E2E_RUN_SUFFIX%
         Description: This is my test preset    
         Engine: "sast"    
         SASTQueries:
@@ -16,7 +16,7 @@ Tests:
         Test: C
   - Name: Create a new IAC preset
     Presets:
-      - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+      - Name: e2e-presets-iac%E2E_RUN_SUFFIX%
         Description: This is my test preset    
         FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Engine: iac
@@ -27,7 +27,7 @@ Tests:
         Test: C
   - Name: Delete SAST preset
     Presets:
-      - Name: e2e-sastquery-preset%E2E_RUN_SUFFIX%
+      - Name: e2e-presets-sast%E2E_RUN_SUFFIX%
         Engine: "sast"
         Test: D      
         OnFail:
@@ -35,7 +35,7 @@ Tests:
           RetryDelay: 2
   - Name: Delete IAC preset
     Presets:
-      - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
+      - Name: e2e-presets-iac%E2E_RUN_SUFFIX%
         Engine: iac
         FeatureFlags: [ "NEW_PRESET_MANAGEMENT_ENABLED" ]
         Test: D   
