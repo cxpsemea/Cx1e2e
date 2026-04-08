@@ -33,6 +33,7 @@ func run() uint {
 	ClientSecret := flag.String("secret", "", "CheckmarxOne Client Secret (if not using API Key)")
 	Cx1URL := flag.String("cx1", "", "Optional: CheckmarxOne platform URL, if not defined in the test config.yaml")
 	IAMURL := flag.String("iam", "", "Optional: CheckmarxOne IAM URL, if not defined in the test config.yaml")
+	AccessToken := flag.String("access-token", "", "CheckmarxOne Access Token (if not using API Key or client id/secret)")
 	Tenant := flag.String("tenant", "", "Optional: CheckmarxOne tenant, if not defined in the test config.yaml")
 	LogLevel := flag.String("log", "", "Log level: TRACE, DEBUG, INFO, WARNING, ERROR, FATAL")
 	ReportType := flag.String("report-type", "html,json", "Report output format: html or json")
@@ -82,9 +83,9 @@ func run() uint {
 		logger.Info("Log level set to default: INFO")
 	}
 
-	if *testConfig == "" || (*APIKey == "" && (*ClientID == "" || *ClientSecret == "")) {
+	if *testConfig == "" || (*APIKey == "" && (*ClientID == "" || *ClientSecret == "") && *AccessToken == "") {
 		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration. For help run: cx1e2e.exe -h")
-		logger.Errorf("Test configuration yaml or authentication (API Key or client+secret) not provided.")
+		logger.Error("Test configuration yaml or authentication (API Key, client+secret, or access token) not provided.")
 		return 1
 	}
 
@@ -190,7 +191,11 @@ func run() uint {
 	} else {
 		cx1config.HTTPHeaders.Set("User-Agent", "Cx1e2e")
 	}
-	if *APIKey != "" {
+
+	if *AccessToken != "" {
+		cx1config.Auth.AccessToken = *AccessToken
+		Config.AuthType = fmt.Sprintf("Access Token %v", Cx1ClientGo.ShortenGUID(*AccessToken))
+	} else if *APIKey != "" {
 		cx1config.Auth.APIKey = *APIKey
 		Config.AuthType = fmt.Sprintf("APIKey %v", Cx1ClientGo.ShortenGUID(*APIKey))
 	} else {
@@ -212,14 +217,14 @@ func run() uint {
 	if cx1client.IsUser() {
 		currentUser, err := cx1client.GetCurrentUser()
 		if err != nil {
-			logger.Errorf("Failed to get cx1 client current user: %s", err)
+			logger.Warningf("Failed to get cx1 client current user: %s", err)
 		} else {
 			Config.AuthUser = currentUser.String()
 		}
 	} else {
 		currentClient, err := cx1client.GetCurrentClient()
 		if err != nil {
-			logger.Errorf("Failed to get cx1 client current OIDC client: %s", err)
+			logger.Warningf("Failed to get cx1 client current OIDC client: %s", err)
 		} else {
 			Config.AuthUser = currentClient.String()
 		}
