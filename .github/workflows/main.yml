@@ -23,7 +23,7 @@ jobs:
       # More assembly might be required: Docker logins, GPG, etc.
       # It all depends on your needs.
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
+        uses: step-security/goreleaser-action@1472c46ac6e641f2b929f1a893354288b3a6b6b6 # v7.2.1
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
