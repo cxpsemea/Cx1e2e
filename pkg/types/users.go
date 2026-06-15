@@ -115,6 +115,8 @@ func (t *UserCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 	var test_User Cx1ClientGo.User
 	test_User.UserName = t.Name
 	test_User.Email = t.Email
+	test_User.FirstName = t.FirstName
+	test_User.LastName = t.LastName
 
 	test_User, err := cx1client.CreateUser(test_User)
 	if err != nil {
