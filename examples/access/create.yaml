@@ -24,6 +24,8 @@ Tests:
       - Name: e2e-access-user%E2E_RUN_SUFFIX%
         FeatureFlags: [ "ACCESS_MANAGEMENT_ENABLED" ]
         Email: e2e_test_access_user1@cx.local
+        FirstName: e2e
+        LastName: test
         Roles: [ ast-scanner ]
         Test: C
   - Name: Grant user access to project        
