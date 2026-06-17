@@ -14,13 +14,6 @@ jobs:
   goreleaser:
     runs-on: cx-public-ubuntu-x64
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@rc
-        with:
-          egress-policy: audit
-          allowed-endpoints: >
-            github.com:443
-            goreleaser.com:443
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
