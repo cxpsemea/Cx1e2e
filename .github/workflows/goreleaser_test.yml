@@ -1,5 +1,5 @@
 # .github/workflows/release.yml
-name: goreleaser
+name: goreleaser_test
 
 on:
   workflow_dispatch:
