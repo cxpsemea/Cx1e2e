@@ -8,4 +8,6 @@ Tests:
     Users:
       - Name: e2e-user-user%E2E_RUN_SUFFIX%
         Email: e2e_test_user1@cx.local
+        FirstName: e2e
+        LastName: "User-Test"
         Test: C
