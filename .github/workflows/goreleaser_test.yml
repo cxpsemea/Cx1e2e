@@ -13,7 +13,7 @@ jobs:
     runs-on: cx-public-ubuntu-x64
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@774f75f2c6334606d2d3d910a663f93c9ea49b3b # rc
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411
         with:
           egress-policy: audit
           allowed-endpoints: >
