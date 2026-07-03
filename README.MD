@@ -117,7 +117,7 @@ There are some limitations in this tool due to unimplemented functionality in th
 ## Engines
 
 Scans can be triggered for: sast, sca, iac (kics), 2ms (secrets), apisec, and containers. See the examples\scan\ folder.
-Custom queries & presets can be for sast and iac (kics) - however IAC custom preset & query tests require the NEW_PRESET_MANAGER_ENABLED flag currently. See the examples\sastquery and examples\iacquery folders.
+Custom queries & presets can be for sast and iac (kics). See the examples\sastquery and examples\iacquery folders.
 Checking results can be done for: sast, sca, and iac (kics). Only SAST and KICS results can be updated. See the examples\results\ folder.
 
 ## Example output

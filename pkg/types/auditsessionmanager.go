@@ -74,7 +74,7 @@ func (m *AuditSessionManager) GetSession(thread int, scope CxQLScope, engine, pl
 			if time.Since(session.LastHeartbeat) < AuditSessionTimeoutMinutes*time.Minute {
 				if err := cx1client.AuditSessionKeepAlive(session); err != nil {
 					logger.Warnf("Tried to refresh existing audit session %v but failed: %s", session.String(), err)
-					_ = cx1client.AuditDeleteSession(session)
+					_ = cx1client.DeleteAuditSession(session)
 					m.Sessions = slices.Delete(m.Sessions, id, id+1)
 					return nil, nil
 				} else {
@@ -83,7 +83,7 @@ func (m *AuditSessionManager) GetSession(thread int, scope CxQLScope, engine, pl
 				}
 			} else {
 				logger.Warnf("Found existing audit session %v but it was created more than %d minutes ago (%v) and may have expired", session.String(), AuditSessionTimeoutMinutes, session.CreatedAt.String())
-				_ = cx1client.AuditDeleteSession(session)
+				_ = cx1client.DeleteAuditSession(session)
 				m.Sessions = slices.Delete(m.Sessions, id, id+1)
 				return nil, nil
 			}
@@ -103,7 +103,7 @@ func (m *AuditSessionManager) Clear(cx1client *Cx1ClientGo.Cx1Client, logger *lo
 
 	for _, s := range m.Sessions {
 		if s.Session != nil {
-			err := cx1client.AuditDeleteSession(s.Session)
+			err := cx1client.DeleteAuditSession(s.Session)
 			if err != nil {
 				logger.Errorf("Failed to terminate audit session %v: %s", s.String(), err)
 			} else {
@@ -133,7 +133,7 @@ func (m *AuditSessionManager) DeleteSession(session *Cx1ClientGo.AuditSession, c
 		}
 	}
 
-	err := cx1client.AuditDeleteSession(&theSession)
+	err := cx1client.DeleteAuditSession(&theSession)
 
 	m.PrintSessions(logger)
 
