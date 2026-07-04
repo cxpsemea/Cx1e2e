@@ -58,7 +58,7 @@ func updateOIDCClientFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *OIDCClientC
 		}
 	}
 
-	_, err = cx1client.GetUserRoles(t.User)
+	_, err = cx1client.GetAllUserRoles(t.User)
 	if err != nil {
 		return fmt.Errorf("failed to get client's roles: %s", err)
 	}

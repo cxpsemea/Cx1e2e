@@ -61,7 +61,7 @@ func updateUserFromConfig(cx1client *Cx1ClientGo.Cx1Client, t *UserCRUD) error {
 		}
 	}
 
-	_, err = cx1client.GetUserRoles(t.User)
+	_, err = cx1client.GetAllUserRoles(t.User)
 	if err != nil {
 		return fmt.Errorf("failed to get user's roles: %s", err)
 	}
