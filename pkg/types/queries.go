@@ -129,6 +129,14 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		return nil, nil
 	}
 
+	rootQuery := queries.GetQueryByName(t.QueryLanguage, t.QueryGroup, t.QueryName)
+	if rootQuery == nil {
+		logger.Errorf("Query %s.%s.%s not found in queries collection", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		return nil, nil
+	} else {
+		logger.Infof("Found existing root query: %s", rootQuery.StringDetailed())
+	}
+
 	var paQueries Cx1ClientGo.SASTQueryCollection
 
 	// sometimes this fails with a 404 for some reason
@@ -159,35 +167,63 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		}
 	}
 	if err != nil {
-		logger.Errorf("Failed to get %v-level queries for project %v: %s", t.ScopeStr, t.ScopeID, err)
+		logger.Errorf("Failed to get %v-level queries: %s", t.ScopeStr, err)
 	}
 
-	queries.AddCollection(&paQueries)
+	counts := []string{}
+	for i := range queries.QueryLanguages {
+		lang := &queries.QueryLanguages[i]
+		total := 0
+		for i := range lang.QueryGroups {
+			total += len(lang.QueryGroups[i].Queries)
+		}
+		counts = append(counts, fmt.Sprintf("%s: %d", lang.Name, total))
+	}
+	logger.Tracef("SAST Query collection has the following queries: %s", strings.Join(counts, ", "))
+	counts = []string{}
+	for i := range paQueries.QueryLanguages {
+		lang := &paQueries.QueryLanguages[i]
+		total := 0
+		for i := range lang.QueryGroups {
+			total += len(lang.QueryGroups[i].Queries)
+		}
+		counts = append(counts, fmt.Sprintf("%s: %d", lang.Name, total))
+	}
+	logger.Tracef("Audit Query collection has the following queries: %s", strings.Join(counts, ", "))
 
 	var query *Cx1ClientGo.SASTQuery
 	logger.Debugf("Trying to find query on scope %v: %v -> %v -> %v", t.ScopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
-	query = queries.GetQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
-
+	query = paQueries.GetQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	if query != nil {
+		if err := queries.UpdateNewQuery(query); err != nil {
+			logger.Debugf("Failed to update audit query from collection: %s", err)
+		}
+		logger.Debugf("Got qc query: %s", query.StringDetailed())
 		qq, err := cx1client.GetAuditSASTQueryByKey(auditSession, query.EditorKey)
 		if err != nil {
 			logger.Errorf("Failed to get full query details for %v: %s", query.StringDetailed(), err)
 		} else {
-			query = &qq
+			query.MergeQuery(qq)
 		}
-		logger.Debugf("Found query: %v", query.StringDetailed())
+		logger.Debugf("Found target query: %v", query.StringDetailed())
 	} else {
-		logger.Debugf("Query doesn't exist")
+		logger.Debugf("Target query %s.%s.%s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
 
-	baseQuery := queries.GetClosestQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryLanguage, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
+	baseQuery := paQueries.GetClosestQueryByLevelAndName(cx1client.QueryTypeApplication(), cx1client.QueryTypeApplication(), t.QueryLanguage, t.QueryGroup, t.QueryName)
 	if baseQuery != nil {
+		if err := queries.UpdateNewQuery(baseQuery); err != nil {
+			logger.Debugf("Failed to update audit query from collection: %s", err)
+		}
 		qq, err := cx1client.GetAuditSASTQueryByKey(auditSession, baseQuery.EditorKey)
 		if err != nil {
-			logger.Errorf("Failed to get full base query details for %v: %s", baseQuery.StringDetailed(), err)
+			logger.Errorf("Failed to get full base query details for tenant-level %s: %s", baseQuery.StringDetailed(), err)
 		} else {
-			baseQuery = &qq
+			baseQuery.MergeQuery(qq)
 		}
+		logger.Debugf("Base query: %v", baseQuery.StringDetailed())
+	} else {
+		logger.Debugf("Base query for %s.%s.%s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
 	return query, baseQuery
 }
@@ -215,10 +251,6 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 	}
 
 	var paQueries Cx1ClientGo.IACQueryCollection
-
-	// sometimes this fails with a 404 for some reason
-	// quick-and-dirty retry
-
 	maxRetry := 3
 	retryDelay := 30
 	for i := 0; i < maxRetry; i++ {
@@ -244,16 +276,30 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 		}
 	}
 	if err != nil {
-		logger.Errorf("Failed to get %v-level queries for project %v: %s", t.ScopeStr, t.ScopeID, err)
+		logger.Errorf("Failed to get %v-level queries: %s", t.ScopeStr, err)
 	}
 
-	queries.AddCollection(&paQueries)
+	//queries.AddCollection(&paQueries)
+
+	counts := []string{}
+	for i := range queries.Platforms {
+		lang := &queries.Platforms[i]
+		total := 0
+		for i := range lang.QueryGroups {
+			total += len(lang.QueryGroups[i].Queries)
+		}
+		counts = append(counts, fmt.Sprintf("%s: %d", lang.Name, total))
+	}
+	logger.Debugf("IaC Query collection has the following queries: %s", strings.Join(counts, ", "))
 
 	var query *Cx1ClientGo.IACQuery
 	logger.Debugf("Trying to find query on scope %v: %v -> %v -> %v", t.ScopeStr, t.QueryPlatform, t.QueryGroup, t.QueryName)
-	query = queries.GetQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryPlatform, t.QueryGroup, t.QueryName)
+	query = paQueries.GetQueryByLevelAndName(t.ScopeStr, t.ScopeID, t.QueryPlatform, t.QueryGroup, t.QueryName)
 
 	if query != nil {
+		if err := queries.UpdateNewQuery(query); err != nil {
+			logger.Debugf("Failed to update audit query from collection: %s", err)
+		}
 		qq, err := cx1client.GetAuditIACQueryByID(auditSession, query.QueryID)
 		if err != nil {
 			logger.Errorf("Failed to get full query details for %v: %s", query.StringDetailed(), err)
@@ -265,8 +311,11 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 		logger.Debugf("Query doesn't exist")
 	}
 
-	baseQuery := queries.GetQueryByName(t.QueryPlatform, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
+	baseQuery := paQueries.GetQueryByName(t.QueryPlatform, t.QueryGroup, t.QueryName) // TODO: this needs better logic - what if base == project level?
 	if baseQuery != nil {
+		if err := queries.UpdateNewQuery(baseQuery); err != nil {
+			logger.Debugf("Failed to update audit query from collection: %s", err)
+		}
 		qq, err := cx1client.GetAuditIACQueryByID(auditSession, baseQuery.QueryID)
 		if err != nil {
 			logger.Errorf("Failed to get full query details for %v: %s", baseQuery.StringDetailed(), err)
@@ -357,6 +406,7 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 		}
 
 		if t.SASTQuery.MetadataDifferent(meta) {
+			logger.Debugf("Updating query %s metadata, differences: %s", t.SASTQuery.StringDetailed(), strings.Join(t.SASTQuery.GetMetadataDiffs(meta), ", "))
 			new_query, err = cx1client.UpdateSASTQueryMetadata(auditSession, *t.SASTQuery, meta)
 			if err != nil {
 				if strings.Contains(err.Error(), "query not found") {
