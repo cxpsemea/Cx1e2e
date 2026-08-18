@@ -88,7 +88,8 @@ func getIACQueryCollection(cx1client *Cx1ClientGo.Cx1Client, _ *ThreadLogger, t 
 }
 
 func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
-	if t.Engine == "sast" {
+	switch t.Engine {
+	case "sast":
 		collection, err := getSASTQueryCollection(cx1client, logger, t)
 		if err != nil {
 			return err
@@ -99,7 +100,7 @@ func (t *PresetCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadL
 			return err
 		}
 		t.Preset = &test_Preset
-	} else if t.Engine == "iac" {
+	case "iac":
 		collection, err := getIACQueryCollection(cx1client, logger, t)
 		if err != nil {
 			return err
@@ -135,7 +136,8 @@ func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadL
 		}
 	}
 
-	if t.Engine == "sast" {
+	switch t.Engine {
+	case "sast":
 		queryCollection, err := getSASTQueryCollection(cx1client, logger, t)
 		if err != nil {
 			return err
@@ -145,7 +147,7 @@ func (t *PresetCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadL
 		t.Preset.UpdateQueries(queryCollection)
 		err = cx1client.UpdateSASTPreset(*t.Preset)
 		return err
-	} else if t.Engine == "iac" {
+	case "iac":
 		queryCollection, err := getIACQueryCollection(cx1client, logger, t)
 		if err != nil {
 			return err
