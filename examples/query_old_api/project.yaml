@@ -17,6 +17,7 @@ Tests:
         Severity: LOW
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         Compile: true   
+        IsExecutable: true
         OldAPI: true     
         DeleteAuditSession: true
         Test: C
