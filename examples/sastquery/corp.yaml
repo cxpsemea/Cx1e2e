@@ -55,5 +55,5 @@ Tests:
         Scope: 
           Tenant: true
           Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
-        Test: R
+        Test: D
         DeleteAuditSession: true

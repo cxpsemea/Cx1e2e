@@ -30,7 +30,9 @@ func (t *CxQLCRUD) Validate(CRUD string) error {
 	if t.Scope.Project == "" {
 		return fmt.Errorf("project name is missing")
 	}
-
+	if t.Engine == "sast" && (t.CRUDTest.IsType(OP_CREATE) || t.CRUDTest.IsType(OP_UPDATE)) && t.IsExecutable == nil {
+		return fmt.Errorf("SAST query create/update requires setting the IsExecutable flag")
+	}
 	return nil
 }
 
