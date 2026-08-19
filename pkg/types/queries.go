@@ -130,7 +130,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 
 	rootQuery := queries.GetQueryByName(t.QueryLanguage, t.QueryGroup, t.QueryName)
 	if rootQuery == nil {
-		return nil, nil, fmt.Errorf("query %s.%s.%s not found in queries collection", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		return nil, nil, nil
 	} else {
 		logger.Infof("Found existing root query: %s", rootQuery.StringDetailed())
 	}
@@ -160,7 +160,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		}
 	}
 	if err != nil {
-		return nil, nil, fmt.Errorf("Failed to get %s-level queries: %s", t.ScopeStr, err)
+		return nil, nil, err
 	}
 
 	counts := []string{}
