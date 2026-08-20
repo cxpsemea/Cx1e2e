@@ -17,6 +17,7 @@ Tests:
           Project: e2e-queryo-project%E2E_RUN_SUFFIX% #Project is still required since the web-audit session is opened in a project's context
         Source: "result = All.NewCxList();"
         Severity: LOW
+        IsExecutable: true
         Compile: true
         OldAPI: true
         DeleteAuditSession: true

@@ -47,6 +47,7 @@ func run() uint {
 	UserAgent := flag.String("useragent", "", "Optional: Custom User-Agent string to use in API requests")
 	IPv4 := flag.Bool("ipv4", false, "Optional: Use IPv4 only for API requests")
 	IPv6 := flag.Bool("ipv6", false, "Optional: Use IPv6 only for API requests")
+	VerifyOnly := flag.Bool("verify", false, "Configuration verification only without running tests")
 
 	flag.Parse()
 
@@ -99,6 +100,9 @@ func run() uint {
 	if !Config.IsValid(logger) {
 		logger.Errorf("Test configuration failed to validate - review the logs and update the YAMLs")
 		return 1
+	} else if *VerifyOnly {
+		logger.Info("Configuration verification finished successfully, exiting.")
+		return 0
 	}
 
 	if *LogLevel == "" && Config.LogLevel != "" {

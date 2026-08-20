@@ -16,6 +16,7 @@ Tests:
         Source: "result = All.NewCxList(); //project override"
         Severity: LOW
         Compile: true        
+        IsExecutable: true
         Test: C
         OnFail:
           Retries: 1
@@ -34,7 +35,8 @@ Tests:
         Severity: LOW
         CWE: 124
         DescriptionID: 124
-        Compile: true        
+        Compile: true       
+        IsExecutable: true 
         Test: U
   - Name: run a scan and verify that the results are correct
     Scans:

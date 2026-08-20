@@ -222,11 +222,12 @@ type CxQLCRUD struct {
 
 func (o CxQLCRUD) String() string {
 	//if o.QueryName != "" {
-	if o.Engine == "sast" {
+	switch o.Engine {
+	case "sast":
 		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
-	} else if o.Engine == "iac" {
+	case "iac":
 		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryPlatform, o.QueryGroup, o.QueryName)
-	} else {
+	default:
 		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
 	}
 	/*} else {

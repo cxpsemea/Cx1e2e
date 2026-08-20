@@ -16,6 +16,7 @@ Tests:
         Source: "result = All.NewCxList();"
         Severity: MEDIUM # currently, you cannot change anything except the source, but this should work june/july
         Compile: true
+        IsExecutable: true
         FeatureFlags: [ "QUERY_EDITOR_SAST_BACKWARD_API_ENABLED" ]
         DeleteAuditSession: true
         OldAPI: true

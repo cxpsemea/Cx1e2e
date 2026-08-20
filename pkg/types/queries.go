@@ -27,11 +27,12 @@ func (t *CxQLCRUD) Validate(CRUD string) error {
 	if t.Engine != "sast" && t.Engine != "iac" {
 		return fmt.Errorf("engine must be 'sast' or 'iac'")
 	}
-
 	if t.Scope.Project == "" {
 		return fmt.Errorf("project name is missing")
 	}
-
+	if t.Engine == "sast" && (t.CRUDTest.IsType(OP_CREATE) || t.CRUDTest.IsType(OP_UPDATE)) && t.IsExecutable == nil {
+		return fmt.Errorf("SAST query create/update requires setting the IsExecutable flag")
+	}
 	return nil
 }
 
@@ -107,11 +108,10 @@ func getQueryScope(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) (string, strin
 	return scope, scopeStr, nil
 }
 
-func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) (*Cx1ClientGo.SASTQuery, *Cx1ClientGo.SASTQuery) {
+func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) (*Cx1ClientGo.SASTQuery, *Cx1ClientGo.SASTQuery, error) {
 	scope, scopeStr, err := getQueryScope(cx1client, t)
 	if err != nil {
-		logger.Errorf("Error with query scope: %v", err)
-		return nil, nil
+		return nil, nil, fmt.Errorf("error with query scope: %v", err)
 	}
 
 	t.ScopeID = scope
@@ -119,20 +119,18 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 
 	auditSession, err := getAuditSession(cx1client, logger, t)
 	if err != nil {
-		logger.Errorf("Failed to get audit session: %s", err)
-		return nil, nil
+
+		return nil, nil, fmt.Errorf("failed to get audit session: %s", err)
 	}
 
 	queries, err := cx1client.GetSASTQueryCollection()
 	if err != nil {
-		logger.Errorf("Failed to get query collection from CheckmarxOne: %s", err)
-		return nil, nil
+		return nil, nil, fmt.Errorf("failed to get query collection from CheckmarxOne: %s", err)
 	}
 
 	rootQuery := queries.GetQueryByName(t.QueryLanguage, t.QueryGroup, t.QueryName)
 	if rootQuery == nil {
-		logger.Errorf("Query %s.%s.%s not found in queries collection", t.QueryLanguage, t.QueryGroup, t.QueryName)
-		return nil, nil
+		return nil, nil, nil
 	} else {
 		logger.Infof("Found existing root query: %s", rootQuery.StringDetailed())
 	}
@@ -145,29 +143,24 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 	maxRetry := 3
 	retryDelay := 30
 	for i := 0; i < maxRetry; i++ {
-		if t.Scope.Corp {
-			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, cx1client.QueryTypeTenant(), cx1client.QueryTypeTenant())
-		} else {
-			paQueries, err = cx1client.GetAuditSASTQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID) // can't fetch app-level queries
-		}
+		paQueries, err = cx1client.GetAllAuditSASTQueries(auditSession)
 		if err == nil {
 			break
 		} else {
-			logger.Warnf("Attempt %d/%d to get %v-level queries failed with error '%s', waiting %d sec to retry...", i, maxRetry, t.ScopeID, err, retryDelay)
+			logger.Warnf("Attempt %d/%d to get %s-level queries failed with error '%s', waiting %d sec to retry...", i, maxRetry, t.ScopeID, err, retryDelay)
 			if err = cx1client.AuditSessionKeepAlive(auditSession); err != nil {
 				logger.Errorf("%v has expired, generating a new session", auditSession.String())
 				auditSession = nil
 				auditSession, err = getAuditSession(cx1client, logger, t)
 				if err != nil {
-					logger.Errorf("Failed to get audit session: %s", err)
-					return nil, nil
+					return nil, nil, fmt.Errorf("failed to get audit session: %s", err)
 				}
 			}
 			time.Sleep(time.Duration(retryDelay) * time.Second)
 		}
 	}
 	if err != nil {
-		logger.Errorf("Failed to get %v-level queries: %s", t.ScopeStr, err)
+		return nil, nil, err
 	}
 
 	counts := []string{}
@@ -198,10 +191,10 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		if err := queries.UpdateNewQuery(query); err != nil {
 			logger.Debugf("Failed to update audit query from collection: %s", err)
 		}
-		logger.Debugf("Got qc query: %s", query.StringDetailed())
+		logger.Debugf("Got query collection query: %s", query.StringDetailed())
 		qq, err := cx1client.GetAuditSASTQueryByKey(auditSession, query.EditorKey)
 		if err != nil {
-			logger.Errorf("Failed to get full query details for %v: %s", query.StringDetailed(), err)
+			return nil, nil, fmt.Errorf("failed to get full query details for %v: %s", query.StringDetailed(), err)
 		} else {
 			query.MergeQuery(qq)
 		}
@@ -217,7 +210,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		}
 		qq, err := cx1client.GetAuditSASTQueryByKey(auditSession, baseQuery.EditorKey)
 		if err != nil {
-			logger.Errorf("Failed to get full base query details for tenant-level %s: %s", baseQuery.StringDetailed(), err)
+			return nil, nil, fmt.Errorf("failed to get full base query details for tenant-level %s: %s", baseQuery.StringDetailed(), err)
 		} else {
 			baseQuery.MergeQuery(qq)
 		}
@@ -225,7 +218,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 	} else {
 		logger.Debugf("Base query for %s.%s.%s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
-	return query, baseQuery
+	return query, baseQuery, nil
 }
 
 func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCRUD) (*Cx1ClientGo.IACQuery, *Cx1ClientGo.IACQuery) {
@@ -378,7 +371,8 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 		return nil
 	}
 
-	if t.Engine == "sast" {
+	switch t.Engine {
+	case "sast":
 		var new_query Cx1ClientGo.SASTQuery
 		meta := t.SASTQuery.GetMetadata()
 
@@ -386,10 +380,11 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 			meta.Severity = t.Severity
 		}
 
-		if t.IsExecutable != nil {
-			if *t.IsExecutable != meta.IsExecutable {
-				logger.Warnf("Attempting to change IsExecutable from %v to %v for query %v", meta.IsExecutable, *t.IsExecutable, t.SASTQuery.StringDetailed())
-				meta.IsExecutable = *t.IsExecutable
+		if meta.IsExecutable == nil {
+			return fmt.Errorf("Query %s has undefined isExecutable flag", t.SASTQuery.StringDetailed())
+		} else if t.IsExecutable != nil {
+			if *t.IsExecutable != *meta.IsExecutable && *t.IsExecutable == false {
+				return fmt.Errorf("blocked attempt to change IsExecutable from %t to %t for query %s (can cause the query to be removed from all presets)", *meta.IsExecutable, *t.IsExecutable, t.SASTQuery.StringDetailed())
 			}
 		}
 		if t.CWE != "" {
@@ -429,7 +424,7 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 		}
 
 		t.SASTQuery = &new_query
-	} else if t.Engine == "iac" {
+	case "iac":
 		var new_query Cx1ClientGo.IACQuery
 		if t.Severity != t.IACQuery.Severity {
 			meta := t.IACQuery.GetMetadata()
@@ -457,7 +452,7 @@ func updateQuery_old(cx1client *Cx1ClientGo.Cx1Client, t *CxQLCRUD) error {
 	}
 
 	if t.IsExecutable != nil {
-		t.SASTQuery.IsExecutable = *t.IsExecutable
+		t.SASTQuery.IsExecutable = t.IsExecutable
 	}
 
 	query := t.SASTQuery.ToAuditQuery_v310()
@@ -492,11 +487,13 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 	}
 
 	var baseQuery *Cx1ClientGo.SASTQuery
-	t.SASTQuery, baseQuery = getSASTQuery(cx1client, logger, t)
+	t.SASTQuery, baseQuery, err = getSASTQuery(cx1client, logger, t)
+	if err != nil {
+		return fmt.Errorf("failed to get query: %s: %s", t.String(), err)
+	}
 
 	if t.SASTQuery != nil {
-		logger.Debugf("Query already exists in target scope: %v", t.SASTQuery.StringDetailed())
-		return updateQuery(cx1client, logger, t)
+		return fmt.Errorf("query already exists in target scope: %v", t.SASTQuery.StringDetailed())
 	} else if baseQuery != nil {
 		logger.Debugf("Found base query: %v", baseQuery.String())
 
@@ -524,12 +521,14 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 			}
 		}
 
-		logger.Debugf("Updating query %v", t.SASTQuery.String())
+		logger.Debugf("Updating new query override %v", t.SASTQuery.StringDetailed())
 		return updateQuery(cx1client, logger, t)
 	} else {
 		if !t.Scope.Corp {
 			return fmt.Errorf("query %v does not exist and must be created at Tenant level before it can be created on a Project or Application level", t.String())
 		}
+
+		logger.Infof("Creating new Tenant-level query %s", t.String())
 
 		if t.IsExecutable == nil {
 			return fmt.Errorf("cannot create a new corp query without specifying if it is executable")
@@ -543,7 +542,7 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 			Group:        t.QueryGroup,
 			Language:     t.QueryLanguage,
 			Severity:     t.Severity,
-			IsExecutable: *t.IsExecutable,
+			IsExecutable: t.IsExecutable,
 			Custom:       true,
 		}
 
@@ -690,9 +689,10 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		return create_old(cx1client, logger, t)
 	} else {
 		defer t.TerminateSession(OP_CREATE, cx1client, logger)
-		if t.Engine == "sast" {
+		switch t.Engine {
+		case "sast":
 			return createSAST(cx1client, logger, t)
-		} else if t.Engine == "iac" {
+		case "iac":
 			return createIAC(cx1client, logger, t)
 		}
 	}
@@ -700,15 +700,18 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 }
 
 func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
-	if t.Engine == "sast" {
+	switch t.Engine {
+	case "sast":
 		var query *Cx1ClientGo.SASTQuery
+		var err error
 		if t.OldAPI {
 			query, _ = getQuery_old(cx1client, logger, t)
 		} else {
-			query, _ = getSASTQuery(cx1client, logger, t)
+			query, _, err = getSASTQuery(cx1client, logger, t)
+			if err != nil {
+				return err
+			}
 		}
-
-		defer t.TerminateSession(OP_READ, cx1client, logger)
 
 		if query == nil {
 			return fmt.Errorf("no such query %v: %v -> %v -> %v exists", t.Scope, t.QueryLanguage, t.QueryGroup, t.QueryName)
@@ -729,7 +732,7 @@ func (t *CxQLCRUD) RunRead(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogge
 		}
 
 		t.SASTQuery = query
-	} else if t.Engine == "iac" {
+	case "iac":
 		var query *Cx1ClientGo.IACQuery
 		query, _ = getIACQuery(cx1client, logger, t)
 
@@ -781,7 +784,8 @@ func (t *CxQLCRUD) RunUpdate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 }
 
 func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, Engines *EnabledEngines) error {
-	if t.Engine == "sast" {
+	switch t.Engine {
+	case "sast":
 
 		if t.SASTQuery == nil {
 			if t.CRUDTest.IsType(OP_READ) { // already tried to read
@@ -809,7 +813,7 @@ func (t *CxQLCRUD) RunDelete(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		}
 
 		return cx1client.DeleteQueryOverrideByKey(auditSession, t.SASTQuery.EditorKey)
-	} else if t.Engine == "iac" {
+	case "iac":
 		if t.IACQuery == nil {
 			if t.CRUDTest.IsType(OP_READ) { // already tried to read
 				return fmt.Errorf("read operation failed")

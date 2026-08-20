@@ -18,6 +18,7 @@ Tests:
         Source: "result = All.NewCxList(); // application override"
         Severity: LOW
         Compile: true
+        IsExecutable: true
         Test: C
         OnFail:
           Retries: 1
