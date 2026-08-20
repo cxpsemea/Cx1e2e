@@ -84,9 +84,9 @@ func run() uint {
 		logger.Info("Log level set to default: INFO")
 	}
 
-	if *testConfig == "" || (*APIKey == "" && (*ClientID == "" || *ClientSecret == "") && *AccessToken == "") {
+	if *testConfig == "" {
 		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration. For help run: cx1e2e.exe -h")
-		logger.Error("Test configuration yaml or authentication (API Key, client+secret, or access token) not provided.")
+		logger.Error("Test configuration yaml was not provided.")
 		return 1
 	}
 
@@ -103,6 +103,12 @@ func run() uint {
 	} else if *VerifyOnly {
 		logger.Info("Configuration verification finished successfully, exiting.")
 		return 0
+	}
+
+	if *APIKey == "" && (*ClientID == "" || *ClientSecret == "") && *AccessToken == "" {
+		logger.Info("The purpose of this tool is to automate testing of the API for various workflows based on the yaml configuration. For help run: cx1e2e.exe -h")
+		logger.Error("Authentication (API Key, client+secret, or access token) was not provided.")
+		return 1
 	}
 
 	if *LogLevel == "" && Config.LogLevel != "" {
