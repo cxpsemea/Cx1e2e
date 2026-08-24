@@ -232,7 +232,7 @@ func (o CxQLCRUD) String() string {
 				exec = "(non-exec)"
 			}
 		}
-		return fmt.Sprintf("%s %s: %s -> %s -> %s (%s)", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName, exec)
+		return fmt.Sprintf("%s %s: %s -> %s -> %s %s", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName, exec)
 	case "iac":
 		return fmt.Sprintf("%s %s: %s -> %s -> %s", o.Engine, o.Scope.String(), o.QueryPlatform, o.QueryGroup, o.QueryName)
 	default:
