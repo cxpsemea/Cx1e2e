@@ -495,7 +495,7 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 	if t.SASTQuery != nil {
 		return fmt.Errorf("query already exists in target scope: %v", t.SASTQuery.StringDetailed())
 	} else if baseQuery != nil {
-		logger.Debugf("Found base query: %v", baseQuery.String())
+		logger.Debugf("Found base query: %v", baseQuery.StringDetailed())
 
 		if t.Scope.Corp {
 			newq, err := cx1client.CreateSASTQueryOverride(auditSession, cx1client.QueryTypeTenant(), baseQuery)
@@ -582,7 +582,7 @@ func createIAC(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCR
 		logger.Debugf("Query already exists in target scope: %v", t.IACQuery.StringDetailed())
 		return updateQuery(cx1client, logger, t)
 	} else if baseQuery != nil {
-		logger.Debugf("Found base query: %v", baseQuery.String())
+		logger.Debugf("Found base query: %v", baseQuery.StringDetailed())
 
 		if t.Scope.Corp {
 			newq, err := cx1client.CreateIACQueryOverride(auditSession, cx1client.QueryTypeTenant(), baseQuery)
@@ -648,7 +648,7 @@ func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 	t.SASTQuery, baseQuery = getQuery_old(cx1client, logger, t)
 
 	if t.SASTQuery != nil {
-		logger.Debugf("Updating query %v", t.SASTQuery.String())
+		logger.Debugf("Updating query %v", t.SASTQuery.StringDetailed())
 		err = updateQuery_old(cx1client, t)
 		return err
 	} else {
@@ -661,10 +661,10 @@ func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 				return fmt.Errorf("creating a new Tenant-level query is no longer possible with the old API")
 			}
 		} else {
-			logger.Debugf("Found base query: %v", baseQuery.String())
+			logger.Debugf("Found base query: %v", baseQuery.StringDetailed())
 
 			if t.Scope.Corp {
-				logger.Debugf("Will create corp override of %v", baseQuery.String())
+				logger.Debugf("Will create corp override of %v", baseQuery.StringDetailed())
 				newq := baseQuery.ToAuditQuery_v310().CreateTenantOverride().ToQuery()
 				t.SASTQuery = &newq
 			} else {
