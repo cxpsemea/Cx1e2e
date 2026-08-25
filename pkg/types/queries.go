@@ -350,6 +350,9 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 	if err != nil {
 		logger.Warnf("Error getting %v-level query %v: %s", scopeStr, t.String(), err)
 	} else {
+		if auditQuery.Level == Cx1ClientGo.AUDIT_QUERY_v310.APPLICATION {
+			auditQuery.LevelID = scope
+		}
 		query := auditQuery.ToQuery()
 		newQuery = &query
 	}
