@@ -333,9 +333,9 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 
 	if t.Scope.Corp {
 		scopeStr = cx1client.QueryTypeTenant()
-		queries, err = cx1client.GetQueriesByLevelID_v310(Cx1ClientGo.AUDIT_QUERY_v310.TENANT, scope)
+		queries, err = cx1client.GetQueriesByLevelID_v310(cx1client.AuditQueryLevels_v310().TENANT, scope)
 	} else {
-		queries, err = cx1client.GetQueriesByLevelID_v310(Cx1ClientGo.AUDIT_QUERY_v310.PROJECT, t.Scope.ProjectID)
+		queries, err = cx1client.GetQueriesByLevelID_v310(cx1client.AuditQueryLevels_v310().PROJECT, t.Scope.ProjectID)
 	}
 
 	if err != nil {
@@ -350,7 +350,7 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 	if err != nil {
 		logger.Warnf("Error getting %v-level query %v: %s", scopeStr, t.String(), err)
 	} else {
-		if auditQuery.Level == Cx1ClientGo.AUDIT_QUERY_v310.APPLICATION {
+		if auditQuery.Level == cx1client.AuditQueryLevels_v310().APPLICATION {
 			auditQuery.LevelID = scope
 		}
 		query := auditQuery.ToQuery()
