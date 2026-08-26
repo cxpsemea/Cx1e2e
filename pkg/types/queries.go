@@ -333,9 +333,9 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 
 	if t.Scope.Corp {
 		scopeStr = cx1client.QueryTypeTenant()
-		queries, err = cx1client.GetQueriesByLevelID_v310(Cx1ClientGo.AUDIT_QUERY_v310.TENANT, scope)
+		queries, err = cx1client.GetQueriesByLevelID_v310(cx1client.AuditQueryLevels_v310().TENANT, scope)
 	} else {
-		queries, err = cx1client.GetQueriesByLevelID_v310(Cx1ClientGo.AUDIT_QUERY_v310.PROJECT, t.Scope.ProjectID)
+		queries, err = cx1client.GetQueriesByLevelID_v310(cx1client.AuditQueryLevels_v310().PROJECT, t.Scope.ProjectID)
 	}
 
 	if err != nil {
@@ -350,6 +350,9 @@ func getQuery_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 	if err != nil {
 		logger.Warnf("Error getting %v-level query %v: %s", scopeStr, t.String(), err)
 	} else {
+		if auditQuery.Level == cx1client.AuditQueryLevels_v310().APPLICATION {
+			auditQuery.LevelID = scope
+		}
 		query := auditQuery.ToQuery()
 		newQuery = &query
 	}
@@ -495,7 +498,7 @@ func createSAST(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 	if t.SASTQuery != nil {
 		return fmt.Errorf("query already exists in target scope: %v", t.SASTQuery.StringDetailed())
 	} else if baseQuery != nil {
-		logger.Debugf("Found base query: %v", baseQuery.String())
+		logger.Debugf("Found base query: %v", baseQuery.StringDetailed())
 
 		if t.Scope.Corp {
 			newq, err := cx1client.CreateSASTQueryOverride(auditSession, cx1client.QueryTypeTenant(), baseQuery)
@@ -582,7 +585,7 @@ func createIAC(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLCR
 		logger.Debugf("Query already exists in target scope: %v", t.IACQuery.StringDetailed())
 		return updateQuery(cx1client, logger, t)
 	} else if baseQuery != nil {
-		logger.Debugf("Found base query: %v", baseQuery.String())
+		logger.Debugf("Found base query: %v", baseQuery.StringDetailed())
 
 		if t.Scope.Corp {
 			newq, err := cx1client.CreateIACQueryOverride(auditSession, cx1client.QueryTypeTenant(), baseQuery)
@@ -648,7 +651,7 @@ func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 	t.SASTQuery, baseQuery = getQuery_old(cx1client, logger, t)
 
 	if t.SASTQuery != nil {
-		logger.Debugf("Updating query %v", t.SASTQuery.String())
+		logger.Debugf("Updating query %v", t.SASTQuery.StringDetailed())
 		err = updateQuery_old(cx1client, t)
 		return err
 	} else {
@@ -661,10 +664,10 @@ func create_old(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQLC
 				return fmt.Errorf("creating a new Tenant-level query is no longer possible with the old API")
 			}
 		} else {
-			logger.Debugf("Found base query: %v", baseQuery.String())
+			logger.Debugf("Found base query: %v", baseQuery.StringDetailed())
 
 			if t.Scope.Corp {
-				logger.Debugf("Will create corp override of %v", baseQuery.String())
+				logger.Debugf("Will create corp override of %v", baseQuery.StringDetailed())
 				newq := baseQuery.ToAuditQuery_v310().CreateTenantOverride().ToQuery()
 				t.SASTQuery = &newq
 			} else {

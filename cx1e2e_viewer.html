@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cx1e2e Log Viewer</title>
+<style>
+  /* ============ Theme / color palette ============
+     Everything color-related lives here so it can be tweaked in one place.
+     Severity colors are looked up by name from JS (see SEVERITY_VAR map). */
+  :root {
+    --bg: #ffffff;
+    --fg: #1b1c1f;
+    --muted: #6b6f76;
+    --border: #d8d9de;
+    --header-bg: #eef0f3;
+    --row-alt: #f6f7f9;
+    --group-alt: #eef3f8;
+    --accent: #3b6ea5;
+    --accent-fg: #ffffff;
+    --btn-bg: #f0f1f4;
+    --btn-fg: #1b1c1f;
+    --btn-border: #c7c9ce;
+    --btn-hidden-bg: #e2e3e7;
+
+    /* severity palette (defaults: error/critical/fatal = red, warn = amber,
+       info = normal/neutral text, debug/trace = pastel-but-readable blue/green) */
+    --sev-trace: #2b7a55;
+    --sev-debug: #2b5ea8;
+    --sev-info: #1b1c1f;
+    --sev-warn: #b5790a;
+    --sev-error: #c62d2d;
+    --sev-critical: #c62d2d;
+    --sev-fatal: #c62d2d;
+    --sev-default: #6b6f76;
+  }
+
+  html[data-theme="dark"] {
+    --bg: #1e1f22;
+    --fg: #e7e8ea;
+    --muted: #9aa0a8;
+    --border: #3a3c41;
+    --header-bg: #2a2c30;
+    --row-alt: #232427;
+    --group-alt: #23282e;
+    --accent: #6fa8dc;
+    --accent-fg: #10151a;
+    --btn-bg: #2f3136;
+    --btn-fg: #e7e8ea;
+    --btn-border: #46484e;
+    --btn-hidden-bg: #26272b;
+
+    --sev-trace: #7fceac;
+    --sev-debug: #7fb4ef;
+    --sev-info: #e7e8ea;
+    --sev-warn: #e3ab3d;
+    --sev-error: #ef6161;
+    --sev-critical: #ef6161;
+    --sev-fatal: #ef6161;
+    --sev-default: #9aa0a8;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  #toolbar {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    row-gap: 8px;
+    padding: 10px 14px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border);
+  }
+  #toolbar .spacer { flex: 1; }
+  #status { color: var(--muted); font-size: 0.9em; }
+
+  #sevFilters { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .sev-filter-item { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; font-size: 0.9em; cursor: pointer; user-select: none; }
+  .sev-filter-item input { cursor: pointer; }
+
+  button, .file-btn {
+    font: inherit;
+    cursor: pointer;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    border: 1px solid var(--btn-border);
+    border-radius: 6px;
+    padding: 6px 12px;
+  }
+  button:hover { filter: brightness(1.08); }
+  button.toggled-off { background: var(--btn-hidden-bg); font-style: italic; color: var(--muted); }
+  input[type="file"] { display: none; }
+
+  #content { flex: 1 1 auto; min-height: 0; position: relative; }
+  #unified-view, #separated-view { display: none; height: 100%; overflow: auto; }
+  body.view-unified #unified-view { display: block; }
+  body.view-separated #separated-view { display: block; }
+
+  table {
+    table-layout: fixed;
+    width: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+  }
+
+  th[data-col] {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--header-bg);
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+    padding: 6px 8px;
+  }
+  /* NOTE: the flex layout lives on this inner wrapper, not on <th> itself —
+     giving a <th> `display:flex` knocks it out of `display:table-cell` and
+     breaks the whole table's column layout (headers stack, fixed widths
+     stop being respected). */
+  .th-inner { display: flex; flex-direction: column; align-items: stretch; }
+  .th-main { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .th-label { font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .th-main button { padding: 2px 8px; font-size: 0.8em; border-radius: 4px; }
+
+  .resize-handle {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+  }
+  .resize-handle:hover { background: var(--accent); opacity: 0.5; }
+
+  .col-scrollbar {
+    position: relative;
+    height: 8px;
+    margin-top: 6px;
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    border-radius: 4px;
+  }
+  .col-scrollbar[hidden] { display: none; }
+  .col-scrollbar-thumb {
+    position: absolute;
+    top: -1px; left: 0;
+    height: 8px;
+    width: 30px;
+    background: var(--accent);
+    border-radius: 4px;
+    cursor: grab;
+  }
+  .col-scrollbar-thumb:active { cursor: grabbing; }
+
+  td {
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 1px 10px;
+    vertical-align: top;
+    /* `table-layout: fixed` only fixes the column width in *theory* — an
+       unbreakable run of text (a long URL with wrap off) still forces the
+       cell wider unless the cell itself is told it may shrink past its
+       content size. `max-width: 0` + `overflow: hidden` here (not just on
+       the inner div) is the standard fix: it makes the <col> width from
+       the colgroup authoritative and clips overflow instead of growing. */
+    max-width: 0;
+    overflow: hidden;
+  }
+  .cell-inner {
+    width: 100%;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  /* For the scroll trick to work, the thing we translate (.cell-inner) has
+     to actually BE as wide as its full content — clipping happens only at
+     the ancestor <td> (already `overflow: hidden; max-width: 0` above), a
+     fixed "window" that never moves. If `.cell-inner` itself stayed at
+     `width: 100%` with its own overflow hidden, its content would already
+     be clipped to that 100% *before* any transform is applied, so sliding
+     that already-clipped box around just moves empty space — the rest of
+     the line was never there to reveal. `width: max-content` lets it grow
+     to the text's natural width so translating it left slides progressively
+     later parts of the (real, un-clipped) line through the fixed <td>
+     window. */
+  .cell-inner.nowrap { width: max-content; white-space: pre; word-break: normal; }
+
+  /* the timestamp column is fixed: no wrap toggle, no resize handle, always one line */
+  td.ts-cell .cell-inner { color: var(--muted); white-space: nowrap; overflow-x: hidden; }
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  #separated-view tbody tr:nth-child(even) { background: var(--group-alt); }
+
+  .tag { font-weight: 600; margin-right: 6px; }
+  /* Unlike column width, a table row's height genuinely cannot be capped
+     below its tallest cell's content — `max-height`/`overflow`/`visibility`
+     on a <td> are simply not honored by the row-height algorithm, so a
+     "hidden" cell that's still rendering (invisibly) still grows the row,
+     and grows it *more* once its column is narrowed by setColumnCollapsed
+     (narrower width -> more wrapped lines). The only way to make a table
+     cell take ~0 height is to give it ~0 *content*: drop the inner content
+     from rendering entirely (`display: none`) rather than just hiding it,
+     leaving the (empty) <td> itself in place so the row's other columns
+     stay aligned. */
+  td.hidden-cell { padding-top: 0; padding-bottom: 0; }
+  td.hidden-cell .cell-inner { display: none; }
+  tr.hidden-row { display: none; }
+  .msg-line.sev-hidden { display: none; }
+
+  .hint { padding: 24px; color: var(--muted); }
+</style>
+</head>
+<body class="view-unified">
+
+<div id="toolbar">
+  <label class="file-btn" for="fileInput">Choose log file…</label>
+  <input type="file" id="fileInput" accept=".txt,.log">
+  <span id="status">No file loaded</span>
+  <div id="sevFilters"></div>
+  <div class="spacer"></div>
+  <button id="viewToggle">Switch to Separated View</button>
+  <button id="themeToggle">Dark mode</button>
+</div>
+
+<div id="content">
+  <div id="unified-view" class="hint">Load a cx1e2e log file to begin.</div>
+  <div id="separated-view"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var MIN_COL_WIDTH = 50;
+
+  // ---- Parsing -------------------------------------------------------
+  // [SEVERITY][timestamp] [T<n>] message
+  // - tolerates an arbitrary leading prefix before that (e.g. a Jenkins
+  //   timestamp), *including one wrapped in its own brackets* like
+  //   "[2026-08-20T07:25:32.962Z][INFO][...] [T4] ..." — the leading `.*?`
+  //   is non-greedy so it stops at the FIRST `[letters][...][Tn]` it finds
+  //   (the real severity marker), rather than a greedy `.*` which searches
+  //   from the end of the line backwards and can latch onto the wrong
+  //   bracket if the message text happens to contain one later.
+  // - lines without a [T<n>] marker, or with an empty message, are dropped
+  var LINE_RE = /^.*?\[([A-Za-z]+)\]\[([^\]]+)\]\s*\[T(\d+)\]\s*(.*)$/;
+
+  function parseLog(text) {
+    var lines = text.split(/\r?\n/);
+    var out = [];
+    for (var i = 0; i < lines.length; i++) {
+      var m = LINE_RE.exec(lines[i]);
+      if (!m) continue;
+      var message = m[4].trim();
+      if (!message) continue;
+      out.push({
+        severity: m[1].toUpperCase(),
+        timestamp: m[2],
+        thread: parseInt(m[3], 10),
+        message: message
+      });
+    }
+    return out;
+  }
+
+  // ---- Severity color lookup -----------------------------------------
+  var SEVERITY_VAR = {
+    TRACE: "--sev-trace",
+    DEBUG: "--sev-debug",
+    INFO: "--sev-info",
+    WARN: "--sev-warn",
+    WARNING: "--sev-warn",
+    ERROR: "--sev-error",
+    CRITICAL: "--sev-critical",
+    FATAL: "--sev-fatal"
+  };
+  var SEV_ORDER = ["TRACE", "DEBUG", "INFO", "WARN", "WARNING", "ERROR", "FATAL", "CRITICAL"];
+  function severityColor(sev) {
+    return "var(" + (SEVERITY_VAR[sev] || "--sev-default") + ")";
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // ---- State -----------------------------------------------------------
+  var entries = [];
+  var hiddenThreads = new Set();
+  var hiddenSeverities = new Set();
+
+  var unifiedEl = document.getElementById("unified-view");
+  var separatedEl = document.getElementById("separated-view");
+  var statusEl = document.getElementById("status");
+  var sevFiltersEl = document.getElementById("sevFilters");
+  var viewToggleBtn = document.getElementById("viewToggle");
+  var themeToggleBtn = document.getElementById("themeToggle");
+  var fileInput = document.getElementById("fileInput");
+
+  // ---- Column header / resize / wrap / scrollbar plumbing -------------
+  // A "column" is { id, label, width, tsHead?, thread?, hideBtn?, fixed? }.
+  // `fixed` columns (the timestamp) get no wrap toggle, resize handle, or
+  // scrollbar — they're always one line at a fixed width.
+  var MAX_COL_WIDTH_RATIO = 0.8; // a single column can't be resized past 80% of the window width
+  function clampDefaultWidth(w) {
+    return Math.min(w, window.innerWidth * MAX_COL_WIDTH_RATIO);
+  }
+
+  function colGroupHtml(columns) {
+    return "<colgroup>" + columns.map(function (c) {
+      return '<col data-col="' + c.id + '" style="width:' + c.width + 'px">';
+    }).join("") + "</colgroup>";
+  }
+
+  function headerCellHtml(c) {
+    var thClass = c.tsHead ? ' class="ts-head"' : "";
+    if (c.fixed) {
+      return '<th data-col="' + c.id + '"' + thClass + '>' +
+        '<div class="th-inner"><div class="th-main"><span class="th-label">' + escapeHtml(c.label) + '</span></div></div>' +
+      '</th>';
+    }
+    var extra = c.hideBtn
+      ? '<button type="button" class="hideBtn" data-thread="' + c.thread + '">Hide</button>'
+      : "";
+    return '<th data-col="' + c.id + '" data-wrap="on"' + thClass + '>' +
+      '<div class="th-inner">' +
+        '<div class="th-main">' +
+          '<span class="th-label">' + escapeHtml(c.label) + '</span>' +
+          extra +
+          '<button type="button" class="wrapBtn" title="Toggle text wrap">Wrap</button>' +
+        '</div>' +
+        '<div class="col-scrollbar" hidden><div class="col-scrollbar-thumb"></div></div>' +
+      '</div>' +
+      '<div class="resize-handle"></div>' +
+    '</th>';
+  }
+
+  // Recomputes whether a column's custom scrollbar should be shown, and
+  // sizes its thumb, based on the current (wrapped/unwrapped) overflow.
+  function updateColumnScrollbar(table, colId) {
+    var th = table.querySelector('th[data-col="' + colId + '"]');
+    if (!th) return;
+    var track = th.querySelector(".col-scrollbar");
+    var thumb = track.querySelector(".col-scrollbar-thumb");
+    var isWrapped = th.getAttribute("data-wrap") !== "off";
+    var cells = table.querySelectorAll('.cell-inner[data-col="' + colId + '"]');
+    // Always snap every cell in the column back to the start. This is a
+    // plain style write (no layout read involved), so it's cheap even
+    // across thousands of cells, and keeps them in sync with the thumb
+    // whenever wrap/resize changes the column's geometry.
+    cells.forEach(function (c) { c.style.transform = "translateX(0px)"; });
+    if (isWrapped || !cells.length) { track.hidden = true; return; }
+
+    // The visible "window" width is now the <td> (the fixed clipper), not
+    // .cell-inner itself — since .cell-inner is `width: max-content` while
+    // unwrapped, its own clientWidth/scrollWidth are both just its full
+    // content width, with nothing to compare against.
+    var clientWidth = 0, maxScrollWidth = 0;
+    cells.forEach(function (c) {
+      clientWidth = c.parentElement.clientWidth;
+      if (c.scrollWidth > maxScrollWidth) maxScrollWidth = c.scrollWidth;
+    });
+    var overflow = maxScrollWidth - clientWidth;
+    if (overflow <= 1) { track.hidden = true; return; }
+
+    track.hidden = false;
+    var trackWidth = track.clientWidth || 1;
+    var thumbWidth = Math.max(20, trackWidth * (clientWidth / maxScrollWidth));
+    thumb.style.width = thumbWidth + "px";
+    thumb.style.left = "0px";
+    track.dataset.maxScroll = String(overflow);
+  }
+
+  // A hidden thread column shrinks to a narrow strip (just the label + Show
+  // button) instead of sitting at whatever width it had, and its resize
+  // handle / wrap button / scrollbar are hidden since there's nothing to
+  // control while empty. The width it had before collapsing is remembered
+  // on the <col> so "Show" can restore it.
+  var COLLAPSED_COL_WIDTH = 90;
+  function setColumnCollapsed(table, colId, collapsed) {
+    var th = table.querySelector('th[data-col="' + colId + '"]');
+    var col = table.querySelector('col[data-col="' + colId + '"]');
+    if (!th || !col) return;
+    var handle = th.querySelector(".resize-handle");
+    var wrapBtn = th.querySelector(".wrapBtn");
+    var track = th.querySelector(".col-scrollbar");
+    if (collapsed) {
+      if (!col.dataset.prevWidth) col.dataset.prevWidth = col.style.width;
+      col.style.width = COLLAPSED_COL_WIDTH + "px";
+      if (handle) handle.style.display = "none";
+      if (wrapBtn) wrapBtn.style.display = "none";
+      if (track) track.hidden = true;
+    } else {
+      if (col.dataset.prevWidth) { col.style.width = col.dataset.prevWidth; delete col.dataset.prevWidth; }
+      if (handle) handle.style.display = "";
+      if (wrapBtn) wrapBtn.style.display = "";
+      updateColumnScrollbar(table, colId);
+    }
+  }
+
+  // Wires resize handles, wrap toggles, and the linked column scrollbar
+  // for every column header in a freshly-rendered table.
+  function wireColumnControls(table) {
+    table.querySelectorAll("th[data-col]").forEach(function (th) {
+      var colId = th.getAttribute("data-col");
+      var wrapBtn = th.querySelector(".wrapBtn");
+      if (!wrapBtn) return; // fixed column (timestamp) - no controls to wire
+      var col = table.querySelector('col[data-col="' + colId + '"]');
+      var handle = th.querySelector(".resize-handle");
+      var track = th.querySelector(".col-scrollbar");
+      var thumb = track.querySelector(".col-scrollbar-thumb");
+
+      wrapBtn.addEventListener("click", function () {
+        var isOn = th.getAttribute("data-wrap") !== "off";
+        var next = isOn ? "off" : "on";
+        th.setAttribute("data-wrap", next);
+        wrapBtn.classList.toggle("toggled-off", next === "off");
+        // Single write-only pass: toggling a class per cell is cheap. Do NOT
+        // also read/set a layout-dependent property (like scrollLeft) inside
+        // this same per-cell loop — interleaving a layout-invalidating write
+        // with a layout-validating one, thousands of times, forces a full
+        // synchronous table reflow on *every* cell (measured: ~14ms each,
+        // 64s total for this table) instead of one reflow for the whole
+        // batch. Wrapped content naturally clamps scrollLeft back to 0 once
+        // it no longer overflows, so no manual reset is needed here anyway.
+        table.querySelectorAll('.cell-inner[data-col="' + colId + '"]').forEach(function (ci) {
+          ci.classList.toggle("nowrap", next === "off");
+        });
+        updateColumnScrollbar(table, colId);
+      });
+
+      handle.addEventListener("mousedown", function (ev) {
+        ev.preventDefault();
+        var startX = ev.clientX;
+        var startWidth = parseFloat(col.style.width) || th.getBoundingClientRect().width || 150;
+        function onMove(e2) {
+          var maxWidth = window.innerWidth * MAX_COL_WIDTH_RATIO;
+          var w = Math.max(MIN_COL_WIDTH, Math.min(maxWidth, startWidth + (e2.clientX - startX)));
+          col.style.width = w + "px";
+        }
+        function onUp() {
+          document.removeEventListener("mousemove", onMove);
+          document.removeEventListener("mouseup", onUp);
+          updateColumnScrollbar(table, colId);
+        }
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+      });
+
+      thumb.addEventListener("mousedown", function (ev) {
+        ev.preventDefault();
+        var startX = ev.clientX;
+        var startLeft = parseFloat(thumb.style.left) || 0;
+        var trackWidth = track.clientWidth;
+        var thumbWidth = thumb.getBoundingClientRect().width;
+        var maxThumbLeft = Math.max(0, trackWidth - thumbWidth);
+        var maxScroll = parseFloat(track.dataset.maxScroll) || 0;
+        function onMove(e2) {
+          var newLeft = Math.min(maxThumbLeft, Math.max(0, startLeft + (e2.clientX - startX)));
+          thumb.style.left = newLeft + "px";
+          var offset = maxThumbLeft > 0 ? (newLeft / maxThumbLeft) * maxScroll : 0;
+          // Every cell in the column shifts by the exact same pixel amount
+          // via `transform`, instead of each cell's own (browser-clamped)
+          // `scrollLeft`. Native scrollLeft clamps per-element to that
+          // cell's own content width, so short cells barely move while long
+          // ones scroll fully — jarring, uneven motion. A shared transform
+          // moves everything together; short content simply slides fully
+          // off to the left, same as long content.
+          table.querySelectorAll('.cell-inner[data-col="' + colId + '"]').forEach(function (c) {
+            c.style.transform = "translateX(-" + offset + "px)";
+          });
+        }
+        function onUp() {
+          document.removeEventListener("mousemove", onMove);
+          document.removeEventListener("mouseup", onUp);
+        }
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+      });
+    });
+  }
+
+  // ---- Unified view ------------------------------------------------
+  function renderUnified() {
+    if (!entries.length) {
+      unifiedEl.className = "hint";
+      unifiedEl.textContent = "Load a cx1e2e log file to begin.";
+      return;
+    }
+    unifiedEl.className = "";
+    var columns = [
+      { id: "ts", label: "Timestamp", width: 200, tsHead: true, fixed: true },
+      { id: "msg", label: "Thread / Severity / Message", width: clampDefaultWidth(900) }
+    ];
+    var html = ['<table id="unifiedTable">', colGroupHtml(columns), "<thead><tr>"];
+    columns.forEach(function (c) { html.push(headerCellHtml(c)); });
+    html.push("</tr></thead><tbody>");
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      var color = severityColor(e.severity);
+      html.push('<tr data-severity="' + escapeHtml(e.severity) + '">');
+      html.push('<td data-col="ts" class="ts-cell"><div class="cell-inner" data-col="ts">' +
+        escapeHtml(e.timestamp) + '</div></td>');
+      html.push('<td data-col="msg"><div class="cell-inner" data-col="msg">' +
+        '<div class="msg-line" data-severity="' + escapeHtml(e.severity) + '" style="color:' + color + '">' +
+        '<span class="tag">[T' + e.thread + '][' + escapeHtml(e.severity) + ']</span>' +
+        '<span class="msg-text">' + escapeHtml(e.message) + '</span>' +
+        '</div></div></td>');
+      html.push("</tr>");
+    }
+    html.push("</tbody></table>");
+    unifiedEl.innerHTML = html.join("");
+    wireColumnControls(document.getElementById("unifiedTable"));
+  }
+
+  // ---- Separated view ------------------------------------------------
+  // Rows are grouped by consecutive entries that share the same timestamp
+  // string, so entries from different threads at the same timestamp land
+  // on one shared row. A thread that logs more than once within a group
+  // gets its messages stacked (in order) inside that one cell.
+  function buildGroups() {
+    var groups = [];
+    var current = null;
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (!current || current.timestamp !== e.timestamp) {
+        current = { timestamp: e.timestamp, threads: {} };
+        groups.push(current);
+      }
+      if (!current.threads[e.thread]) current.threads[e.thread] = [];
+      current.threads[e.thread].push(e);
+    }
+    return groups;
+  }
+
+  function renderSeparated() {
+    if (!entries.length) {
+      separatedEl.innerHTML = "";
+      return;
+    }
+    var threadSet = new Set();
+    for (var i = 0; i < entries.length; i++) threadSet.add(entries[i].thread);
+    var threads = Array.from(threadSet).sort(function (a, b) { return a - b; });
+    var groups = buildGroups();
+
+    var columns = [{ id: "ts", label: "Timestamp", width: 200, tsHead: true, fixed: true }];
+    threads.forEach(function (t) {
+      columns.push({ id: "t" + t, label: "T" + t, width: clampDefaultWidth(280), thread: t, hideBtn: true });
+    });
+
+    var html = ['<table id="sepTable">', colGroupHtml(columns), "<thead><tr>"];
+    columns.forEach(function (c) { html.push(headerCellHtml(c)); });
+    html.push("</tr></thead><tbody>");
+
+    groups.forEach(function (g) {
+      html.push("<tr>");
+      html.push('<td data-col="ts" class="ts-cell"><div class="cell-inner" data-col="ts">' +
+        escapeHtml(g.timestamp) + '</div></td>');
+      threads.forEach(function (t) {
+        var colId = "t" + t;
+        var list = g.threads[t];
+        var inner = "";
+        if (list) {
+          inner = list.map(function (e) {
+            var color = severityColor(e.severity);
+            return '<div class="msg-line" data-severity="' + escapeHtml(e.severity) + '" style="color:' + color + '">' +
+              '<span class="tag">[' + escapeHtml(e.severity) + ']</span>' +
+              '<span class="msg-text">' + escapeHtml(e.message) + '</span>' +
+              '</div>';
+          }).join("");
+        }
+        html.push('<td data-col="' + colId + '" data-thread="' + t + '"><div class="cell-inner" data-col="' + colId + '">' +
+          inner + '</div></td>');
+      });
+      html.push("</tr>");
+    });
+    html.push("</tbody></table>");
+    separatedEl.innerHTML = html.join("");
+
+    var table = document.getElementById("sepTable");
+    wireColumnControls(table);
+    table.querySelectorAll(".hideBtn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var t = parseInt(btn.getAttribute("data-thread"), 10);
+        if (hiddenThreads.has(t)) hiddenThreads.delete(t);
+        else hiddenThreads.add(t);
+        applyFilters();
+      });
+    });
+  }
+
+  // ---- Filters (severity checkboxes + thread hide/show) ---------------
+  // Data-driven: recomputed from hiddenThreads / hiddenSeverities rather
+  // than sniffed from rendered text, so it stays correct as both combine.
+  function applyFilters() {
+    document.querySelectorAll(".msg-line").forEach(function (el) {
+      el.classList.toggle("sev-hidden", hiddenSeverities.has(el.getAttribute("data-severity")));
+    });
+
+    document.querySelectorAll("#unifiedTable tbody tr").forEach(function (tr) {
+      tr.classList.toggle("hidden-row", hiddenSeverities.has(tr.getAttribute("data-severity")));
+    });
+
+    var table = document.getElementById("sepTable");
+    if (table) {
+      // Un-hide the cells (removing `hidden-cell`, which is what makes their
+      // content `display:none`) *before* setColumnCollapsed below measures
+      // them to decide whether the column's scrollbar should reappear —
+      // measuring a still-display:none cell always reports 0 width, which
+      // looks like "no overflow" and keeps the bar hidden.
+      table.querySelectorAll("td[data-thread]").forEach(function (td) {
+        td.classList.toggle("hidden-cell", hiddenThreads.has(parseInt(td.getAttribute("data-thread"), 10)));
+      });
+      table.querySelectorAll(".hideBtn").forEach(function (btn) {
+        var t = parseInt(btn.getAttribute("data-thread"), 10);
+        var isHidden = hiddenThreads.has(t);
+        btn.textContent = isHidden ? "Show" : "Hide";
+        btn.classList.toggle("toggled-off", isHidden);
+        setColumnCollapsed(table, "t" + t, isHidden);
+      });
+      table.querySelectorAll("tbody tr").forEach(function (tr) {
+        var anyVisible = false;
+        tr.querySelectorAll("td[data-thread]").forEach(function (td) {
+          if (td.classList.contains("hidden-cell")) return;
+          if (td.querySelector(".msg-line:not(.sev-hidden)")) anyVisible = true;
+        });
+        tr.classList.toggle("hidden-row", !anyVisible);
+      });
+    }
+  }
+
+  function buildSeverityFilters() {
+    var present = Array.from(new Set(entries.map(function (e) { return e.severity; })));
+    present.sort(function (a, b) {
+      var ia = SEV_ORDER.indexOf(a); if (ia === -1) ia = SEV_ORDER.length;
+      var ib = SEV_ORDER.indexOf(b); if (ib === -1) ib = SEV_ORDER.length;
+      return ia - ib || a.localeCompare(b);
+    });
+    sevFiltersEl.innerHTML = present.map(function (sev) {
+      return '<label class="sev-filter-item" style="color:' + severityColor(sev) + '">' +
+        '<input type="checkbox" checked data-sev="' + escapeHtml(sev) + '">' + escapeHtml(sev) +
+        '</label>';
+    }).join("");
+    sevFiltersEl.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        var sev = cb.getAttribute("data-sev");
+        if (cb.checked) hiddenSeverities.delete(sev);
+        else hiddenSeverities.add(sev);
+        applyFilters();
+      });
+    });
+  }
+
+  // ---- View toggle -----------------------------------------------------
+  function setView(view) {
+    document.body.className = "view-" + view;
+    viewToggleBtn.textContent = view === "unified"
+      ? "Switch to Separated View"
+      : "Switch to Unified View";
+  }
+  viewToggleBtn.addEventListener("click", function () {
+    var next = document.body.classList.contains("view-unified") ? "separated" : "unified";
+    setView(next);
+  });
+
+  // ---- Dark mode ---------------------------------------------------
+  function setTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    themeToggleBtn.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+    try { localStorage.setItem("cx1e2e-viewer-theme", theme); } catch (err) { /* ignore */ }
+  }
+  themeToggleBtn.addEventListener("click", function () {
+    var current = document.documentElement.getAttribute("data-theme");
+    setTheme(current === "dark" ? "light" : "dark");
+  });
+  (function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem("cx1e2e-viewer-theme"); } catch (err) { /* ignore */ }
+    if (!saved) {
+      saved = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ? "dark" : "light";
+    }
+    setTheme(saved);
+  })();
+
+  // ---- File loading ------------------------------------------------
+  fileInput.addEventListener("change", function () {
+    var file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      entries = parseLog(String(reader.result));
+      hiddenThreads = new Set();
+      hiddenSeverities = new Set();
+      statusEl.textContent = file.name + " — " + entries.length + " entries";
+      buildSeverityFilters();
+      renderUnified();
+      renderSeparated();
+      applyFilters();
+      setView("unified");
+    };
+    reader.onerror = function () {
+      statusEl.textContent = "Failed to read " + file.name;
+    };
+    reader.readAsText(file);
+  });
+
+  setView("unified");
+})();
+</script>
+</body>
+</html>

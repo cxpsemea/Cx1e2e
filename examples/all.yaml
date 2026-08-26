@@ -6,13 +6,10 @@ Tenant: your_tenant_here
 MultiThreadable: true
 Tests:
   - Name: SAST Query
-    File: sastquery/all.yaml
+    File: sastquery.yaml
     Thread: 1
   - Name: 10 second pause
     Wait: 10
-  - Name: SAST Query (old api)
-    File: query_old_api/all.yaml
-    Thread: 2
   - Name: IAC Query
     File: iacquery/all.yaml
     Thread: 3

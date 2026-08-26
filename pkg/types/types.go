@@ -224,11 +224,19 @@ func (o CxQLCRUD) String() string {
 	//if o.QueryName != "" {
 	switch o.Engine {
 	case "sast":
-		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
+		exec := "(exec:nil)"
+		if o.IsExecutable != nil {
+			if *o.IsExecutable {
+				exec = "(exec)"
+			} else {
+				exec = "(non-exec)"
+			}
+		}
+		return fmt.Sprintf("%s %s: %s -> %s -> %s %s", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName, exec)
 	case "iac":
-		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryPlatform, o.QueryGroup, o.QueryName)
+		return fmt.Sprintf("%s %s: %s -> %s -> %s", o.Engine, o.Scope.String(), o.QueryPlatform, o.QueryGroup, o.QueryName)
 	default:
-		return fmt.Sprintf("%v %v: %v -> %v -> %v", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
+		return fmt.Sprintf("%s %s: %s -> %s -> %s", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
 	}
 	/*} else {
 		return fmt.Sprintf("QueryID#%d", o.QueryID)
