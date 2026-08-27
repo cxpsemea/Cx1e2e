@@ -247,11 +247,7 @@ func getIACQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 	maxRetry := 3
 	retryDelay := 30
 	for i := 0; i < maxRetry; i++ {
-		if t.Scope.Corp {
-			paQueries, err = cx1client.GetAuditIACQueriesByLevelID(auditSession, cx1client.QueryTypeTenant(), cx1client.QueryTypeTenant())
-		} else {
-			paQueries, err = cx1client.GetAuditIACQueriesByLevelID(auditSession, cx1client.QueryTypeProject(), t.Scope.ProjectID)
-		}
+		paQueries, err = cx1client.GetAllAuditIACQueries(auditSession)
 		if err == nil {
 			break
 		} else {

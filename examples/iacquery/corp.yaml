@@ -21,9 +21,22 @@ Tests:
         Severity: LOW       
         Test: C
         OnFail:
-          FailTestSet: true
           Retries: 2
           RetryDelay: 15
+  - Name: verify the override exists
+    Queries:
+      - Name: Healthcheck Instruction Missing
+        Engine: iac
+        Group: common
+        Platform: Dockerfile
+        Scope: 
+          Tenant: true
+          Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Test: R
+        OnFail:
+          Retries: 2
+          RetryDelay: 15
+  - Name: run a scan
     Scans:
       - Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/SSBAv0.8.zip

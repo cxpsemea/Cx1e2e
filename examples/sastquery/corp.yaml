@@ -4,7 +4,7 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create corp query override and run a scan
+  - Name: create corp query override
     Queries:
       - Engine: sast
         Name: Client_DOM_XSS
@@ -22,7 +22,21 @@ Tests:
         OnFail:
           Retries: 1
           RetryDelay: 30
-          FailTestSet: true
+  - Name: verify the override exists
+    Queries:
+      - Engine: sast
+        Name: Client_DOM_XSS
+        Engine: sast
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
+        Test: R
+        OnFail:
+          Retries: 1
+          RetryDelay: 30
+  - Name: run a scan
     Scans:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip

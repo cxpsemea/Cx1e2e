@@ -4,7 +4,7 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create a new corp query and add to preset
+  - Name: create a new corp query
     Queries:
       - Name: Ronald McDonald is running things
         Engine: iac
@@ -41,10 +41,26 @@ Tests:
         Severity: LOW       
         Test: C
         OnFail:
-          FailTestSet: true
           Retries: 2
           RetryDelay: 15
-          
+  - Name: verify the query exists
+    Queries:
+      - Name: Ronald McDonald is running things
+        Engine: iac
+        Group: common
+        Platform: Dockerfile
+        Category: Resource Management
+        Description: This is a custom preset
+        DescriptionURL: https://checkmarx.com
+        CWE: 123
+        Scope: 
+          Tenant: true
+          Project: e2e-iacquery-project%E2E_RUN_SUFFIX%
+        Test: R
+        OnFail:
+          Retries: 2
+          RetryDelay: 15 
+  - Name: run a scan
     Presets:
       - Name: e2e-iacquery-preset%E2E_RUN_SUFFIX%
         Description: This is my test preset        
