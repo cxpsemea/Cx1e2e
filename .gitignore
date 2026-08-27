@@ -1,11 +1,13 @@
 *.bat
 *.exe
 config
-cx1e2e*
-*.html
+cx1e2e
+cx1e2e_result*.json
+cx1e2e_result*.html
 *.log
 dist
 run*.sh
 build*.sh
 release*.sh
 .vscode
+.internal

@@ -55,6 +55,7 @@ Tests:
         Compile: true
         Severity: LOW
         DeleteAuditSession: true
+        IsExecutable: true
         Test: C
   - Name: simple test U for all
     Roles:
@@ -98,10 +99,12 @@ Tests:
         Test: U
     Scans:
       - Project: e2e-project1
+        Engine: "sast"
         Test: R
     Results:
       - Project: e2e-project1
         State: CONFIRMED
+        Type: sast
         Severity: HIGH
         Test: U
     Queries:
@@ -115,6 +118,7 @@ Tests:
         Source: "// no result but updated"
         Severity: HIGH
         DeleteAuditSession: true
+        IsExecutable: true
         Test: U
   - Name: simple delete for all
     Roles:
@@ -141,6 +145,7 @@ Tests:
         Test: D
     Scans:
       - Project: e2e-project1
+        Engine: "sast"
         Test: D
     Queries:
       - Engine: sast
