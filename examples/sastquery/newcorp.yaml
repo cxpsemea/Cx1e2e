@@ -4,7 +4,7 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create new corp query, add to preset
+  - Name: create new corp query
     Queries:
       - Engine: sast
         Name: EtoE_Test_Cheeseburgers
@@ -20,6 +20,19 @@ Tests:
         DescriptionID: 123
         Compile: true
         Test: C
+        OnFail:
+          Retries: 1
+          RetryDelay: 30
+  - Name: verify it exists and add to preset
+    Queries:
+      - Engine: sast
+        Name: EtoE_Test_Cheeseburgers
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: true
+          Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
+        Test: R
         OnFail:
           Retries: 1
           RetryDelay: 30

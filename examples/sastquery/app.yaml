@@ -4,7 +4,7 @@ Tenant: your_tenant_here
 #ProxyURL: http://127.0.0.1:8080
 #LogLevel: TRACE
 Tests:
-  - Name: create app-level override and run a scan
+  - Name: create app-level override
     Queries:
       - Engine: sast
         Name: Client_DOM_XSS
@@ -23,7 +23,22 @@ Tests:
         OnFail:
           Retries: 1
           RetryDelay: 30
-          FailTestSet: true
+  - Name: verify the override exists
+    Queries:
+      - Engine: sast
+        Name: Client_DOM_XSS
+        Engine: sast
+        Group: JavaScript_High_Risk
+        Language: JavaScript
+        Scope: 
+          Tenant: false
+          Application: e2e-sastquery-app%E2E_RUN_SUFFIX%
+          Project: e2e-sastquery-project%E2E_RUN_SUFFIX% #Project is still required since the web-audit session is opened in a project's context
+        Test: R
+        OnFail:
+          Retries: 1
+          RetryDelay: 30
+  - Name: run a scan
     Scans:
       - Project: e2e-sastquery-project%E2E_RUN_SUFFIX%
         ZipFile: ../files/xss-burger.zip
