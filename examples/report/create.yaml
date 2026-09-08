@@ -15,7 +15,7 @@ Tests:
         Repository: https://github.com/cx-michael-kubiaczyk/ssba
         Branch: master
         SASTPreset: All
-        Engine: sast
+        Engine: sast secrets
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
@@ -31,7 +31,7 @@ Tests:
         Repository: https://github.com/cx-michael-kubiaczyk/simple-java-command-injection
         Branch: main
         SASTPreset: All
-        Engine: sast
+        Engine: sast secrets
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
