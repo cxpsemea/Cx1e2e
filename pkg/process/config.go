@@ -656,6 +656,15 @@ func (o TestConfig) CreateHTTPClient(logger *logrus.Logger) (*http.Client, error
 		}
 		transport.Proxy = http.ProxyURL(proxyURL)
 		logger.Infof("Running with proxy: %v", o.ProxyURL)
+
+		// Proxies (Burp in particular) can recycle their end of a keep-alive
+		// connection independently of our client's idle pool. When that happens
+		// mid-reuse, a queued request can be written onto a connection the proxy
+		// has already started closing, surfacing as a transport-level EOF or
+		// "connection broken" error. Disabling keep-alives removes connection
+		// reuse entirely, so there's no stale pooled connection to race against.
+		transport.DisableKeepAlives = true
+		logger.Info("Proxy configured: disabling HTTP keep-alives to avoid connection-reuse races")
 	}
 
 	if o.NoTLS {
