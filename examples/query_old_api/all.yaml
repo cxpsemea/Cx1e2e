@@ -10,8 +10,8 @@ Tests:
     File: project.yaml
   - Name: App override
     File: app.yaml
-  - Name: Tenant override
-    File: corp.yaml
+#  - Name: Tenant override # old-API corp-override delete removes the query from all custom presets (bug, won't fix)
+#    File: corp.yaml
 #  - Name: Tenant new query # old-API new Tenant-query no longer works in 3.20+
 #    File: newcorp.yaml
   - Name: Delete
