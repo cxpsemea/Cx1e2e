@@ -232,15 +232,12 @@ func (o CxQLCRUD) String() string {
 				exec = "(non-exec)"
 			}
 		}
-		return fmt.Sprintf("%s %s: %s -> %s -> %s %s", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName, exec)
+		return fmt.Sprintf("%s query %s -> %s -> %s %s on %s", o.Engine, o.QueryLanguage, o.QueryGroup, o.QueryName, exec, o.Scope.String())
 	case "iac":
-		return fmt.Sprintf("%s %s: %s -> %s -> %s", o.Engine, o.Scope.String(), o.QueryPlatform, o.QueryGroup, o.QueryName)
+		return fmt.Sprintf("%s query %s -> %s -> %s on %s", o.Engine, o.QueryPlatform, o.QueryGroup, o.QueryName, o.Scope.String())
 	default:
-		return fmt.Sprintf("%s %s: %s -> %s -> %s", o.Engine, o.Scope.String(), o.QueryLanguage, o.QueryGroup, o.QueryName)
+		return fmt.Sprintf("%s query %s -> %s -> %s on %s", o.Engine, o.QueryLanguage, o.QueryGroup, o.QueryName, o.Scope.String())
 	}
-	/*} else {
-		return fmt.Sprintf("QueryID#%d", o.QueryID)
-	} // */
 }
 
 type CxQLScope struct {
