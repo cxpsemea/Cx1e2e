@@ -24,7 +24,7 @@ Tests:
         Status: Completed
         Number: 1
         Format: pdf
-        Scanners: [ sast ]
+        Scanners: [ SAST, microengines ]
         Test: C
   - Name: Generate multiple project report v2
     Reports:
@@ -32,5 +32,5 @@ Tests:
         ReportVersion: 2
         Projects: [ e2e-report-project-1%E2E_RUN_SUFFIX%, e2e-report-project-2%E2E_RUN_SUFFIX% ]
         Format: pdf
-        Scanners: [ sast ]
+        Scanners: [ SAST, microengines ]
         Test: C

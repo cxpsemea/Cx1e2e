@@ -98,6 +98,8 @@ func (t *ScanCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 	for _, e := range requested_engines {
 		if e == "iac" {
 			e = "kics"
+		} else if e == "secrets" || e == "2ms" {
+			e = "microengines"
 		}
 
 		if _, ok := cx1client.IsEngineAllowed(e); !ok && !t.IsForced() {

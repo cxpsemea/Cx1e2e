@@ -20,7 +20,7 @@ Tests:
         ZipFile: ../files/SSBAv0.1.zip
         Branch: zip
         SASTPreset: All
-        Engine: sast # sca iac apisec
+        Engine: sast secrets # sca iac apisec
         WaitForEnd: true
         CancelOnTimeout: true
         Timeout: 300 #300 seconds, 5min => scan should take ~1 minute
@@ -34,7 +34,7 @@ Tests:
         Status: Completed
         Number: 1
         Format: pdf
-        Scanners: [ SAST ]
+        Scanners: [ SAST, secrets ]
         Test: C
   - Name: Update a scan result
     Results:
@@ -64,7 +64,7 @@ Tests:
         Status: Completed
         Number: 1
         Format: pdf
-        Scanners: [ sast ]
+        Scanners: [ SAST, microengines ]
         Test: C
   - Name: Generate single project report v2
     Reports:
@@ -72,7 +72,7 @@ Tests:
         ReportVersion: 2
         Projects: [ e2e-runas-project%E2E_RUN_SUFFIX% ]
         Format: pdf
-        Scanners: [ sast ]
+        Scanners: [ SAST, microengines ]
         Test: C
   - Name: Delete scan fail-test
     Scans:
