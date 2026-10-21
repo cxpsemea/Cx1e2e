@@ -412,14 +412,17 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 					return err
 				}
 			}
+		} else {
+			logger.Trace("Query metadata unchanged")
 		}
 
 		if t.Source != "" {
-			t.SASTQuery.Source = t.Source
 			new_query, _, err = cx1client.UpdateSASTQuerySource(auditSession, *t.SASTQuery, t.Source)
 			if err != nil {
 				return err
 			}
+		} else {
+			logger.Trace("Query source unchanged")
 		}
 
 		t.SASTQuery = &new_query
@@ -688,6 +691,14 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		return create_old(cx1client, logger, t)
 	} else {
 		defer t.TerminateSession(OP_CREATE, cx1client, logger)
+		scope, scopeStr, err := getQueryScope(cx1client, t)
+		if err != nil {
+			return err
+		}
+
+		t.ScopeID = scope
+		t.ScopeStr = scopeStr
+
 		switch t.Engine {
 		case "sast":
 			return createSAST(cx1client, logger, t)
