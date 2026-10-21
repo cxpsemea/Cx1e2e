@@ -200,7 +200,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		}
 		logger.Debugf("Found target query: %v", query.StringDetailed())
 	} else {
-		logger.Debugf("Target query %s.%s.%s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		logger.Debugf("Target query %v: %v -> %v -> %v doesn't exist", t.ScopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
 
 	baseQuery := paQueries.GetClosestQueryByLevelAndName(cx1client.QueryTypeApplication(), cx1client.QueryTypeApplication(), t.QueryLanguage, t.QueryGroup, t.QueryName)
@@ -216,7 +216,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		}
 		logger.Debugf("Base query: %v", baseQuery.StringDetailed())
 	} else {
-		logger.Debugf("Base query for %s.%s.%s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		logger.Debugf("Base query for %s -> %s -> %s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
 	return query, baseQuery, nil
 }
