@@ -200,7 +200,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		}
 		logger.Debugf("Found target query: %v", query.StringDetailed())
 	} else {
-		logger.Debugf("Target query %s.%s.%s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		logger.Debugf("Target query %v: %v -> %v -> %v doesn't exist", t.ScopeStr, t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
 
 	baseQuery := paQueries.GetClosestQueryByLevelAndName(cx1client.QueryTypeApplication(), cx1client.QueryTypeApplication(), t.QueryLanguage, t.QueryGroup, t.QueryName)
@@ -216,7 +216,7 @@ func getSASTQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQ
 		}
 		logger.Debugf("Base query: %v", baseQuery.StringDetailed())
 	} else {
-		logger.Debugf("Base query for %s.%s.%s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
+		logger.Debugf("Base query for %s -> %s -> %s doesn't exist", t.QueryLanguage, t.QueryGroup, t.QueryName)
 	}
 	return query, baseQuery, nil
 }
@@ -412,14 +412,17 @@ func updateQuery(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLogger, t *CxQL
 					return err
 				}
 			}
+		} else {
+			logger.Trace("Query metadata unchanged")
 		}
 
 		if t.Source != "" {
-			t.SASTQuery.Source = t.Source
 			new_query, _, err = cx1client.UpdateSASTQuerySource(auditSession, *t.SASTQuery, t.Source)
 			if err != nil {
 				return err
 			}
+		} else {
+			logger.Trace("Query source unchanged")
 		}
 
 		t.SASTQuery = &new_query
@@ -688,6 +691,14 @@ func (t *CxQLCRUD) RunCreate(cx1client *Cx1ClientGo.Cx1Client, logger *ThreadLog
 		return create_old(cx1client, logger, t)
 	} else {
 		defer t.TerminateSession(OP_CREATE, cx1client, logger)
+		scope, scopeStr, err := getQueryScope(cx1client, t)
+		if err != nil {
+			return err
+		}
+
+		t.ScopeID = scope
+		t.ScopeStr = scopeStr
+
 		switch t.Engine {
 		case "sast":
 			return createSAST(cx1client, logger, t)
